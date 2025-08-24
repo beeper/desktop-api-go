@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package githubcombeeperdesktopapigo_test
 
 import (
 	"context"
@@ -20,13 +20,13 @@ func TestUsage(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Chats.Find(context.TODO(), githubcombeeperbeeperdesktopapigo.ChatFindParams{
-		Limit: githubcombeeperbeeperdesktopapigo.Int(10),
-		Type:  githubcombeeperbeeperdesktopapigo.ChatFindParamsTypeSingle,
+	page, err := client.Chats.Find(context.TODO(), githubcombeeperdesktopapigo.ChatFindParams{
+		Limit: githubcombeeperdesktopapigo.Int(10),
+		Type:  githubcombeeperdesktopapigo.ChatFindParamsTypeSingle,
 	})
 	if err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())

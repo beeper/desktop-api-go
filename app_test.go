@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package githubcombeeperdesktopapigo_test
 
 import (
 	"context"
@@ -21,16 +21,16 @@ func TestAppFocusWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Focus(context.TODO(), githubcombeeperbeeperdesktopapigo.AppFocusParams{
-		ChatID:         githubcombeeperbeeperdesktopapigo.String("!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost"),
-		MessageSortKey: githubcombeeperbeeperdesktopapigo.String("messageSortKey"),
+	_, err := client.App.Focus(context.TODO(), githubcombeeperdesktopapigo.AppFocusParams{
+		ChatID:         githubcombeeperdesktopapigo.String("!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost"),
+		MessageSortKey: githubcombeeperdesktopapigo.String("messageSortKey"),
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}

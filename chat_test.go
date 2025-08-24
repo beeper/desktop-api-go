@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package githubcombeeperdesktopapigo_test
 
 import (
 	"context"
@@ -22,16 +22,16 @@ func TestChatGetWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.Get(context.TODO(), githubcombeeperbeeperdesktopapigo.ChatGetParams{
+	_, err := client.Chats.Get(context.TODO(), githubcombeeperdesktopapigo.ChatGetParams{
 		ChatID:              "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		MaxParticipantCount: githubcombeeperbeeperdesktopapigo.Int(50),
+		MaxParticipantCount: githubcombeeperdesktopapigo.Int(50),
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -47,16 +47,16 @@ func TestChatArchiveWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.Archive(context.TODO(), githubcombeeperbeeperdesktopapigo.ChatArchiveParams{
+	_, err := client.Chats.Archive(context.TODO(), githubcombeeperdesktopapigo.ChatArchiveParams{
 		ChatID:   "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		Archived: githubcombeeperbeeperdesktopapigo.Bool(true),
+		Archived: githubcombeeperdesktopapigo.Bool(true),
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -72,26 +72,26 @@ func TestChatFindWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.Find(context.TODO(), githubcombeeperbeeperdesktopapigo.ChatFindParams{
+	_, err := client.Chats.Find(context.TODO(), githubcombeeperdesktopapigo.ChatFindParams{
 		AccountIDs:         []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "slackgo.T031TC83W"},
-		EndingBefore:       githubcombeeperbeeperdesktopapigo.String("872739"),
-		Inbox:              githubcombeeperbeeperdesktopapigo.ChatFindParamsInboxPrimary,
-		IncludeMuted:       githubcombeeperbeeperdesktopapigo.Bool(true),
-		LastActivityAfter:  githubcombeeperbeeperdesktopapigo.Time(time.Now()),
-		LastActivityBefore: githubcombeeperbeeperdesktopapigo.Time(time.Now()),
-		Limit:              githubcombeeperbeeperdesktopapigo.Int(1),
-		ParticipantQuery:   githubcombeeperbeeperdesktopapigo.String("participantQuery"),
-		Query:              githubcombeeperbeeperdesktopapigo.String("query"),
-		StartingAfter:      githubcombeeperbeeperdesktopapigo.String("196640"),
-		Type:               githubcombeeperbeeperdesktopapigo.ChatFindParamsTypeSingle,
-		UnreadOnly:         githubcombeeperbeeperdesktopapigo.Bool(true),
+		EndingBefore:       githubcombeeperdesktopapigo.String("872739"),
+		Inbox:              githubcombeeperdesktopapigo.ChatFindParamsInboxPrimary,
+		IncludeMuted:       githubcombeeperdesktopapigo.Bool(true),
+		LastActivityAfter:  githubcombeeperdesktopapigo.Time(time.Now()),
+		LastActivityBefore: githubcombeeperdesktopapigo.Time(time.Now()),
+		Limit:              githubcombeeperdesktopapigo.Int(1),
+		ParticipantQuery:   githubcombeeperdesktopapigo.String("participantQuery"),
+		Query:              githubcombeeperdesktopapigo.String("query"),
+		StartingAfter:      githubcombeeperdesktopapigo.String("196640"),
+		Type:               githubcombeeperdesktopapigo.ChatFindParamsTypeSingle,
+		UnreadOnly:         githubcombeeperdesktopapigo.Bool(true),
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -107,16 +107,16 @@ func TestChatGetLinkWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.GetLink(context.TODO(), githubcombeeperbeeperdesktopapigo.ChatGetLinkParams{
+	_, err := client.Chats.GetLink(context.TODO(), githubcombeeperdesktopapigo.ChatGetLinkParams{
 		ChatID:         "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		MessageSortKey: githubcombeeperbeeperdesktopapigo.String("messageSortKey"),
+		MessageSortKey: githubcombeeperdesktopapigo.String("messageSortKey"),
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}

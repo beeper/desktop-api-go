@@ -1,4 +1,4 @@
-package githubcombeeperbeeperdesktopapigo
+package githubcombeeperdesktopapigo
 
 import (
 	"github.com/beeper/desktop-api-go/packages/param"

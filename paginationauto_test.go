@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package githubcombeeperdesktopapigo_test
 
 import (
 	"context"
@@ -20,13 +20,13 @@ func TestAutoPagination(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperbeeperdesktopapigo.MessageSearchParams{
-		Limit: githubcombeeperbeeperdesktopapigo.Int(20),
-		Query: githubcombeeperbeeperdesktopapigo.String("meeting"),
+	iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+		Limit: githubcombeeperdesktopapigo.Int(20),
+		Query: githubcombeeperdesktopapigo.String("meeting"),
 	})
 	// Prism mock isn't going to give us real pagination
 	for i := 0; i < 3 && iter.Next(); i++ {
