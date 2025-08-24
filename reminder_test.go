@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package githubcombeeperdesktopapigo_test
 
 import (
 	"context"
@@ -21,15 +21,15 @@ func TestReminderClear(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Reminders.Clear(context.TODO(), githubcombeeperbeeperdesktopapigo.ReminderClearParams{
+	_, err := client.Reminders.Clear(context.TODO(), githubcombeeperdesktopapigo.ReminderClearParams{
 		ChatID: "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -45,19 +45,19 @@ func TestReminderSetWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Reminders.Set(context.TODO(), githubcombeeperbeeperdesktopapigo.ReminderSetParams{
+	_, err := client.Reminders.Set(context.TODO(), githubcombeeperdesktopapigo.ReminderSetParams{
 		ChatID: "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		Reminder: githubcombeeperbeeperdesktopapigo.ReminderSetParamsReminder{
+		Reminder: githubcombeeperdesktopapigo.ReminderSetParamsReminder{
 			RemindAtMs:               0,
-			DismissOnIncomingMessage: githubcombeeperbeeperdesktopapigo.Bool(true),
+			DismissOnIncomingMessage: githubcombeeperdesktopapigo.Bool(true),
 		},
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}

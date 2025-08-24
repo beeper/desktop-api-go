@@ -13,7 +13,7 @@ It is generated with [Stainless](https://www.stainless.com/).
 
 ```go
 import (
-	"github.com/beeper/desktop-api-go" // imported as githubcombeeperbeeperdesktopapigo
+	"github.com/beeper/desktop-api-go" // imported as githubcombeeperdesktopapigo
 )
 ```
 
@@ -49,12 +49,12 @@ import (
 )
 
 func main() {
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithAccessToken("My Access Token"), // defaults to os.LookupEnv("BEEPER_ACCESS_TOKEN")
 	)
-	page, err := client.Chats.Find(context.TODO(), githubcombeeperbeeperdesktopapigo.ChatFindParams{
-		Limit: githubcombeeperbeeperdesktopapigo.Int(10),
-		Type:  githubcombeeperbeeperdesktopapigo.ChatFindParamsTypeSingle,
+	page, err := client.Chats.Find(context.TODO(), githubcombeeperdesktopapigo.ChatFindParams{
+		Limit: githubcombeeperdesktopapigo.Int(10),
+		Type:  githubcombeeperdesktopapigo.ChatFindParamsTypeSingle,
 	})
 	if err != nil {
 		panic(err.Error())
@@ -66,13 +66,13 @@ func main() {
 
 ### Request fields
 
-The githubcombeeperbeeperdesktopapigo library uses the [`omitzero`](https://tip.golang.org/doc/go1.24#encodingjsonpkgencodingjson)
+The githubcombeeperdesktopapigo library uses the [`omitzero`](https://tip.golang.org/doc/go1.24#encodingjsonpkgencodingjson)
 semantics from the Go 1.24+ `encoding/json` release for request fields.
 
 Required primitive fields (`int64`, `string`, etc.) feature the tag <code>\`json:"...,required"\`</code>. These
 fields are always serialized, even their zero values.
 
-Optional primitive types are wrapped in a `param.Opt[T]`. These fields can be set with the provided constructors, `githubcombeeperbeeperdesktopapigo.String(string)`, `githubcombeeperbeeperdesktopapigo.Int(int64)`, etc.
+Optional primitive types are wrapped in a `param.Opt[T]`. These fields can be set with the provided constructors, `githubcombeeperdesktopapigo.String(string)`, `githubcombeeperdesktopapigo.Int(int64)`, etc.
 
 Any `param.Opt[T]`, map, slice, struct or string enum uses the
 tag <code>\`json:"...,omitzero"\`</code>. Its zero value is considered omitted.
@@ -80,17 +80,17 @@ tag <code>\`json:"...,omitzero"\`</code>. Its zero value is considered omitted.
 The `param.IsOmitted(any)` function can confirm the presence of any `omitzero` field.
 
 ```go
-p := githubcombeeperbeeperdesktopapigo.ExampleParams{
-	ID:   "id_xxx",                                        // required property
-	Name: githubcombeeperbeeperdesktopapigo.String("..."), // optional property
+p := githubcombeeperdesktopapigo.ExampleParams{
+	ID:   "id_xxx",                                  // required property
+	Name: githubcombeeperdesktopapigo.String("..."), // optional property
 
-	Point: githubcombeeperbeeperdesktopapigo.Point{
-		X: 0,                                        // required field will serialize as 0
-		Y: githubcombeeperbeeperdesktopapigo.Int(1), // optional field will serialize as 1
+	Point: githubcombeeperdesktopapigo.Point{
+		X: 0,                                  // required field will serialize as 0
+		Y: githubcombeeperdesktopapigo.Int(1), // optional field will serialize as 1
 		// ... omitted non-required fields will not be serialized
 	},
 
-	Origin: githubcombeeperbeeperdesktopapigo.Origin{}, // the zero value of [Origin] is considered omitted
+	Origin: githubcombeeperdesktopapigo.Origin{}, // the zero value of [Origin] is considered omitted
 }
 ```
 
@@ -119,7 +119,7 @@ p.SetExtraFields(map[string]any{
 })
 
 // Send a number instead of an object
-custom := param.Override[githubcombeeperbeeperdesktopapigo.FooParams](12)
+custom := param.Override[githubcombeeperdesktopapigo.FooParams](12)
 ```
 
 ### Request unions
@@ -260,7 +260,7 @@ This library uses the functional options pattern. Functions defined in the
 requests. For example:
 
 ```go
-client := githubcombeeperbeeperdesktopapigo.NewClient(
+client := githubcombeeperdesktopapigo.NewClient(
 	// Adds a header to every request made by the client
 	option.WithHeader("X-Some-Header", "custom_header_info"),
 )
@@ -284,9 +284,9 @@ This library provides some conveniences for working with paginated list endpoint
 You can use `.ListAutoPaging()` methods to iterate through items across all pages:
 
 ```go
-iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperbeeperdesktopapigo.MessageSearchParams{
-	Limit: githubcombeeperbeeperdesktopapigo.Int(20),
-	Query: githubcombeeperbeeperdesktopapigo.String("meeting"),
+iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+	Limit: githubcombeeperdesktopapigo.Int(20),
+	Query: githubcombeeperdesktopapigo.String("meeting"),
 })
 // Automatically fetches more pages as needed.
 for iter.Next() {
@@ -302,9 +302,9 @@ Or you can use simple `.List()` methods to fetch a single page and receive a sta
 with additional helper methods like `.GetNextPage()`, e.g.:
 
 ```go
-page, err := client.Messages.Search(context.TODO(), githubcombeeperbeeperdesktopapigo.MessageSearchParams{
-	Limit: githubcombeeperbeeperdesktopapigo.Int(20),
-	Query: githubcombeeperbeeperdesktopapigo.String("meeting"),
+page, err := client.Messages.Search(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+	Limit: githubcombeeperdesktopapigo.Int(20),
+	Query: githubcombeeperdesktopapigo.String("meeting"),
 })
 for page != nil {
 	for _, message := range page.Data {
@@ -320,19 +320,19 @@ if err != nil {
 ### Errors
 
 When the API returns a non-success status code, we return an error with type
-`*githubcombeeperbeeperdesktopapigo.Error`. This contains the `StatusCode`, `*http.Request`, and
+`*githubcombeeperdesktopapigo.Error`. This contains the `StatusCode`, `*http.Request`, and
 `*http.Response` values of the request, as well as the JSON of the error body
 (much like other response objects in the SDK).
 
 To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
-_, err := client.Messages.Send(context.TODO(), githubcombeeperbeeperdesktopapigo.MessageSendParams{
+_, err := client.Messages.Send(context.TODO(), githubcombeeperdesktopapigo.MessageSendParams{
 	ChatID: "!invalid-chat-id",
-	Text:   githubcombeeperbeeperdesktopapigo.String("Test message"),
+	Text:   githubcombeeperdesktopapigo.String("Test message"),
 })
 if err != nil {
-	var apierr *githubcombeeperbeeperdesktopapigo.Error
+	var apierr *githubcombeeperdesktopapigo.Error
 	if errors.As(err, &apierr) {
 		println(string(apierr.DumpRequest(true)))  // Prints the serialized HTTP request
 		println(string(apierr.DumpResponse(true))) // Prints the serialized HTTP response
@@ -372,7 +372,7 @@ The file name and content-type can be customized by implementing `Name() string`
 string` on the run-time type of `io.Reader`. Note that `os.File` implements `Name() string`, so a
 file returned by `os.Open` will be sent with the file name on disk.
 
-We also provide a helper `githubcombeeperbeeperdesktopapigo.File(reader io.Reader, filename string, contentType string)`
+We also provide a helper `githubcombeeperdesktopapigo.File(reader io.Reader, filename string, contentType string)`
 which can be used to wrap any `io.Reader` with the appropriate file name and content type.
 
 ### Retries
@@ -385,7 +385,7 @@ You can use the `WithMaxRetries` option to configure or disable this:
 
 ```go
 // Configure the default for all requests:
-client := githubcombeeperbeeperdesktopapigo.NewClient(
+client := githubcombeeperdesktopapigo.NewClient(
 	option.WithMaxRetries(0), // default is 2
 )
 
@@ -446,7 +446,7 @@ or the `option.WithJSONSet()` methods.
 params := FooNewParams{
     ID:   "id_xxxx",
     Data: FooNewParamsData{
-        FirstName: githubcombeeperbeeperdesktopapigo.String("John"),
+        FirstName: githubcombeeperdesktopapigo.String("John"),
     },
 }
 client.Foo.New(context.Background(), params, option.WithJSONSet("data.last_name", "Doe"))
@@ -481,7 +481,7 @@ func Logger(req *http.Request, next option.MiddlewareNext) (res *http.Response, 
     return res, err
 }
 
-client := githubcombeeperbeeperdesktopapigo.NewClient(
+client := githubcombeeperdesktopapigo.NewClient(
 	option.WithMiddleware(Logger),
 )
 ```

@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package githubcombeeperdesktopapigo_test
 
 import (
 	"context"
@@ -21,13 +21,13 @@ func TestOAuthGetUserInfo(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.OAuth.GetUserInfo(context.TODO())
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -43,16 +43,16 @@ func TestOAuthRevokeTokenWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	err := client.OAuth.RevokeToken(context.TODO(), githubcombeeperbeeperdesktopapigo.OAuthRevokeTokenParams{
+	err := client.OAuth.RevokeToken(context.TODO(), githubcombeeperdesktopapigo.OAuthRevokeTokenParams{
 		Token:         "token",
-		TokenTypeHint: githubcombeeperbeeperdesktopapigo.OAuthRevokeTokenParamsTokenTypeHintAccessToken,
+		TokenTypeHint: githubcombeeperdesktopapigo.OAuthRevokeTokenParamsTokenTypeHintAccessToken,
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
