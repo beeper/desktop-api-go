@@ -9,14 +9,14 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/beeper/beeper-desktop-api-go/internal/apijson"
-	"github.com/beeper/beeper-desktop-api-go/internal/apiquery"
-	"github.com/beeper/beeper-desktop-api-go/internal/requestconfig"
-	"github.com/beeper/beeper-desktop-api-go/option"
-	"github.com/beeper/beeper-desktop-api-go/packages/pagination"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
-	"github.com/beeper/beeper-desktop-api-go/packages/respjson"
-	"github.com/beeper/beeper-desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/apiquery"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/packages/pagination"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/shared"
 )
 
 // Send, draft, and search messages across all chat networks

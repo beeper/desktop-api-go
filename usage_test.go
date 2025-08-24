@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/beeper-desktop-api-go"
-	"github.com/beeper/beeper-desktop-api-go/internal/testutil"
-	"github.com/beeper/beeper-desktop-api-go/option"
+	"github.com/beeper/desktop-api-go"
+	"github.com/beeper/desktop-api-go/internal/testutil"
+	"github.com/beeper/desktop-api-go/option"
 )
 
 func TestUsage(t *testing.T) {

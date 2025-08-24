@@ -13,7 +13,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/param"
 )
 
 var encoders sync.Map // map[encoderEntry]encoderFunc

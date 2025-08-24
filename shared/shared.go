@@ -3,9 +3,9 @@
 package shared
 
 import (
-	"github.com/beeper/beeper-desktop-api-go/internal/apijson"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
-	"github.com/beeper/beeper-desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/respjson"
 )
 
 // aliased to make [param.APIUnion] private when embedding
