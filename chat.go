@@ -40,12 +40,7 @@ func NewChatService(opts ...option.RequestOption) (r ChatService) {
 	return
 }
 
-// Retrieve chat details: metadata, participants (limited), and latest message.
-//
-//   - When to use: fetch a complete view of a chat beyond what search returns.
-//   - Constraints: not available for iMessage chats ('imsg##'). Participants limited
-//     by 'maxParticipantCount' (default 20, max 500). Returns: chat details.Agents:
-//     ALWAYS use linkToChat to make clickable links in your response
+// Retrieve chat details including metadata, participants, and latest message
 func (r *ChatService) Get(ctx context.Context, query ChatGetParams, opts ...option.RequestOption) (res *GetChatResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/get-chat"
@@ -62,14 +57,7 @@ func (r *ChatService) Archive(ctx context.Context, body ChatArchiveParams, opts 
 	return
 }
 
-// Search and filter conversations across all messaging accounts.
-//
-//   - When to use: browse chats by inbox (primary/low-priority/archive), type,
-//     unread status, or search terms.
-//   - Pagination: use cursor + direction for pagination.
-//   - Performance: provide accountIDs when known for faster filtering. Returns:
-//     matching chats with pagination. Agents: ALWAYS use linkToChat to make
-//     clickable links in your response
+// Search and filter conversations across all messaging accounts
 func (r *ChatService) Find(ctx context.Context, query ChatFindParams, opts ...option.RequestOption) (res *pagination.CursorID[Chat], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
@@ -87,14 +75,7 @@ func (r *ChatService) Find(ctx context.Context, query ChatFindParams, opts ...op
 	return res, nil
 }
 
-// Search and filter conversations across all messaging accounts.
-//
-//   - When to use: browse chats by inbox (primary/low-priority/archive), type,
-//     unread status, or search terms.
-//   - Pagination: use cursor + direction for pagination.
-//   - Performance: provide accountIDs when known for faster filtering. Returns:
-//     matching chats with pagination. Agents: ALWAYS use linkToChat to make
-//     clickable links in your response
+// Search and filter conversations across all messaging accounts
 func (r *ChatService) FindAutoPaging(ctx context.Context, query ChatFindParams, opts ...option.RequestOption) *pagination.CursorIDAutoPager[Chat] {
 	return pagination.NewCursorIDAutoPager(r.Find(ctx, query, opts...))
 }

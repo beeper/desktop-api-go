@@ -34,14 +34,7 @@ func NewAppService(opts ...option.RequestOption) (r AppService) {
 	return
 }
 
-// Bring Beeper Desktop to the foreground on this device. Optionally focuses a
-// specific chat if chatID is provided.
-//
-//   - When to use: open Beeper, or jump to a specific chat.
-//   - Constraints: requires Beeper Desktop running locally; no-op in headless
-//     environments.
-//   - Idempotent: safe to call repeatedly. Returns an error if chatID is not found.
-//     Returns: success.
+// Bring Beeper Desktop to the foreground on this device
 func (r *AppService) Focus(ctx context.Context, body AppFocusParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/focus-app"

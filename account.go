@@ -34,11 +34,7 @@ func NewAccountService(opts ...option.RequestOption) (r AccountService) {
 	return
 }
 
-// List connected Beeper accounts available on this device.
-//
-//   - When to use: select account context before account-scoped operations.
-//   - Scope: only accounts currently Connected on this device are included. Returns:
-//     connected accounts.
+// List connected Beeper accounts available on this device
 func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption) (res *AccountsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/get-accounts"
