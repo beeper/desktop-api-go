@@ -14,7 +14,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestMessageDraftWithOptionalParams(t *testing.T) {
+func TestMessageDraftMessageWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -26,7 +26,7 @@ func TestMessageDraftWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.Draft(context.TODO(), githubcombeeperdesktopapigo.MessageDraftParams{
+	_, err := client.Messages.DraftMessage(context.TODO(), githubcombeeperdesktopapigo.MessageDraftMessageParams{
 		ChatID:   "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
 		FocusApp: githubcombeeperdesktopapigo.Bool(true),
 		Text:     githubcombeeperdesktopapigo.String("text"),
@@ -40,7 +40,7 @@ func TestMessageDraftWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestMessageSearchWithOptionalParams(t *testing.T) {
+func TestMessageSearchMessagesWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -52,10 +52,10 @@ func TestMessageSearchWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.Search(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+	_, err := client.Messages.SearchMessages(context.TODO(), githubcombeeperdesktopapigo.MessageSearchMessagesParams{
 		AccountIDs:         []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
 		ChatIDs:            []string{"!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost"},
-		ChatType:           githubcombeeperdesktopapigo.MessageSearchParamsChatTypeGroup,
+		ChatType:           githubcombeeperdesktopapigo.MessageSearchMessagesParamsChatTypeGroup,
 		DateAfter:          githubcombeeperdesktopapigo.Time(time.Now()),
 		DateBefore:         githubcombeeperdesktopapigo.Time(time.Now()),
 		EndingBefore:       githubcombeeperdesktopapigo.String("872739"),
@@ -68,7 +68,7 @@ func TestMessageSearchWithOptionalParams(t *testing.T) {
 		OnlyWithMedia:      githubcombeeperdesktopapigo.Bool(true),
 		OnlyWithVideo:      githubcombeeperdesktopapigo.Bool(true),
 		Query:              githubcombeeperdesktopapigo.String("dinner"),
-		Sender:             githubcombeeperdesktopapigo.MessageSearchParamsSenderMe,
+		Sender:             githubcombeeperdesktopapigo.MessageSearchMessagesParamsSenderMe,
 		StartingAfter:      githubcombeeperdesktopapigo.String("196640"),
 	})
 	if err != nil {
@@ -80,7 +80,7 @@ func TestMessageSearchWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestMessageSendWithOptionalParams(t *testing.T) {
+func TestMessageSendMessageWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -92,7 +92,7 @@ func TestMessageSendWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.Send(context.TODO(), githubcombeeperdesktopapigo.MessageSendParams{
+	_, err := client.Messages.SendMessage(context.TODO(), githubcombeeperdesktopapigo.MessageSendMessageParams{
 		ChatID:           "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
 		ReplyToMessageID: githubcombeeperdesktopapigo.String("replyToMessageID"),
 		Text:             githubcombeeperdesktopapigo.String("text"),

@@ -42,7 +42,7 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 
 // Draft a message in a specific chat. This will be placed in the message input
 // field without sending
-func (r *MessageService) Draft(ctx context.Context, body MessageDraftParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *MessageService) DraftMessage(ctx context.Context, body MessageDraftMessageParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/draft-message"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -50,7 +50,7 @@ func (r *MessageService) Draft(ctx context.Context, body MessageDraftParams, opt
 }
 
 // Search messages across chats using Beeper's message index
-func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) (res *pagination.CursorID[Message], err error) {
+func (r *MessageService) SearchMessages(ctx context.Context, query MessageSearchMessagesParams, opts ...option.RequestOption) (res *pagination.CursorID[Message], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -68,13 +68,13 @@ func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, 
 }
 
 // Search messages across chats using Beeper's message index
-func (r *MessageService) SearchAutoPaging(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) *pagination.CursorIDAutoPager[Message] {
-	return pagination.NewCursorIDAutoPager(r.Search(ctx, query, opts...))
+func (r *MessageService) SearchMessagesAutoPaging(ctx context.Context, query MessageSearchMessagesParams, opts ...option.RequestOption) *pagination.CursorIDAutoPager[Message] {
+	return pagination.NewCursorIDAutoPager(r.SearchMessages(ctx, query, opts...))
 }
 
 // Send a text message to a specific chat. Supports replying to existing messages.
 // Returns the sent message ID and a deeplink to the chat
-func (r *MessageService) Send(ctx context.Context, body MessageSendParams, opts ...option.RequestOption) (res *SendResponse, err error) {
+func (r *MessageService) SendMessage(ctx context.Context, body MessageSendMessageParams, opts ...option.RequestOption) (res *SendResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/send-message"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -216,7 +216,7 @@ func (r *SendResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type MessageDraftParams struct {
+type MessageDraftMessageParams struct {
 	// Provide the unique identifier of the chat where you want to draft a message
 	ChatID string `json:"chatID,required"`
 	// Set to true to bring Beeper application to the foreground, or false to draft
@@ -228,15 +228,15 @@ type MessageDraftParams struct {
 	paramObj
 }
 
-func (r MessageDraftParams) MarshalJSON() (data []byte, err error) {
-	type shadow MessageDraftParams
+func (r MessageDraftMessageParams) MarshalJSON() (data []byte, err error) {
+	type shadow MessageDraftMessageParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *MessageDraftParams) UnmarshalJSON(data []byte) error {
+func (r *MessageDraftMessageParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type MessageSearchParams struct {
+type MessageSearchMessagesParams struct {
 	// Only include messages with timestamp strictly after this ISO 8601 datetime
 	// (e.g., '2024-07-01T00:00:00Z' or '2024-07-01T00:00:00+02:00').
 	DateAfter param.Opt[time.Time] `query:"dateAfter,omitzero" format:"date-time" json:"-"`
@@ -283,15 +283,16 @@ type MessageSearchParams struct {
 	// Filter by chat type: 'group' for group chats, 'single' for 1:1 chats.
 	//
 	// Any of "group", "single".
-	ChatType MessageSearchParamsChatType `query:"chatType,omitzero" json:"-"`
+	ChatType MessageSearchMessagesParamsChatType `query:"chatType,omitzero" json:"-"`
 	// Filter by sender: 'me' (messages sent by the authenticated user), 'others'
 	// (messages sent by others), or a specific user ID string (user.id).
-	Sender MessageSearchParamsSender `query:"sender,omitzero" json:"-"`
+	Sender MessageSearchMessagesParamsSender `query:"sender,omitzero" json:"-"`
 	paramObj
 }
 
-// URLQuery serializes [MessageSearchParams]'s query parameters as `url.Values`.
-func (r MessageSearchParams) URLQuery() (v url.Values, err error) {
+// URLQuery serializes [MessageSearchMessagesParams]'s query parameters as
+// `url.Values`.
+func (r MessageSearchMessagesParams) URLQuery() (v url.Values, err error) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
@@ -299,23 +300,23 @@ func (r MessageSearchParams) URLQuery() (v url.Values, err error) {
 }
 
 // Filter by chat type: 'group' for group chats, 'single' for 1:1 chats.
-type MessageSearchParamsChatType string
+type MessageSearchMessagesParamsChatType string
 
 const (
-	MessageSearchParamsChatTypeGroup  MessageSearchParamsChatType = "group"
-	MessageSearchParamsChatTypeSingle MessageSearchParamsChatType = "single"
+	MessageSearchMessagesParamsChatTypeGroup  MessageSearchMessagesParamsChatType = "group"
+	MessageSearchMessagesParamsChatTypeSingle MessageSearchMessagesParamsChatType = "single"
 )
 
 // Filter by sender: 'me' (messages sent by the authenticated user), 'others'
 // (messages sent by others), or a specific user ID string (user.id).
-type MessageSearchParamsSender string
+type MessageSearchMessagesParamsSender string
 
 const (
-	MessageSearchParamsSenderMe     MessageSearchParamsSender = "me"
-	MessageSearchParamsSenderOthers MessageSearchParamsSender = "others"
+	MessageSearchMessagesParamsSenderMe     MessageSearchMessagesParamsSender = "me"
+	MessageSearchMessagesParamsSenderOthers MessageSearchMessagesParamsSender = "others"
 )
 
-type MessageSendParams struct {
+type MessageSendMessageParams struct {
 	// The identifier of the chat where the message will send
 	ChatID string `json:"chatID,required"`
 	// Provide a message ID to send this as a reply to an existing message
@@ -325,10 +326,10 @@ type MessageSendParams struct {
 	paramObj
 }
 
-func (r MessageSendParams) MarshalJSON() (data []byte, err error) {
-	type shadow MessageSendParams
+func (r MessageSendMessageParams) MarshalJSON() (data []byte, err error) {
+	type shadow MessageSendMessageParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *MessageSendParams) UnmarshalJSON(data []byte) error {
+func (r *MessageSendMessageParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

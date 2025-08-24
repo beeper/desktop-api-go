@@ -35,14 +35,14 @@ func NewAppService(opts ...option.RequestOption) (r AppService) {
 }
 
 // Bring Beeper Desktop to the foreground on this device
-func (r *AppService) Focus(ctx context.Context, body AppFocusParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *AppService) FocusApp(ctx context.Context, body AppFocusAppParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/focus-app"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
-type AppFocusParams struct {
+type AppFocusAppParams struct {
 	// Optional Beeper chat ID to focus after bringing the app to foreground. If
 	// omitted, only foregrounds the app. Required if messageSortKey is present. No-op
 	// in headless environments.
@@ -52,10 +52,10 @@ type AppFocusParams struct {
 	paramObj
 }
 
-func (r AppFocusParams) MarshalJSON() (data []byte, err error) {
-	type shadow AppFocusParams
+func (r AppFocusAppParams) MarshalJSON() (data []byte, err error) {
+	type shadow AppFocusAppParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *AppFocusParams) UnmarshalJSON(data []byte) error {
+func (r *AppFocusAppParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

@@ -40,17 +40,9 @@ func NewChatService(opts ...option.RequestOption) (r ChatService) {
 	return
 }
 
-// Retrieve chat details including metadata, participants, and latest message
-func (r *ChatService) Get(ctx context.Context, query ChatGetParams, opts ...option.RequestOption) (res *GetChatResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/get-chat"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
-
 // Archive or unarchive a chat. Set archived=true to move to archive,
 // archived=false to move back to inbox
-func (r *ChatService) Archive(ctx context.Context, body ChatArchiveParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *ChatService) ArchiveChat(ctx context.Context, body ChatArchiveChatParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/archive-chat"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -58,7 +50,7 @@ func (r *ChatService) Archive(ctx context.Context, body ChatArchiveParams, opts 
 }
 
 // Search and filter conversations across all messaging accounts
-func (r *ChatService) Find(ctx context.Context, query ChatFindParams, opts ...option.RequestOption) (res *pagination.CursorID[Chat], err error) {
+func (r *ChatService) FindChats(ctx context.Context, query ChatFindChatsParams, opts ...option.RequestOption) (res *pagination.CursorID[Chat], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -76,13 +68,21 @@ func (r *ChatService) Find(ctx context.Context, query ChatFindParams, opts ...op
 }
 
 // Search and filter conversations across all messaging accounts
-func (r *ChatService) FindAutoPaging(ctx context.Context, query ChatFindParams, opts ...option.RequestOption) *pagination.CursorIDAutoPager[Chat] {
-	return pagination.NewCursorIDAutoPager(r.Find(ctx, query, opts...))
+func (r *ChatService) FindChatsAutoPaging(ctx context.Context, query ChatFindChatsParams, opts ...option.RequestOption) *pagination.CursorIDAutoPager[Chat] {
+	return pagination.NewCursorIDAutoPager(r.FindChats(ctx, query, opts...))
+}
+
+// Retrieve chat details including metadata, participants, and latest message
+func (r *ChatService) GetChat(ctx context.Context, query ChatGetChatParams, opts ...option.RequestOption) (res *GetChatResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	path := "v0/get-chat"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
 }
 
 // Generate a deep link to a specific chat or message. This link can be used to
 // open the chat directly in the Beeper app.
-func (r *ChatService) GetLink(ctx context.Context, body ChatGetLinkParams, opts ...option.RequestOption) (res *LinkResponse, err error) {
+func (r *ChatService) GetLinkToChat(ctx context.Context, body ChatGetLinkToChatParams, opts ...option.RequestOption) (res *LinkResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/get-link-to-chat"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -393,25 +393,7 @@ func (r *LinkResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type ChatGetParams struct {
-	// Unique identifier of the chat to retrieve. Not available for iMessage chats.
-	// Participants are limited by 'maxParticipantCount'.
-	ChatID string `query:"chatID,required" json:"-"`
-	// Maximum number of participants to return. Use -1 for all; otherwise 0–500.
-	// Defaults to 20.
-	MaxParticipantCount param.Opt[int64] `query:"maxParticipantCount,omitzero" json:"-"`
-	paramObj
-}
-
-// URLQuery serializes [ChatGetParams]'s query parameters as `url.Values`.
-func (r ChatGetParams) URLQuery() (v url.Values, err error) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
-type ChatArchiveParams struct {
+type ChatArchiveChatParams struct {
 	// The identifier of the chat to archive or unarchive
 	ChatID string `json:"chatID,required"`
 	// True to archive, false to unarchive
@@ -419,15 +401,15 @@ type ChatArchiveParams struct {
 	paramObj
 }
 
-func (r ChatArchiveParams) MarshalJSON() (data []byte, err error) {
-	type shadow ChatArchiveParams
+func (r ChatArchiveChatParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatArchiveChatParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ChatArchiveParams) UnmarshalJSON(data []byte) error {
+func (r *ChatArchiveChatParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type ChatFindParams struct {
+type ChatFindChatsParams struct {
 	// A cursor for use in pagination. ending_before is an object ID that defines your
 	// place in the list. For instance, if you make a list request and receive 100
 	// objects, starting with obj_bar, your subsequent call can include
@@ -465,17 +447,17 @@ type ChatFindParams struct {
 	// "low-priority", or "archive". If not specified, shows all chats.
 	//
 	// Any of "primary", "low-priority", "archive".
-	Inbox ChatFindParamsInbox `query:"inbox,omitzero" json:"-"`
+	Inbox ChatFindChatsParamsInbox `query:"inbox,omitzero" json:"-"`
 	// Specify the type of chats to retrieve: use "single" for direct messages, "group"
 	// for group chats, "channel" for channels, or "any" to get all types
 	//
 	// Any of "single", "group", "channel", "any".
-	Type ChatFindParamsType `query:"type,omitzero" json:"-"`
+	Type ChatFindChatsParamsType `query:"type,omitzero" json:"-"`
 	paramObj
 }
 
-// URLQuery serializes [ChatFindParams]'s query parameters as `url.Values`.
-func (r ChatFindParams) URLQuery() (v url.Values, err error) {
+// URLQuery serializes [ChatFindChatsParams]'s query parameters as `url.Values`.
+func (r ChatFindChatsParams) URLQuery() (v url.Values, err error) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
@@ -484,26 +466,44 @@ func (r ChatFindParams) URLQuery() (v url.Values, err error) {
 
 // Filter by inbox type: "primary" (non-archived, non-low-priority),
 // "low-priority", or "archive". If not specified, shows all chats.
-type ChatFindParamsInbox string
+type ChatFindChatsParamsInbox string
 
 const (
-	ChatFindParamsInboxPrimary     ChatFindParamsInbox = "primary"
-	ChatFindParamsInboxLowPriority ChatFindParamsInbox = "low-priority"
-	ChatFindParamsInboxArchive     ChatFindParamsInbox = "archive"
+	ChatFindChatsParamsInboxPrimary     ChatFindChatsParamsInbox = "primary"
+	ChatFindChatsParamsInboxLowPriority ChatFindChatsParamsInbox = "low-priority"
+	ChatFindChatsParamsInboxArchive     ChatFindChatsParamsInbox = "archive"
 )
 
 // Specify the type of chats to retrieve: use "single" for direct messages, "group"
 // for group chats, "channel" for channels, or "any" to get all types
-type ChatFindParamsType string
+type ChatFindChatsParamsType string
 
 const (
-	ChatFindParamsTypeSingle  ChatFindParamsType = "single"
-	ChatFindParamsTypeGroup   ChatFindParamsType = "group"
-	ChatFindParamsTypeChannel ChatFindParamsType = "channel"
-	ChatFindParamsTypeAny     ChatFindParamsType = "any"
+	ChatFindChatsParamsTypeSingle  ChatFindChatsParamsType = "single"
+	ChatFindChatsParamsTypeGroup   ChatFindChatsParamsType = "group"
+	ChatFindChatsParamsTypeChannel ChatFindChatsParamsType = "channel"
+	ChatFindChatsParamsTypeAny     ChatFindChatsParamsType = "any"
 )
 
-type ChatGetLinkParams struct {
+type ChatGetChatParams struct {
+	// Unique identifier of the chat to retrieve. Not available for iMessage chats.
+	// Participants are limited by 'maxParticipantCount'.
+	ChatID string `query:"chatID,required" json:"-"`
+	// Maximum number of participants to return. Use -1 for all; otherwise 0–500.
+	// Defaults to 20.
+	MaxParticipantCount param.Opt[int64] `query:"maxParticipantCount,omitzero" json:"-"`
+	paramObj
+}
+
+// URLQuery serializes [ChatGetChatParams]'s query parameters as `url.Values`.
+func (r ChatGetChatParams) URLQuery() (v url.Values, err error) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+type ChatGetLinkToChatParams struct {
 	// The ID of the chat to link to.
 	ChatID string `json:"chatID,required"`
 	// Optional message sort key. Jumps to that message in the chat.
@@ -511,10 +511,10 @@ type ChatGetLinkParams struct {
 	paramObj
 }
 
-func (r ChatGetLinkParams) MarshalJSON() (data []byte, err error) {
-	type shadow ChatGetLinkParams
+func (r ChatGetLinkToChatParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatGetLinkToChatParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ChatGetLinkParams) UnmarshalJSON(data []byte) error {
+func (r *ChatGetLinkToChatParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

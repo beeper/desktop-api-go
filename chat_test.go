@@ -14,7 +14,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestChatGetWithOptionalParams(t *testing.T) {
+func TestChatArchiveChatWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -26,32 +26,7 @@ func TestChatGetWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.Get(context.TODO(), githubcombeeperdesktopapigo.ChatGetParams{
-		ChatID:              "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		MaxParticipantCount: githubcombeeperdesktopapigo.Int(50),
-	})
-	if err != nil {
-		var apierr *githubcombeeperdesktopapigo.Error
-		if errors.As(err, &apierr) {
-			t.Log(string(apierr.DumpRequest(true)))
-		}
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-}
-
-func TestChatArchiveWithOptionalParams(t *testing.T) {
-	baseURL := "http://localhost:4010"
-	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
-		baseURL = envURL
-	}
-	if !testutil.CheckTestServer(t, baseURL) {
-		return
-	}
-	client := githubcombeeperdesktopapigo.NewClient(
-		option.WithBaseURL(baseURL),
-		option.WithAccessToken("My Access Token"),
-	)
-	_, err := client.Chats.Archive(context.TODO(), githubcombeeperdesktopapigo.ChatArchiveParams{
+	_, err := client.Chats.ArchiveChat(context.TODO(), githubcombeeperdesktopapigo.ChatArchiveChatParams{
 		ChatID:   "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
 		Archived: githubcombeeperdesktopapigo.Bool(true),
 	})
@@ -64,7 +39,7 @@ func TestChatArchiveWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestChatFindWithOptionalParams(t *testing.T) {
+func TestChatFindChatsWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -76,10 +51,10 @@ func TestChatFindWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.Find(context.TODO(), githubcombeeperdesktopapigo.ChatFindParams{
+	_, err := client.Chats.FindChats(context.TODO(), githubcombeeperdesktopapigo.ChatFindChatsParams{
 		AccountIDs:         []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "slackgo.T031TC83W"},
 		EndingBefore:       githubcombeeperdesktopapigo.String("872739"),
-		Inbox:              githubcombeeperdesktopapigo.ChatFindParamsInboxPrimary,
+		Inbox:              githubcombeeperdesktopapigo.ChatFindChatsParamsInboxPrimary,
 		IncludeMuted:       githubcombeeperdesktopapigo.Bool(true),
 		LastActivityAfter:  githubcombeeperdesktopapigo.Time(time.Now()),
 		LastActivityBefore: githubcombeeperdesktopapigo.Time(time.Now()),
@@ -87,7 +62,7 @@ func TestChatFindWithOptionalParams(t *testing.T) {
 		ParticipantQuery:   githubcombeeperdesktopapigo.String("participantQuery"),
 		Query:              githubcombeeperdesktopapigo.String("query"),
 		StartingAfter:      githubcombeeperdesktopapigo.String("196640"),
-		Type:               githubcombeeperdesktopapigo.ChatFindParamsTypeSingle,
+		Type:               githubcombeeperdesktopapigo.ChatFindChatsParamsTypeSingle,
 		UnreadOnly:         githubcombeeperdesktopapigo.Bool(true),
 	})
 	if err != nil {
@@ -99,7 +74,7 @@ func TestChatFindWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestChatGetLinkWithOptionalParams(t *testing.T) {
+func TestChatGetChatWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -111,7 +86,32 @@ func TestChatGetLinkWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.GetLink(context.TODO(), githubcombeeperdesktopapigo.ChatGetLinkParams{
+	_, err := client.Chats.GetChat(context.TODO(), githubcombeeperdesktopapigo.ChatGetChatParams{
+		ChatID:              "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
+		MaxParticipantCount: githubcombeeperdesktopapigo.Int(50),
+	})
+	if err != nil {
+		var apierr *githubcombeeperdesktopapigo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestChatGetLinkToChatWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := githubcombeeperdesktopapigo.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Chats.GetLinkToChat(context.TODO(), githubcombeeperdesktopapigo.ChatGetLinkToChatParams{
 		ChatID:         "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
 		MessageSortKey: githubcombeeperdesktopapigo.String("messageSortKey"),
 	})
