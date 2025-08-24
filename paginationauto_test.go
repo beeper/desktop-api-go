@@ -24,7 +24,7 @@ func TestAutoPagination(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+	iter := client.Messages.SearchMessagesAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchMessagesParams{
 		Limit: githubcombeeperdesktopapigo.Int(20),
 		Query: githubcombeeperdesktopapigo.String("meeting"),
 	})

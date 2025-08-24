@@ -24,7 +24,7 @@ func TestManualPagination(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Messages.Search(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+	page, err := client.Messages.SearchMessages(context.TODO(), githubcombeeperdesktopapigo.MessageSearchMessagesParams{
 		Limit: githubcombeeperdesktopapigo.Int(20),
 		Query: githubcombeeperdesktopapigo.String("meeting"),
 	})

@@ -52,9 +52,9 @@ func main() {
 	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithAccessToken("My Access Token"), // defaults to os.LookupEnv("BEEPER_ACCESS_TOKEN")
 	)
-	page, err := client.Chats.Find(context.TODO(), githubcombeeperdesktopapigo.ChatFindParams{
+	page, err := client.Chats.FindChats(context.TODO(), githubcombeeperdesktopapigo.ChatFindChatsParams{
 		Limit: githubcombeeperdesktopapigo.Int(10),
-		Type:  githubcombeeperdesktopapigo.ChatFindParamsTypeSingle,
+		Type:  githubcombeeperdesktopapigo.ChatFindChatsParamsTypeSingle,
 	})
 	if err != nil {
 		panic(err.Error())
@@ -265,7 +265,7 @@ client := githubcombeeperdesktopapigo.NewClient(
 	option.WithHeader("X-Some-Header", "custom_header_info"),
 )
 
-client.Accounts.List(context.TODO(), ...,
+client.Accounts.GetAccounts(context.TODO(), ...,
 	// Override the header
 	option.WithHeader("X-Some-Header", "some_other_custom_header_info"),
 	// Add an undocumented field to the request body, using sjson syntax
@@ -284,7 +284,7 @@ This library provides some conveniences for working with paginated list endpoint
 You can use `.ListAutoPaging()` methods to iterate through items across all pages:
 
 ```go
-iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+iter := client.Messages.SearchMessagesAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchMessagesParams{
 	Limit: githubcombeeperdesktopapigo.Int(20),
 	Query: githubcombeeperdesktopapigo.String("meeting"),
 })
@@ -302,7 +302,7 @@ Or you can use simple `.List()` methods to fetch a single page and receive a sta
 with additional helper methods like `.GetNextPage()`, e.g.:
 
 ```go
-page, err := client.Messages.Search(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
+page, err := client.Messages.SearchMessages(context.TODO(), githubcombeeperdesktopapigo.MessageSearchMessagesParams{
 	Limit: githubcombeeperdesktopapigo.Int(20),
 	Query: githubcombeeperdesktopapigo.String("meeting"),
 })
@@ -327,7 +327,7 @@ When the API returns a non-success status code, we return an error with type
 To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
-_, err := client.Messages.Send(context.TODO(), githubcombeeperdesktopapigo.MessageSendParams{
+_, err := client.Messages.SendMessage(context.TODO(), githubcombeeperdesktopapigo.MessageSendMessageParams{
 	ChatID: "!invalid-chat-id",
 	Text:   githubcombeeperdesktopapigo.String("Test message"),
 })
@@ -355,7 +355,7 @@ To set a per-retry timeout, use `option.WithRequestTimeout()`.
 // This sets the timeout for the request, including all the retries.
 ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 defer cancel()
-client.Accounts.List(
+client.Accounts.GetAccounts(
 	ctx,
 	// This sets the per-retry timeout
 	option.WithRequestTimeout(20*time.Second),
@@ -390,7 +390,7 @@ client := githubcombeeperdesktopapigo.NewClient(
 )
 
 // Override per-request:
-client.Accounts.List(context.TODO(), option.WithMaxRetries(5))
+client.Accounts.GetAccounts(context.TODO(), option.WithMaxRetries(5))
 ```
 
 ### Accessing raw response data (e.g. response headers)
@@ -401,7 +401,7 @@ you need to examine response headers, status codes, or other details.
 ```go
 // Create a variable to store the HTTP response
 var response *http.Response
-accountsResponse, err := client.Accounts.List(context.TODO(), option.WithResponseInto(&response))
+accountsResponse, err := client.Accounts.GetAccounts(context.TODO(), option.WithResponseInto(&response))
 if err != nil {
 	// handle error
 }

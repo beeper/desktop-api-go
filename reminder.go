@@ -35,7 +35,7 @@ func NewReminderService(opts ...option.RequestOption) (r ReminderService) {
 }
 
 // Clear an existing reminder from a chat
-func (r *ReminderService) Clear(ctx context.Context, body ReminderClearParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *ReminderService) ClearChatReminder(ctx context.Context, body ReminderClearChatReminderParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/clear-chat-reminder"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -43,47 +43,47 @@ func (r *ReminderService) Clear(ctx context.Context, body ReminderClearParams, o
 }
 
 // Set a reminder for a chat at a specific time
-func (r *ReminderService) Set(ctx context.Context, body ReminderSetParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *ReminderService) SetChatReminder(ctx context.Context, body ReminderSetChatReminderParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/set-chat-reminder"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
-type ReminderClearParams struct {
+type ReminderClearChatReminderParams struct {
 	// The identifier of the chat to clear reminder from
 	ChatID string `json:"chatID,required"`
 	paramObj
 }
 
-func (r ReminderClearParams) MarshalJSON() (data []byte, err error) {
-	type shadow ReminderClearParams
+func (r ReminderClearChatReminderParams) MarshalJSON() (data []byte, err error) {
+	type shadow ReminderClearChatReminderParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ReminderClearParams) UnmarshalJSON(data []byte) error {
+func (r *ReminderClearChatReminderParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type ReminderSetParams struct {
+type ReminderSetChatReminderParams struct {
 	// The identifier of the chat to set reminder for
 	ChatID string `json:"chatID,required"`
 	// Reminder configuration
-	Reminder ReminderSetParamsReminder `json:"reminder,omitzero,required"`
+	Reminder ReminderSetChatReminderParamsReminder `json:"reminder,omitzero,required"`
 	paramObj
 }
 
-func (r ReminderSetParams) MarshalJSON() (data []byte, err error) {
-	type shadow ReminderSetParams
+func (r ReminderSetChatReminderParams) MarshalJSON() (data []byte, err error) {
+	type shadow ReminderSetChatReminderParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ReminderSetParams) UnmarshalJSON(data []byte) error {
+func (r *ReminderSetChatReminderParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Reminder configuration
 //
 // The property RemindAtMs is required.
-type ReminderSetParamsReminder struct {
+type ReminderSetChatReminderParamsReminder struct {
 	// Unix timestamp in milliseconds when reminder should trigger
 	RemindAtMs float64 `json:"remindAtMs,required"`
 	// Cancel reminder if someone messages in the chat
@@ -91,10 +91,10 @@ type ReminderSetParamsReminder struct {
 	paramObj
 }
 
-func (r ReminderSetParamsReminder) MarshalJSON() (data []byte, err error) {
-	type shadow ReminderSetParamsReminder
+func (r ReminderSetChatReminderParamsReminder) MarshalJSON() (data []byte, err error) {
+	type shadow ReminderSetChatReminderParamsReminder
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ReminderSetParamsReminder) UnmarshalJSON(data []byte) error {
+func (r *ReminderSetChatReminderParamsReminder) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

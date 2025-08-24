@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestAccountList(t *testing.T) {
+func TestAccountGetAccounts(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,7 @@ func TestAccountList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Accounts.List(context.TODO())
+	_, err := client.Accounts.GetAccounts(context.TODO())
 	if err != nil {
 		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {

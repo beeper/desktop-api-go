@@ -35,7 +35,7 @@ func NewAccountService(opts ...option.RequestOption) (r AccountService) {
 }
 
 // List connected Beeper accounts available on this device
-func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption) (res *AccountsResponse, err error) {
+func (r *AccountService) GetAccounts(ctx context.Context, opts ...option.RequestOption) (res *AccountsResponse, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "v0/get-accounts"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)

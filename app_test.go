@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestAppFocusWithOptionalParams(t *testing.T) {
+func TestAppFocusAppWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,7 @@ func TestAppFocusWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Focus(context.TODO(), githubcombeeperdesktopapigo.AppFocusParams{
+	_, err := client.App.FocusApp(context.TODO(), githubcombeeperdesktopapigo.AppFocusAppParams{
 		ChatID:         githubcombeeperdesktopapigo.String("!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost"),
 		MessageSortKey: githubcombeeperdesktopapigo.String("messageSortKey"),
 	})
