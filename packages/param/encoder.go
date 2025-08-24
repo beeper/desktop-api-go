@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"time"
 
-	shimjson "github.com/beeper/beeper-desktop-api-go/internal/encoding/json"
+	shimjson "github.com/beeper/desktop-api-go/internal/encoding/json"
 
 	"github.com/tidwall/sjson"
 )

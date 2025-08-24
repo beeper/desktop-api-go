@@ -6,11 +6,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/beeper/beeper-desktop-api-go/internal/apijson"
-	"github.com/beeper/beeper-desktop-api-go/internal/requestconfig"
-	"github.com/beeper/beeper-desktop-api-go/option"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
-	"github.com/beeper/beeper-desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/shared"
 )
 
 // Set and clear reminders for chats

@@ -2,7 +2,7 @@ package param_test
 
 import (
 	"encoding/json"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/param"
 	"testing"
 )
 

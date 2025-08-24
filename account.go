@@ -6,11 +6,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/beeper/beeper-desktop-api-go/internal/apijson"
-	"github.com/beeper/beeper-desktop-api-go/internal/requestconfig"
-	"github.com/beeper/beeper-desktop-api-go/option"
-	"github.com/beeper/beeper-desktop-api-go/packages/respjson"
-	"github.com/beeper/beeper-desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/shared"
 )
 
 // Manage and list connected messaging accounts
