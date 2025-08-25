@@ -24,15 +24,15 @@ func TestManualPagination(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Messages.SearchMessages(context.TODO(), githubcombeeperdesktopapigo.MessageSearchMessagesParams{
+	page, err := client.V0.SearchMessages(context.TODO(), githubcombeeperdesktopapigo.V0SearchMessagesParams{
 		Limit: githubcombeeperdesktopapigo.Int(20),
 		Query: githubcombeeperdesktopapigo.String("meeting"),
 	})
 	if err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
-	for _, message := range page.Data {
-		t.Logf("%+v\n", message.ID)
+	for _, v0 := range page.Data {
+		t.Logf("%+v\n", v0.ID)
 	}
 	// Prism mock isn't going to give us real pagination
 	page, err = page.GetNextPage()
@@ -40,8 +40,8 @@ func TestManualPagination(t *testing.T) {
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
 	if page != nil {
-		for _, message := range page.Data {
-			t.Logf("%+v\n", message.ID)
+		for _, v0 := range page.Data {
+			t.Logf("%+v\n", v0.ID)
 		}
 	}
 }

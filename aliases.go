@@ -16,6 +16,11 @@ type paramObj = param.APIObject
 
 type Error = apierror.Error
 
+// A chat account added to Beeper
+//
+// This is an alias to an internal type.
+type Account = shared.Account
+
 // This is an alias to an internal type.
 type Attachment = shared.Attachment
 
@@ -43,6 +48,45 @@ type AttachmentSize = shared.AttachmentSize
 
 // This is an alias to an internal type.
 type BaseResponse = shared.BaseResponse
+
+// This is an alias to an internal type.
+type Chat = shared.Chat
+
+// Chat participants information.
+//
+// This is an alias to an internal type.
+type ChatParticipants = shared.ChatParticipants
+
+// Chat type: 'single' for direct messages, 'group' for group chats, 'channel' for
+// channels, 'broadcast' for broadcasts.
+//
+// This is an alias to an internal type.
+type ChatType = shared.ChatType
+
+// Equals "single"
+const ChatTypeSingle = shared.ChatTypeSingle
+
+// Equals "group"
+const ChatTypeGroup = shared.ChatTypeGroup
+
+// Equals "channel"
+const ChatTypeChannel = shared.ChatTypeChannel
+
+// Equals "broadcast"
+const ChatTypeBroadcast = shared.ChatTypeBroadcast
+
+// Last read message sortKey (hsOrder). Used to compute 'isUnread'.
+//
+// This is an alias to an internal type.
+type ChatLastReadMessageSortKeyUnion = shared.ChatLastReadMessageSortKeyUnion
+
+// This is an alias to an internal type.
+type Message = shared.Message
+
+// A unique key used to sort messages
+//
+// This is an alias to an internal type.
+type MessageSortKeyUnion = shared.MessageSortKeyUnion
 
 // This is an alias to an internal type.
 type Reaction = shared.Reaction

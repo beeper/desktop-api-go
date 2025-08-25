@@ -16,16 +16,8 @@ import (
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
 	Options []option.RequestOption
-	// Manage and list connected messaging accounts
-	Accounts AccountService
-	// Control the Beeper Desktop application
-	App AppService
-	// Send, draft, and search messages across all chat networks
-	Messages MessageService
-	// Manage chats, conversations, and threads
-	Chats ChatService
-	// Set and clear reminders for chats
-	Reminders ReminderService
+	// Beeper Desktop API v0
+	V0 V0Service
 	// OAuth2 authentication and token management
 	OAuth OAuthService
 }
@@ -52,11 +44,7 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 
 	r = Client{Options: opts}
 
-	r.Accounts = NewAccountService(opts...)
-	r.App = NewAppService(opts...)
-	r.Messages = NewMessageService(opts...)
-	r.Chats = NewChatService(opts...)
-	r.Reminders = NewReminderService(opts...)
+	r.V0 = NewV0Service(opts...)
 	r.OAuth = NewOAuthService(opts...)
 
 	return

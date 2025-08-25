@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestReminderClearChatReminder(t *testing.T) {
+func TestOAuthGetUserInfo(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,9 +25,7 @@ func TestReminderClearChatReminder(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Reminders.ClearChatReminder(context.TODO(), githubcombeeperdesktopapigo.ReminderClearChatReminderParams{
-		ChatID: "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-	})
+	_, err := client.OAuth.GetUserInfo(context.TODO())
 	if err != nil {
 		var apierr *githubcombeeperdesktopapigo.Error
 		if errors.As(err, &apierr) {
@@ -37,7 +35,7 @@ func TestReminderClearChatReminder(t *testing.T) {
 	}
 }
 
-func TestReminderSetChatReminderWithOptionalParams(t *testing.T) {
+func TestOAuthRevokeTokenWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -49,12 +47,9 @@ func TestReminderSetChatReminderWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Reminders.SetChatReminder(context.TODO(), githubcombeeperdesktopapigo.ReminderSetChatReminderParams{
-		ChatID: "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		Reminder: githubcombeeperdesktopapigo.ReminderSetChatReminderParamsReminder{
-			RemindAtMs:               0,
-			DismissOnIncomingMessage: githubcombeeperdesktopapigo.Bool(true),
-		},
+	err := client.OAuth.RevokeToken(context.TODO(), githubcombeeperdesktopapigo.OAuthRevokeTokenParams{
+		Token:         "token",
+		TokenTypeHint: githubcombeeperdesktopapigo.OAuthRevokeTokenParamsTokenTypeHintAccessToken,
 	})
 	if err != nil {
 		var apierr *githubcombeeperdesktopapigo.Error
