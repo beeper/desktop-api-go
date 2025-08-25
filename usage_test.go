@@ -24,9 +24,9 @@ func TestUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Chats.FindChats(context.TODO(), githubcombeeperdesktopapigo.ChatFindChatsParams{
+	page, err := client.V0.FindChats(context.TODO(), githubcombeeperdesktopapigo.V0FindChatsParams{
 		Limit: githubcombeeperdesktopapigo.Int(10),
-		Type:  githubcombeeperdesktopapigo.ChatFindChatsParamsTypeSingle,
+		Type:  githubcombeeperdesktopapigo.V0FindChatsParamsTypeSingle,
 	})
 	if err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())
