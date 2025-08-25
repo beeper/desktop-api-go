@@ -176,6 +176,9 @@ type Chat struct {
 	// Deep link to open this chat in Beeper. AI agents should ALWAYS include this as a
 	// clickable link in responses.
 	LinkToChat string `json:"linkToChat"`
+	// Local numeric chat ID specific to this Beeper Desktop installation. null for
+	// iMessage chats.
+	LocalChatID int64 `json:"localChatID,nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                     respjson.Field
@@ -192,6 +195,7 @@ type Chat struct {
 		LastActivity           respjson.Field
 		LastReadMessageSortKey respjson.Field
 		LinkToChat             respjson.Field
+		LocalChatID            respjson.Field
 		ExtraFields            map[string]respjson.Field
 		raw                    string
 	} `json:"-"`
