@@ -52,11 +52,14 @@ func main() {
 	client := githubcombeeperdesktopapigo.NewClient(
 		option.WithAccessToken("My Access Token"), // defaults to os.LookupEnv("BEEPER_ACCESS_TOKEN")
 	)
-	accounts, err := client.Accounts.List(context.TODO())
+	page, err := client.Chats.Search(context.TODO(), githubcombeeperdesktopapigo.ChatSearchParams{
+		Limit: githubcombeeperdesktopapigo.Int(10),
+		Type:  githubcombeeperdesktopapigo.ChatSearchParamsTypeSingle,
+	})
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("%+v\n", accounts.Accounts)
+	fmt.Printf("%+v\n", page)
 }
 
 ```
