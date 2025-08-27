@@ -263,7 +263,7 @@ func WithRequestTimeout(dur time.Duration) RequestOption {
 // environment to be the "local" environment. An environment specifies which base URL
 // to use by default.
 func WithEnvironmentLocal() RequestOption {
-	return requestconfig.WithDefaultBaseURL("http://localhost:23374/")
+	return requestconfig.WithDefaultBaseURL("http://localhost:23373/")
 }
 
 // WithAccessToken returns a RequestOption that sets the client setting "access_token".

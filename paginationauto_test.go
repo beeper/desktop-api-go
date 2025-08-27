@@ -24,14 +24,14 @@ func TestAutoPagination(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	iter := client.V0.SearchMessagesAutoPaging(context.TODO(), githubcombeeperdesktopapigo.V0SearchMessagesParams{
+	iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
 		Limit: githubcombeeperdesktopapigo.Int(20),
 		Query: githubcombeeperdesktopapigo.String("meeting"),
 	})
 	// Prism mock isn't going to give us real pagination
 	for i := 0; i < 3 && iter.Next(); i++ {
-		v0 := iter.Current()
-		t.Logf("%+v\n", v0.ID)
+		message := iter.Current()
+		t.Logf("%+v\n", message.ID)
 	}
 	if err := iter.Err(); err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())

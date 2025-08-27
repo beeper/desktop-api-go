@@ -4,6 +4,7 @@ package githubcombeeperdesktopapigo_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestManualPagination(t *testing.T) {
+func TestAppFocusWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -24,24 +25,16 @@ func TestManualPagination(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Messages.Search(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
-		Limit: githubcombeeperdesktopapigo.Int(20),
-		Query: githubcombeeperdesktopapigo.String("meeting"),
+	_, err := client.App.Focus(context.TODO(), githubcombeeperdesktopapigo.AppFocusParams{
+		ChatID:         githubcombeeperdesktopapigo.String("!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost"),
+		DraftText:      githubcombeeperdesktopapigo.String("draftText"),
+		MessageSortKey: githubcombeeperdesktopapigo.String("messageSortKey"),
 	})
 	if err != nil {
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-	for _, message := range page.Data {
-		t.Logf("%+v\n", message.ID)
-	}
-	// Prism mock isn't going to give us real pagination
-	page, err = page.GetNextPage()
-	if err != nil {
-		t.Fatalf("err should be nil: %s", err.Error())
-	}
-	if page != nil {
-		for _, message := range page.Data {
-			t.Logf("%+v\n", message.ID)
+		var apierr *githubcombeeperdesktopapigo.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
 		}
+		t.Fatalf("err should be nil: %s", err.Error())
 	}
 }

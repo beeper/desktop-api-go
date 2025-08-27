@@ -16,8 +16,16 @@ import (
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
 	Options []option.RequestOption
-	// Beeper Desktop API v0
-	V0 V0Service
+	// Accounts operations
+	Accounts AccountService
+	// App operations
+	App AppService
+	// Chats operations
+	Chats ChatService
+	// Messages operations
+	Messages MessageService
+	// Reminders operations
+	Reminders ReminderService
 	// OAuth2 authentication and token management
 	OAuth OAuthService
 }
@@ -44,7 +52,11 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 
 	r = Client{Options: opts}
 
-	r.V0 = NewV0Service(opts...)
+	r.Accounts = NewAccountService(opts...)
+	r.App = NewAppService(opts...)
+	r.Chats = NewChatService(opts...)
+	r.Messages = NewMessageService(opts...)
+	r.Reminders = NewReminderService(opts...)
 	r.OAuth = NewOAuthService(opts...)
 
 	return
