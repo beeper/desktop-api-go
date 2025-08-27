@@ -173,12 +173,9 @@ type Chat struct {
 	LastActivity time.Time `json:"lastActivity" format:"date-time"`
 	// Last read message sortKey (hsOrder). Used to compute 'isUnread'.
 	LastReadMessageSortKey ChatLastReadMessageSortKeyUnion `json:"lastReadMessageSortKey"`
-	// Deep link to open this chat in Beeper. AI agents should ALWAYS include this as a
-	// clickable link in responses.
-	LinkToChat string `json:"linkToChat"`
 	// Local numeric chat ID specific to this Beeper Desktop installation. null for
 	// iMessage chats.
-	LocalChatID int64 `json:"localChatID,nullable"`
+	LocalChatID string `json:"localChatID,nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                     respjson.Field
@@ -194,7 +191,6 @@ type Chat struct {
 		IsPinned               respjson.Field
 		LastActivity           respjson.Field
 		LastReadMessageSortKey respjson.Field
-		LinkToChat             respjson.Field
 		LocalChatID            respjson.Field
 		ExtraFields            map[string]respjson.Field
 		raw                    string
