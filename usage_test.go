@@ -24,9 +24,12 @@ func TestUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	accounts, err := client.Accounts.List(context.TODO())
+	page, err := client.Chats.Search(context.TODO(), githubcombeeperdesktopapigo.ChatSearchParams{
+		Limit: githubcombeeperdesktopapigo.Int(10),
+		Type:  githubcombeeperdesktopapigo.ChatSearchParamsTypeSingle,
+	})
 	if err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
-	t.Logf("%+v\n", accounts.Accounts)
+	t.Logf("%+v\n", page)
 }
