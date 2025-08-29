@@ -9,12 +9,11 @@ import (
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/beeper/desktop-api-go/option"
-	"github.com/beeper/desktop-api-go/packages/param"
 	"github.com/beeper/desktop-api-go/packages/respjson"
 	"github.com/beeper/desktop-api-go/shared"
 )
 
-// Authenticated operations related to the current access token
+// Operations related to the current access token
 //
 // TokenService contains methods and other services that help with interacting with
 // the beeperdesktop API.
@@ -35,28 +34,11 @@ func NewTokenService(opts ...option.RequestOption) (r TokenService) {
 	return
 }
 
-// List connected Beeper accounts available on this device
-func (r *TokenService) Accounts(ctx context.Context, opts ...option.RequestOption) (res *GetAccountsResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/get-accounts"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
-}
-
 // Returns information about the authenticated user/token
 func (r *TokenService) Info(ctx context.Context, opts ...option.RequestOption) (res *UserInfo, err error) {
 	opts = append(r.Options[:], opts...)
 	path := "oauth/userinfo"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
-}
-
-// Revoke an access token or refresh token (RFC 7009)
-func (r *TokenService) Revoke(ctx context.Context, body TokenRevokeParams, opts ...option.RequestOption) (err error) {
-	opts = append(r.Options[:], opts...)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
-	path := "oauth/revoke"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 
@@ -121,29 +103,4 @@ type UserInfoTokenUse string
 
 const (
 	UserInfoTokenUseAccess UserInfoTokenUse = "access"
-)
-
-type TokenRevokeParams struct {
-	// The token to revoke
-	Token string `json:"token,required"`
-	// Token type hint (RFC 7009)
-	//
-	// Any of "access_token".
-	TokenTypeHint TokenRevokeParamsTokenTypeHint `json:"token_type_hint,omitzero"`
-	paramObj
-}
-
-func (r TokenRevokeParams) MarshalJSON() (data []byte, err error) {
-	type shadow TokenRevokeParams
-	return param.MarshalObject(r, (*shadow)(&r))
-}
-func (r *TokenRevokeParams) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Token type hint (RFC 7009)
-type TokenRevokeParamsTokenTypeHint string
-
-const (
-	TokenRevokeParamsTokenTypeHintAccessToken TokenRevokeParamsTokenTypeHint = "access_token"
 )
