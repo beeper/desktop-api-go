@@ -401,11 +401,11 @@ you need to examine response headers, status codes, or other details.
 ```go
 // Create a variable to store the HTTP response
 var response *http.Response
-accounts, err := client.Accounts.List(context.TODO(), option.WithResponseInto(&response))
+getAccountsResponse, err := client.Accounts.List(context.TODO(), option.WithResponseInto(&response))
 if err != nil {
 	// handle error
 }
-fmt.Printf("%+v\n", accounts)
+fmt.Printf("%+v\n", getAccountsResponse)
 
 fmt.Printf("Status Code: %d\n", response.StatusCode)
 fmt.Printf("Headers: %+#v\n", response.Header)

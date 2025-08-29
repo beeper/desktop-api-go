@@ -26,8 +26,8 @@ type Client struct {
 	Messages MessageService
 	// Reminders operations
 	Reminders ReminderService
-	// OAuth2 authentication and token management
-	OAuth OAuthService
+	// Authenticated operations related to the current access token
+	Token TokenService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
@@ -57,7 +57,7 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r.Chats = NewChatService(opts...)
 	r.Messages = NewMessageService(opts...)
 	r.Reminders = NewReminderService(opts...)
-	r.OAuth = NewOAuthService(opts...)
+	r.Token = NewTokenService(opts...)
 
 	return
 }
