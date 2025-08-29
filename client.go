@@ -26,7 +26,7 @@ type Client struct {
 	Messages MessageService
 	// Reminders operations
 	Reminders ReminderService
-	// Authenticated operations related to the current access token
+	// Operations related to the current access token
 	Token TokenService
 }
 
