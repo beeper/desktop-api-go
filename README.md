@@ -5,8 +5,6 @@
 The Beeper Desktop Go library provides convenient access to the [Beeper Desktop REST API](https://www.beeper.com/desktop-api)
 from applications written in Go.
 
-It is generated with [Stainless](https://www.stainless.com/).
-
 ## Installation
 
 <!-- x-release-please-start-version -->
