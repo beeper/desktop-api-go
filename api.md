@@ -1,76 +1,14 @@
-# Shared Response Types
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#Attachment">Attachment</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#BaseResponse">BaseResponse</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#Message">Message</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#Reaction">Reaction</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#User">User</a>
-
 # beeperdesktopapi
-
-Response Types:
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#DownloadAssetResponse">DownloadAssetResponse</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#OpenResponse">OpenResponse</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#SearchResponse">SearchResponse</a>
-
-Methods:
-
-- <code title="post /v0/download-asset">client.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#BeeperdesktopapiService.DownloadAsset">DownloadAsset</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#DownloadAssetParams">DownloadAssetParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#DownloadAssetResponse">DownloadAssetResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-- <code title="post /v0/open-app">client.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#BeeperdesktopapiService.Open">Open</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#OpenParams">OpenParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#OpenResponse">OpenResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-- <code title="get /v0/search">client.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#BeeperdesktopapiService.Search">Search</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#SearchParams">SearchParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#SearchResponse">SearchResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 # Accounts
 
-Response Types:
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#Account">Account</a>
-
-Methods:
-
-- <code title="get /v0/get-accounts">client.Accounts.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#AccountService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) ([]<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#Account">Account</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-
 # Contacts
-
-Response Types:
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ContactSearchResponse">ContactSearchResponse</a>
-
-Methods:
-
-- <code title="get /v0/search-users">client.Contacts.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ContactService.Search">Search</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ContactSearchParams">ContactSearchParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ContactSearchResponse">ContactSearchResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 # Chats
 
-Response Types:
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#Chat">Chat</a>
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatNewResponse">ChatNewResponse</a>
-
-Methods:
-
-- <code title="post /v0/create-chat">client.Chats.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatNewParams">ChatNewParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatNewResponse">ChatNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-- <code title="get /v0/get-chat">client.Chats.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatGetParams">ChatGetParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#Chat">Chat</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-- <code title="post /v0/archive-chat">client.Chats.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatService.Archive">Archive</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatArchiveParams">ChatArchiveParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#BaseResponse">BaseResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-- <code title="get /v0/search-chats">client.Chats.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatService.Search">Search</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatSearchParams">ChatSearchParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/packages/pagination">pagination</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/packages/pagination#Cursor">Cursor</a>[<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#Chat">Chat</a>], <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-
 ## Reminders
 
-Methods:
-
-- <code title="post /v0/set-chat-reminder">client.Chats.Reminders.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatReminderService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatReminderNewParams">ChatReminderNewParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#BaseResponse">BaseResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-- <code title="post /v0/clear-chat-reminder">client.Chats.Reminders.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatReminderService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#ChatReminderDeleteParams">ChatReminderDeleteParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#BaseResponse">BaseResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-
 # Messages
-
-Response Types:
-
-- <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#MessageSendResponse">MessageSendResponse</a>
-
-Methods:
-
-- <code title="get /v0/search-messages">client.Messages.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#MessageService.Search">Search</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#MessageSearchParams">MessageSearchParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/packages/pagination">pagination</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/packages/pagination#Cursor">Cursor</a>[<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go/shared#Message">Message</a>], <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
-- <code title="post /v0/send-message">client.Messages.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#MessageService.Send">Send</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#MessageSendParams">MessageSendParams</a>) (<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/stainless-sdks/beeper-desktop-api-go#MessageSendResponse">MessageSendResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 # Token
 

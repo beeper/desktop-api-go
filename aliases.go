@@ -5,7 +5,6 @@ package beeperdesktopapi
 import (
 	"github.com/stainless-sdks/beeper-desktop-api-go/internal/apierror"
 	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
-	"github.com/stainless-sdks/beeper-desktop-api-go/shared"
 )
 
 // aliased to make [param.APIUnion] private when embedding
@@ -15,48 +14,3 @@ type paramUnion = param.APIUnion
 type paramObj = param.APIObject
 
 type Error = apierror.Error
-
-// This is an alias to an internal type.
-type Attachment = shared.Attachment
-
-// Attachment type.
-//
-// This is an alias to an internal type.
-type AttachmentType = shared.AttachmentType
-
-// Equals "unknown"
-const AttachmentTypeUnknown = shared.AttachmentTypeUnknown
-
-// Equals "img"
-const AttachmentTypeImg = shared.AttachmentTypeImg
-
-// Equals "video"
-const AttachmentTypeVideo = shared.AttachmentTypeVideo
-
-// Equals "audio"
-const AttachmentTypeAudio = shared.AttachmentTypeAudio
-
-// Pixel dimensions of the attachment: width/height in px.
-//
-// This is an alias to an internal type.
-type AttachmentSize = shared.AttachmentSize
-
-// This is an alias to an internal type.
-type BaseResponse = shared.BaseResponse
-
-// This is an alias to an internal type.
-type Message = shared.Message
-
-// A unique key used to sort messages
-//
-// This is an alias to an internal type.
-type MessageSortKeyUnion = shared.MessageSortKeyUnion
-
-// This is an alias to an internal type.
-type Reaction = shared.Reaction
-
-// A person on or reachable through Beeper. Values are best-effort and can vary by
-// network.
-//
-// This is an alias to an internal type.
-type User = shared.User
