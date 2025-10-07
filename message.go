@@ -39,6 +39,29 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 	return
 }
 
+// List all messages in a chat with cursor-based pagination. Sorted by timestamp.
+func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *pagination.Cursor[shared.Message], err error) {
+	var raw *http.Response
+	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	path := "v1/messages"
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List all messages in a chat with cursor-based pagination. Sorted by timestamp.
+func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListParams, opts ...option.RequestOption) *pagination.CursorAutoPager[shared.Message] {
+	return pagination.NewCursorAutoPager(r.List(ctx, query, opts...))
+}
+
 // Search messages across chats using Beeper's message index
 func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) (res *pagination.Cursor[shared.Message], err error) {
 	var raw *http.Response
@@ -91,6 +114,40 @@ func (r MessageSendResponse) RawJSON() string { return r.JSON.raw }
 func (r *MessageSendResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
+
+type MessageListParams struct {
+	// The chat ID to list messages from
+	ChatID string `query:"chatID,required" json:"-"`
+	// Message cursor for pagination. Use with direction to navigate results.
+	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
+	// Maximum number of messages to return (1–500). Defaults to 50.
+	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
+	// Pagination direction used with 'cursor': 'before' fetches older messages,
+	// 'after' fetches newer messages. Defaults to 'before' when only 'cursor' is
+	// provided.
+	//
+	// Any of "after", "before".
+	Direction MessageListParamsDirection `query:"direction,omitzero" json:"-"`
+	paramObj
+}
+
+// URLQuery serializes [MessageListParams]'s query parameters as `url.Values`.
+func (r MessageListParams) URLQuery() (v url.Values, err error) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Pagination direction used with 'cursor': 'before' fetches older messages,
+// 'after' fetches newer messages. Defaults to 'before' when only 'cursor' is
+// provided.
+type MessageListParamsDirection string
+
+const (
+	MessageListParamsDirectionAfter  MessageListParamsDirection = "after"
+	MessageListParamsDirectionBefore MessageListParamsDirection = "before"
+)
 
 type MessageSearchParams struct {
 	// Exclude messages marked Low Priority by the user. Default: true. Set to false to

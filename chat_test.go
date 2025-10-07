@@ -70,6 +70,33 @@ func TestChatGetWithOptionalParams(t *testing.T) {
 	}
 }
 
+func TestChatListWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Chats.List(context.TODO(), beeperdesktopapi.ChatListParams{
+		AccountIDs: []string{"whatsapp", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
+		Cursor:     beeperdesktopapi.String("1725489123456"),
+		Direction:  beeperdesktopapi.ChatListParamsDirectionBefore,
+		Limit:      beeperdesktopapi.Int(1),
+	})
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestChatArchiveWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {

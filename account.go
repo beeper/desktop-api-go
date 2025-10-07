@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/shared"
 )
 
-// Accounts operations
+// Manage connected chat accounts
 //
 // AccountService contains methods and other services that help with interacting
 // with the beeperdesktop API.

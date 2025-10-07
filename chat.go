@@ -66,6 +66,31 @@ func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParam
 	return
 }
 
+// List all chats sorted by last activity (most recent first). Combines all
+// accounts into a single paginated list.
+func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...option.RequestOption) (res *pagination.Cursor[ChatListResponse], err error) {
+	var raw *http.Response
+	opts = append(r.Options[:], opts...)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	path := "v1/chats"
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List all chats sorted by last activity (most recent first). Combines all
+// accounts into a single paginated list.
+func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, opts ...option.RequestOption) *pagination.CursorAutoPager[ChatListResponse] {
+	return pagination.NewCursorAutoPager(r.List(ctx, query, opts...))
+}
+
 // Archive or unarchive a chat. Set archived=true to move to archive,
 // archived=false to move back to inbox
 func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
@@ -246,6 +271,24 @@ func (r *ChatNewResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
+type ChatListResponse struct {
+	// Last message preview for this chat, if available.
+	Preview shared.Message `json:"preview"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Preview     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+	Chat
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatListResponse) RawJSON() string { return r.JSON.raw }
+func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
 type ChatNewParams struct {
 	// Account to create the chat on.
 	AccountID string `json:"accountID,required"`
@@ -294,6 +337,39 @@ func (r ChatGetParams) URLQuery() (v url.Values, err error) {
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
+
+type ChatListParams struct {
+	// Timestamp cursor (milliseconds since epoch) for pagination. Use with direction
+	// to navigate results.
+	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
+	// Maximum number of chats to return (1–200). Defaults to 50.
+	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
+	// Limit to specific account IDs. If omitted, fetches from all accounts.
+	AccountIDs []string `query:"accountIDs,omitzero" json:"-"`
+	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+	// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+	//
+	// Any of "after", "before".
+	Direction ChatListParamsDirection `query:"direction,omitzero" json:"-"`
+	paramObj
+}
+
+// URLQuery serializes [ChatListParams]'s query parameters as `url.Values`.
+func (r ChatListParams) URLQuery() (v url.Values, err error) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+type ChatListParamsDirection string
+
+const (
+	ChatListParamsDirectionAfter  ChatListParamsDirection = "after"
+	ChatListParamsDirectionBefore ChatListParamsDirection = "before"
+)
 
 type ChatArchiveParams struct {
 	// True to archive, false to unarchive
