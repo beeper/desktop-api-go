@@ -129,16 +129,8 @@ func (r *Client) Delete(ctx context.Context, path string, params any, res any, o
 // file URL.
 func (r *Client) DownloadAsset(ctx context.Context, body DownloadAssetParams, opts ...option.RequestOption) (res *DownloadAssetResponse, err error) {
 	opts = append(r.Options[:], opts...)
-	path := "v1/app/download-asset"
+	path := "v1/download-asset"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
-}
-
-// Returns information about the authenticated user/token
-func (r *Client) GetTokenInfo(ctx context.Context, opts ...option.RequestOption) (res *GetTokenInfoResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "oauth/userinfo"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
 }
 
@@ -146,7 +138,7 @@ func (r *Client) GetTokenInfo(ctx context.Context, opts ...option.RequestOption)
 // pre-fill draft text and attachment.
 func (r *Client) Open(ctx context.Context, body OpenParams, opts ...option.RequestOption) (res *OpenResponse, err error) {
 	opts = append(r.Options[:], opts...)
-	path := "v1/app/open"
+	path := "v1/open"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
