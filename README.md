@@ -282,41 +282,8 @@ This library provides some conveniences for working with paginated list endpoint
 
 You can use `.ListAutoPaging()` methods to iterate through items across all pages:
 
-```go
-iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
-	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
-	Limit:      beeperdesktopapi.Int(10),
-	Query:      beeperdesktopapi.String("deployment"),
-})
-// Automatically fetches more pages as needed.
-for iter.Next() {
-	message := iter.Current()
-	fmt.Printf("%+v\n", message)
-}
-if err := iter.Err(); err != nil {
-	panic(err.Error())
-}
-```
-
 Or you can use simple `.List()` methods to fetch a single page and receive a standard response object
 with additional helper methods like `.GetNextPage()`, e.g.:
-
-```go
-page, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
-	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
-	Limit:      beeperdesktopapi.Int(10),
-	Query:      beeperdesktopapi.String("deployment"),
-})
-for page != nil {
-	for _, message := range page.Items {
-		fmt.Printf("%+v\n", message)
-	}
-	page, err = page.GetNextPage()
-}
-if err != nil {
-	panic(err.Error())
-}
-```
 
 ### Errors
 

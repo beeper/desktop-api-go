@@ -63,26 +63,11 @@ func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListPa
 }
 
 // Search messages across chats using Beeper's message index
-func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) (res *pagination.Cursor[shared.Message], err error) {
-	var raw *http.Response
+func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) (res *MessageSearchResponse, err error) {
 	opts = append(r.Options[:], opts...)
-	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/messages/search"
-	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
-	if err != nil {
-		return nil, err
-	}
-	err = cfg.Execute()
-	if err != nil {
-		return nil, err
-	}
-	res.SetPageConfig(cfg, raw)
-	return res, nil
-}
-
-// Search messages across chats using Beeper's message index
-func (r *MessageService) SearchAutoPaging(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) *pagination.CursorAutoPager[shared.Message] {
-	return pagination.NewCursorAutoPager(r.Search(ctx, query, opts...))
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
 }
 
 // Send a text message to a specific chat. Supports replying to existing messages.
@@ -92,6 +77,37 @@ func (r *MessageService) Send(ctx context.Context, body MessageSendParams, opts 
 	path := "v1/messages"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
+}
+
+type MessageSearchResponse struct {
+	// Map of chatID -> chat details for chats referenced in items.
+	Chats map[string]Chat `json:"chats,required"`
+	// True if additional results can be fetched using the provided cursors.
+	HasMore bool `json:"hasMore,required"`
+	// Messages matching the query and filters.
+	Items []shared.Message `json:"items,required"`
+	// Cursor for fetching newer results (use with direction='after'). Opaque string;
+	// do not inspect.
+	NewestCursor string `json:"newestCursor,required"`
+	// Cursor for fetching older results (use with direction='before'). Opaque string;
+	// do not inspect.
+	OldestCursor string `json:"oldestCursor,required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Chats        respjson.Field
+		HasMore      respjson.Field
+		Items        respjson.Field
+		NewestCursor respjson.Field
+		OldestCursor respjson.Field
+		ExtraFields  map[string]respjson.Field
+		raw          string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r MessageSearchResponse) RawJSON() string { return r.JSON.raw }
+func (r *MessageSearchResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 type MessageSendResponse struct {
