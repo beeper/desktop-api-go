@@ -16,7 +16,7 @@ import (
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
 	Options []option.RequestOption
-	// Accounts operations
+	// Manage connected chat accounts
 	Accounts AccountService
 	// Contacts operations
 	Contacts ContactService
