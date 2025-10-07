@@ -50,11 +50,15 @@ func main() {
 	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"), // defaults to os.LookupEnv("BEEPER_ACCESS_TOKEN")
 	)
-	userInfo, err := client.Token.Info(context.TODO())
+	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
+		IncludeMuted: beeperdesktopapi.Bool(true),
+		Limit:        beeperdesktopapi.Int(3),
+		Type:         beeperdesktopapi.ChatSearchParamsTypeSingle,
+	})
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("%+v\n", userInfo.Sub)
+	fmt.Printf("%+v\n", page)
 }
 
 ```
@@ -260,7 +264,7 @@ client := beeperdesktopapi.NewClient(
 	option.WithHeader("X-Some-Header", "custom_header_info"),
 )
 
-client.Token.Info(context.TODO(), ...,
+client.Accounts.List(context.TODO(), ...,
 	// Override the header
 	option.WithHeader("X-Some-Header", "some_other_custom_header_info"),
 	// Add an undocumented field to the request body, using sjson syntax
@@ -278,8 +282,41 @@ This library provides some conveniences for working with paginated list endpoint
 
 You can use `.ListAutoPaging()` methods to iterate through items across all pages:
 
+```go
+iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
+	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+	Limit:      beeperdesktopapi.Int(10),
+	Query:      beeperdesktopapi.String("deployment"),
+})
+// Automatically fetches more pages as needed.
+for iter.Next() {
+	message := iter.Current()
+	fmt.Printf("%+v\n", message)
+}
+if err := iter.Err(); err != nil {
+	panic(err.Error())
+}
+```
+
 Or you can use simple `.List()` methods to fetch a single page and receive a standard response object
 with additional helper methods like `.GetNextPage()`, e.g.:
+
+```go
+page, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
+	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+	Limit:      beeperdesktopapi.Int(10),
+	Query:      beeperdesktopapi.String("deployment"),
+})
+for page != nil {
+	for _, message := range page.Items {
+		fmt.Printf("%+v\n", message)
+	}
+	page, err = page.GetNextPage()
+}
+if err != nil {
+	panic(err.Error())
+}
+```
 
 ### Errors
 
@@ -291,14 +328,17 @@ When the API returns a non-success status code, we return an error with type
 To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
-_, err := client.Token.Info(context.TODO())
+_, err := client.Messages.Send(context.TODO(), beeperdesktopapi.MessageSendParams{
+	ChatID: "1229391",
+	Text:   beeperdesktopapi.String("Hello! Just checking in on the project status."),
+})
 if err != nil {
 	var apierr *beeperdesktopapi.Error
 	if errors.As(err, &apierr) {
 		println(string(apierr.DumpRequest(true)))  // Prints the serialized HTTP request
 		println(string(apierr.DumpResponse(true))) // Prints the serialized HTTP response
 	}
-	panic(err.Error()) // GET "/oauth/userinfo": 400 Bad Request { ... }
+	panic(err.Error()) // GET "/v1/messages": 400 Bad Request { ... }
 }
 ```
 
@@ -316,7 +356,7 @@ To set a per-retry timeout, use `option.WithRequestTimeout()`.
 // This sets the timeout for the request, including all the retries.
 ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
 defer cancel()
-client.Token.Info(
+client.Accounts.List(
 	ctx,
 	// This sets the per-retry timeout
 	option.WithRequestTimeout(20*time.Second),
@@ -351,7 +391,7 @@ client := beeperdesktopapi.NewClient(
 )
 
 // Override per-request:
-client.Token.Info(context.TODO(), option.WithMaxRetries(5))
+client.Accounts.List(context.TODO(), option.WithMaxRetries(5))
 ```
 
 ### Accessing raw response data (e.g. response headers)
@@ -362,11 +402,11 @@ you need to examine response headers, status codes, or other details.
 ```go
 // Create a variable to store the HTTP response
 var response *http.Response
-userInfo, err := client.Token.Info(context.TODO(), option.WithResponseInto(&response))
+accounts, err := client.Accounts.List(context.TODO(), option.WithResponseInto(&response))
 if err != nil {
 	// handle error
 }
-fmt.Printf("%+v\n", userInfo)
+fmt.Printf("%+v\n", accounts)
 
 fmt.Printf("Status Code: %d\n", response.StatusCode)
 fmt.Printf("Headers: %+#v\n", response.Header)
