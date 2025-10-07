@@ -32,50 +32,6 @@ func (r *DownloadAssetResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type GetTokenInfoResponse struct {
-	// Issued at timestamp (Unix epoch seconds)
-	Iat float64 `json:"iat,required"`
-	// Granted scopes
-	Scope string `json:"scope,required"`
-	// Subject identifier (token ID)
-	Sub string `json:"sub,required"`
-	// Token type
-	//
-	// Any of "access".
-	TokenUse GetTokenInfoResponseTokenUse `json:"token_use,required"`
-	// Audience (client ID)
-	Aud string `json:"aud"`
-	// Client identifier
-	ClientID string `json:"client_id"`
-	// Expiration timestamp (Unix epoch seconds)
-	Exp float64 `json:"exp"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Iat         respjson.Field
-		Scope       respjson.Field
-		Sub         respjson.Field
-		TokenUse    respjson.Field
-		Aud         respjson.Field
-		ClientID    respjson.Field
-		Exp         respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r GetTokenInfoResponse) RawJSON() string { return r.JSON.raw }
-func (r *GetTokenInfoResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Token type
-type GetTokenInfoResponseTokenUse string
-
-const (
-	GetTokenInfoResponseTokenUseAccess GetTokenInfoResponseTokenUse = "access"
-)
-
 // Response indicating successful app opening.
 type OpenResponse struct {
 	// Whether the app was successfully opened/focused.
