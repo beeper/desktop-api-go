@@ -127,31 +127,3 @@ func (r *Client) Patch(ctx context.Context, path string, params any, res any, op
 func (r *Client) Delete(ctx context.Context, path string, params any, res any, opts ...option.RequestOption) error {
 	return r.Execute(ctx, http.MethodDelete, path, params, res, opts...)
 }
-
-// Download a Matrix asset using its mxc:// or localmxc:// URL and return the local
-// file URL.
-func (r *Client) DownloadAsset(ctx context.Context, body DownloadAssetParams, opts ...option.RequestOption) (res *DownloadAssetResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/download-asset"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
-}
-
-// Open Beeper Desktop and optionally navigate to a specific chat, message, or
-// pre-fill draft text and attachment.
-func (r *Client) Open(ctx context.Context, body OpenParams, opts ...option.RequestOption) (res *OpenResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/open-app"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
-}
-
-// Returns matching chats, participant name matches in groups, and the first page
-// of messages in one call. Paginate messages via search-messages. Paginate chats
-// via search-chats. Uses the same sorting as the chat search in the app.
-func (r *Client) Search(ctx context.Context, query SearchParams, opts ...option.RequestOption) (res *SearchResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/search"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}

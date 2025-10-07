@@ -3,14 +3,7 @@
 package beeperdesktopapi
 
 import (
-	"context"
-	"net/http"
-
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/apijson"
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/requestconfig"
 	"github.com/stainless-sdks/beeper-desktop-api-go/option"
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/respjson"
-	"github.com/stainless-sdks/beeper-desktop-api-go/shared"
 )
 
 // Accounts operations
@@ -32,38 +25,4 @@ func NewAccountService(opts ...option.RequestOption) (r AccountService) {
 	r = AccountService{}
 	r.Options = opts
 	return
-}
-
-// List connected Beeper accounts available on this device
-func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption) (res *[]Account, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/get-accounts"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
-}
-
-// A chat account added to Beeper
-type Account struct {
-	// Chat account added to Beeper. Use this to route account-scoped actions.
-	AccountID string `json:"accountID,required"`
-	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger'). You
-	// MUST use 'accountID' to perform actions.
-	Network string `json:"network,required"`
-	// A person on or reachable through Beeper. Values are best-effort and can vary by
-	// network.
-	User shared.User `json:"user,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		AccountID   respjson.Field
-		Network     respjson.Field
-		User        respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r Account) RawJSON() string { return r.JSON.raw }
-func (r *Account) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
 }
