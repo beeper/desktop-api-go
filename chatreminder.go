@@ -3,7 +3,16 @@
 package beeperdesktopapi
 
 import (
+	"context"
+	"errors"
+	"fmt"
+	"net/http"
+
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/shared"
 )
 
 // Reminders operations
@@ -25,4 +34,61 @@ func NewChatReminderService(opts ...option.RequestOption) (r ChatReminderService
 	r = ChatReminderService{}
 	r.Options = opts
 	return
+}
+
+// Set a reminder for a chat at a specific time
+func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Clear an existing reminder from a chat
+func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	return
+}
+
+type ChatReminderNewParams struct {
+	// Reminder configuration
+	Reminder ChatReminderNewParamsReminder `json:"reminder,omitzero,required"`
+	paramObj
+}
+
+func (r ChatReminderNewParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatReminderNewParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatReminderNewParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Reminder configuration
+//
+// The property RemindAtMs is required.
+type ChatReminderNewParamsReminder struct {
+	// Unix timestamp in milliseconds when reminder should trigger
+	RemindAtMs float64 `json:"remindAtMs,required"`
+	// Cancel reminder if someone messages in the chat
+	DismissOnIncomingMessage param.Opt[bool] `json:"dismissOnIncomingMessage,omitzero"`
+	paramObj
+}
+
+func (r ChatReminderNewParamsReminder) MarshalJSON() (data []byte, err error) {
+	type shadow ChatReminderNewParamsReminder
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatReminderNewParamsReminder) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }

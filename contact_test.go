@@ -4,6 +4,7 @@ package beeperdesktopapi_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestUsage(t *testing.T) {
+func TestContactSearch(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -24,13 +25,15 @@ func TestUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
-		IncludeMuted: beeperdesktopapi.Bool(true),
-		Limit:        beeperdesktopapi.Int(3),
-		Type:         beeperdesktopapi.ChatSearchParamsTypeSingle,
+	_, err := client.Contacts.Search(context.TODO(), beeperdesktopapi.ContactSearchParams{
+		AccountID: "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc",
+		Query:     "x",
 	})
 	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
-	t.Logf("%+v\n", page)
 }
