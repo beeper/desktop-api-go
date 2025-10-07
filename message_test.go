@@ -30,7 +30,6 @@ func TestMessageListWithOptionalParams(t *testing.T) {
 		ChatID:    "!NCdzlIaMjZUmvmvyHU:beeper.com",
 		Cursor:    beeperdesktopapi.String("821744079"),
 		Direction: beeperdesktopapi.MessageListParamsDirectionBefore,
-		Limit:     beeperdesktopapi.Int(1),
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error

@@ -68,7 +68,7 @@ func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParam
 
 // List all chats sorted by last activity (most recent first). Combines all
 // accounts into a single paginated list.
-func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...option.RequestOption) (res *pagination.Cursor[ChatListResponse], err error) {
+func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...option.RequestOption) (res *pagination.CursorList[ChatListResponse], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -87,8 +87,8 @@ func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...op
 
 // List all chats sorted by last activity (most recent first). Combines all
 // accounts into a single paginated list.
-func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, opts ...option.RequestOption) *pagination.CursorAutoPager[ChatListResponse] {
-	return pagination.NewCursorAutoPager(r.List(ctx, query, opts...))
+func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, opts ...option.RequestOption) *pagination.CursorListAutoPager[ChatListResponse] {
+	return pagination.NewCursorListAutoPager(r.List(ctx, query, opts...))
 }
 
 // Archive or unarchive a chat. Set archived=true to move to archive,
@@ -106,7 +106,7 @@ func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchi
 
 // Search chats by title/network or participants using Beeper Desktop's renderer
 // algorithm.
-func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) (res *pagination.Cursor[Chat], err error) {
+func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) (res *pagination.CursorSearch[Chat], err error) {
 	var raw *http.Response
 	opts = append(r.Options[:], opts...)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -125,8 +125,8 @@ func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts .
 
 // Search chats by title/network or participants using Beeper Desktop's renderer
 // algorithm.
-func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) *pagination.CursorAutoPager[Chat] {
-	return pagination.NewCursorAutoPager(r.Search(ctx, query, opts...))
+func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) *pagination.CursorSearchAutoPager[Chat] {
+	return pagination.NewCursorSearchAutoPager(r.Search(ctx, query, opts...))
 }
 
 type Chat struct {
@@ -342,8 +342,6 @@ type ChatListParams struct {
 	// Timestamp cursor (milliseconds since epoch) for pagination. Use with direction
 	// to navigate results.
 	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
-	// Maximum number of chats to return (1–200). Defaults to 50.
-	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
 	// Limit to specific account IDs. If omitted, fetches from all accounts.
 	AccountIDs []string `query:"accountIDs,omitzero" json:"-"`
 	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'

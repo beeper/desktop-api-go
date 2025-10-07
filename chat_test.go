@@ -86,7 +86,6 @@ func TestChatListWithOptionalParams(t *testing.T) {
 		AccountIDs: []string{"whatsapp", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
 		Cursor:     beeperdesktopapi.String("1725489123456"),
 		Direction:  beeperdesktopapi.ChatListParamsDirectionBefore,
-		Limit:      beeperdesktopapi.Int(1),
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
