@@ -1,15 +1,15 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperdesktopapigo_test
+package beeperdesktopapi_test
 
 import (
 	"context"
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go"
-	"github.com/beeper/desktop-api-go/internal/testutil"
-	"github.com/beeper/desktop-api-go/option"
+	"github.com/stainless-sdks/beeper-desktop-api-go"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/testutil"
+	"github.com/stainless-sdks/beeper-desktop-api-go/option"
 )
 
 func TestManualPagination(t *testing.T) {
@@ -20,18 +20,19 @@ func TestManualPagination(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Messages.Search(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
-		Limit: githubcombeeperdesktopapigo.Int(20),
-		Query: githubcombeeperdesktopapigo.String("meeting"),
+	page, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
+		AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+		Limit:      beeperdesktopapi.Int(10),
+		Query:      beeperdesktopapi.String("deployment"),
 	})
 	if err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
-	for _, message := range page.Data {
+	for _, message := range page.Items {
 		t.Logf("%+v\n", message.ID)
 	}
 	// Prism mock isn't going to give us real pagination
@@ -40,7 +41,7 @@ func TestManualPagination(t *testing.T) {
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
 	if page != nil {
-		for _, message := range page.Data {
+		for _, message := range page.Items {
 			t.Logf("%+v\n", message.ID)
 		}
 	}

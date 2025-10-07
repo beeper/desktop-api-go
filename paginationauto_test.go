@@ -1,15 +1,15 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperdesktopapigo_test
+package beeperdesktopapi_test
 
 import (
 	"context"
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go"
-	"github.com/beeper/desktop-api-go/internal/testutil"
-	"github.com/beeper/desktop-api-go/option"
+	"github.com/stainless-sdks/beeper-desktop-api-go"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/testutil"
+	"github.com/stainless-sdks/beeper-desktop-api-go/option"
 )
 
 func TestAutoPagination(t *testing.T) {
@@ -20,13 +20,14 @@ func TestAutoPagination(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	iter := client.Messages.SearchAutoPaging(context.TODO(), githubcombeeperdesktopapigo.MessageSearchParams{
-		Limit: githubcombeeperdesktopapigo.Int(20),
-		Query: githubcombeeperdesktopapigo.String("meeting"),
+	iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
+		AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+		Limit:      beeperdesktopapi.Int(10),
+		Query:      beeperdesktopapi.String("deployment"),
 	})
 	// Prism mock isn't going to give us real pagination
 	for i := 0; i < 3 && iter.Next(); i++ {

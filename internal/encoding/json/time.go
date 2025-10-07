@@ -2,7 +2,7 @@
 package json
 
 import (
-	"github.com/beeper/desktop-api-go/internal/encoding/json/shims"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/encoding/json/shims"
 	"reflect"
 	"time"
 )

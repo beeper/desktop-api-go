@@ -1,7 +1,7 @@
 package apiquery
 
 import (
-	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
 	"net/url"
 	"testing"
 	"time"

@@ -1,16 +1,15 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperdesktopapigo
+package beeperdesktopapi
 
 import (
 	"context"
 	"net/http"
 
-	"github.com/beeper/desktop-api-go/internal/apijson"
-	"github.com/beeper/desktop-api-go/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/option"
-	"github.com/beeper/desktop-api-go/packages/respjson"
-	"github.com/beeper/desktop-api-go/shared"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/apijson"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/requestconfig"
+	"github.com/stainless-sdks/beeper-desktop-api-go/option"
+	"github.com/stainless-sdks/beeper-desktop-api-go/packages/respjson"
 )
 
 // Operations related to the current access token
@@ -40,25 +39,6 @@ func (r *TokenService) Info(ctx context.Context, opts ...option.RequestOption) (
 	path := "oauth/userinfo"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
-}
-
-// Response payload for listing connected Beeper accounts.
-type GetAccountsResponse struct {
-	// Connected accounts the user can act through. Includes accountID, network, and
-	// user identity.
-	Accounts []shared.Account `json:"accounts,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Accounts    respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r GetAccountsResponse) RawJSON() string { return r.JSON.raw }
-func (r *GetAccountsResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
 }
 
 type UserInfo struct {

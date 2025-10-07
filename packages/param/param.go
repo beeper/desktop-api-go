@@ -2,7 +2,7 @@ package param
 
 import (
 	"encoding/json"
-	"github.com/beeper/desktop-api-go/internal/encoding/json/sentinel"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/encoding/json/sentinel"
 	"reflect"
 )
 

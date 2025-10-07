@@ -7,7 +7,7 @@ package apijson
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
 	"reflect"
 	"strconv"
 	"sync"

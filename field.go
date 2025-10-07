@@ -1,7 +1,7 @@
-package githubcombeeperdesktopapigo
+package beeperdesktopapi
 
 import (
-	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
 	"io"
 	"time"
 )

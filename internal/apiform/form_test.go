@@ -2,7 +2,7 @@ package apiform
 
 import (
 	"bytes"
-	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
 	"io"
 	"mime/multipart"
 	"strings"
