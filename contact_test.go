@@ -13,7 +13,7 @@ import (
 	"github.com/stainless-sdks/beeper-desktop-api-go/option"
 )
 
-func TestTokenInfo(t *testing.T) {
+func TestContactSearch(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,10 @@ func TestTokenInfo(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Token.Info(context.TODO())
+	_, err := client.Contacts.Search(context.TODO(), beeperdesktopapi.ContactSearchParams{
+		AccountID: "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc",
+		Query:     "x",
+	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {

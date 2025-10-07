@@ -1,14 +1,14 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperdesktopapigo
+package beeperdesktopapi
 
 import (
 	"context"
 	"net/http"
 	"os"
 
-	"github.com/beeper/desktop-api-go/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/option"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/requestconfig"
+	"github.com/stainless-sdks/beeper-desktop-api-go/option"
 )
 
 // Client creates a struct with services and top level methods that help with
@@ -18,23 +18,21 @@ type Client struct {
 	Options []option.RequestOption
 	// Accounts operations
 	Accounts AccountService
-	// App operations
-	App AppService
+	// Contacts operations
+	Contacts ContactService
 	// Chats operations
 	Chats ChatService
 	// Messages operations
 	Messages MessageService
-	// Reminders operations
-	Reminders ReminderService
 	// Operations related to the current access token
 	Token TokenService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
-// BEEPER-DESKTOP_BASE_URL). This should be used to initialize new clients.
+// BEEPER_DESKTOP_BASE_URL). This should be used to initialize new clients.
 func DefaultClientOptions() []option.RequestOption {
 	defaults := []option.RequestOption{option.WithEnvironmentLocal()}
-	if o, ok := os.LookupEnv("BEEPER-DESKTOP_BASE_URL"); ok {
+	if o, ok := os.LookupEnv("BEEPER_DESKTOP_BASE_URL"); ok {
 		defaults = append(defaults, option.WithBaseURL(o))
 	}
 	if o, ok := os.LookupEnv("BEEPER_ACCESS_TOKEN"); ok {
@@ -44,7 +42,7 @@ func DefaultClientOptions() []option.RequestOption {
 }
 
 // NewClient generates a new client with the default option read from the
-// environment (BEEPER_ACCESS_TOKEN, BEEPER-DESKTOP_BASE_URL). The option passed in
+// environment (BEEPER_ACCESS_TOKEN, BEEPER_DESKTOP_BASE_URL). The option passed in
 // as arguments are applied after these default arguments, and all option will be
 // passed down to the services and requests that this client makes.
 func NewClient(opts ...option.RequestOption) (r Client) {
@@ -53,10 +51,9 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r = Client{Options: opts}
 
 	r.Accounts = NewAccountService(opts...)
-	r.App = NewAppService(opts...)
+	r.Contacts = NewContactService(opts...)
 	r.Chats = NewChatService(opts...)
 	r.Messages = NewMessageService(opts...)
-	r.Reminders = NewReminderService(opts...)
 	r.Token = NewTokenService(opts...)
 
 	return
@@ -129,4 +126,32 @@ func (r *Client) Patch(ctx context.Context, path string, params any, res any, op
 // response.
 func (r *Client) Delete(ctx context.Context, path string, params any, res any, opts ...option.RequestOption) error {
 	return r.Execute(ctx, http.MethodDelete, path, params, res, opts...)
+}
+
+// Download a Matrix asset using its mxc:// or localmxc:// URL and return the local
+// file URL.
+func (r *Client) DownloadAsset(ctx context.Context, body DownloadAssetParams, opts ...option.RequestOption) (res *DownloadAssetResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	path := "v0/download-asset"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Open Beeper Desktop and optionally navigate to a specific chat, message, or
+// pre-fill draft text and attachment.
+func (r *Client) Open(ctx context.Context, body OpenParams, opts ...option.RequestOption) (res *OpenResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	path := "v0/open-app"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Returns matching chats, participant name matches in groups, and the first page
+// of messages in one call. Paginate messages via search-messages. Paginate chats
+// via search-chats. Uses the same sorting as the chat search in the app.
+func (r *Client) Search(ctx context.Context, query SearchParams, opts ...option.RequestOption) (res *SearchResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	path := "v0/search"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
 }

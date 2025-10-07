@@ -1,7 +1,7 @@
 package apijson
 
 import (
-	"github.com/beeper/desktop-api-go/packages/respjson"
+	"github.com/stainless-sdks/beeper-desktop-api-go/packages/respjson"
 	"reflect"
 )
 

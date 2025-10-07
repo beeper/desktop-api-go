@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperdesktopapigo_test
+package beeperdesktopapi_test
 
 import (
 	"context"
@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go"
-	"github.com/beeper/desktop-api-go/internal/testutil"
-	"github.com/beeper/desktop-api-go/option"
+	"github.com/stainless-sdks/beeper-desktop-api-go"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/testutil"
+	"github.com/stainless-sdks/beeper-desktop-api-go/option"
 )
 
 func TestAccountList(t *testing.T) {
@@ -21,13 +21,13 @@ func TestAccountList(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Accounts.List(context.TODO())
 	if err != nil {
-		var apierr *githubcombeeperdesktopapigo.Error
+		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}

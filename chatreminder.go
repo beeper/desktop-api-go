@@ -1,0 +1,102 @@
+// File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
+
+package beeperdesktopapi
+
+import (
+	"context"
+	"net/http"
+
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/apijson"
+	"github.com/stainless-sdks/beeper-desktop-api-go/internal/requestconfig"
+	"github.com/stainless-sdks/beeper-desktop-api-go/option"
+	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
+	"github.com/stainless-sdks/beeper-desktop-api-go/shared"
+)
+
+// Reminders operations
+//
+// ChatReminderService contains methods and other services that help with
+// interacting with the beeperdesktop API.
+//
+// Note, unlike clients, this service does not read variables from the environment
+// automatically. You should not instantiate this service directly, and instead use
+// the [NewChatReminderService] method instead.
+type ChatReminderService struct {
+	Options []option.RequestOption
+}
+
+// NewChatReminderService generates a new service that applies the given options to
+// each request. These options are applied after the parent client's options (if
+// there is one), and before any request-specific options.
+func NewChatReminderService(opts ...option.RequestOption) (r ChatReminderService) {
+	r = ChatReminderService{}
+	r.Options = opts
+	return
+}
+
+// Set a reminder for a chat at a specific time
+func (r *ChatReminderService) New(ctx context.Context, body ChatReminderNewParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	path := "v0/set-chat-reminder"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Clear an existing reminder from a chat
+func (r *ChatReminderService) Delete(ctx context.Context, body ChatReminderDeleteParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	path := "v0/clear-chat-reminder"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+type ChatReminderNewParams struct {
+	// The identifier of the chat to set reminder for (accepts both chatID and local
+	// chat ID)
+	ChatID string `json:"chatID,required"`
+	// Reminder configuration
+	Reminder ChatReminderNewParamsReminder `json:"reminder,omitzero,required"`
+	paramObj
+}
+
+func (r ChatReminderNewParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatReminderNewParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatReminderNewParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Reminder configuration
+//
+// The property RemindAtMs is required.
+type ChatReminderNewParamsReminder struct {
+	// Unix timestamp in milliseconds when reminder should trigger
+	RemindAtMs float64 `json:"remindAtMs,required"`
+	// Cancel reminder if someone messages in the chat
+	DismissOnIncomingMessage param.Opt[bool] `json:"dismissOnIncomingMessage,omitzero"`
+	paramObj
+}
+
+func (r ChatReminderNewParamsReminder) MarshalJSON() (data []byte, err error) {
+	type shadow ChatReminderNewParamsReminder
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatReminderNewParamsReminder) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatReminderDeleteParams struct {
+	// The identifier of the chat to clear reminder from (accepts both chatID and local
+	// chat ID)
+	ChatID string `json:"chatID,required"`
+	paramObj
+}
+
+func (r ChatReminderDeleteParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatReminderDeleteParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatReminderDeleteParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}

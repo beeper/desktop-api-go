@@ -1,6 +1,6 @@
 package param
 
-import "github.com/beeper/desktop-api-go/internal/encoding/json/sentinel"
+import "github.com/stainless-sdks/beeper-desktop-api-go/internal/encoding/json/sentinel"
 
 // NullMap returns a non-nil map with a length of 0.
 // When used with [MarshalObject] or [MarshalUnion], it will be marshaled as null.
