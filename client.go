@@ -24,8 +24,6 @@ type Client struct {
 	Chats ChatService
 	// Messages operations
 	Messages MessageService
-	// Operations related to the current access token
-	Token TokenService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
@@ -54,7 +52,6 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r.Contacts = NewContactService(opts...)
 	r.Chats = NewChatService(opts...)
 	r.Messages = NewMessageService(opts...)
-	r.Token = NewTokenService(opts...)
 
 	return
 }
@@ -134,6 +131,14 @@ func (r *Client) DownloadAsset(ctx context.Context, body DownloadAssetParams, op
 	opts = append(r.Options[:], opts...)
 	path := "v1/app/download-asset"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Returns information about the authenticated user/token
+func (r *Client) GetTokenInfo(ctx context.Context, opts ...option.RequestOption) (res *GetTokenInfoResponse, err error) {
+	opts = append(r.Options[:], opts...)
+	path := "oauth/userinfo"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
 }
 
