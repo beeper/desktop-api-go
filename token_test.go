@@ -8,9 +8,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stainless-sdks/beeper-desktop-api-go"
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/testutil"
-	"github.com/stainless-sdks/beeper-desktop-api-go/option"
+	"github.com/beeper/desktop-api-go"
+	"github.com/beeper/desktop-api-go/internal/testutil"
+	"github.com/beeper/desktop-api-go/option"
 )
 
 func TestTokenInfo(t *testing.T) {

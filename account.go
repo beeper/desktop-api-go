@@ -3,7 +3,7 @@
 package beeperdesktopapi
 
 import (
-	"github.com/stainless-sdks/beeper-desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/option"
 )
 
 // Accounts operations

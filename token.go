@@ -6,10 +6,10 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/apijson"
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/requestconfig"
-	"github.com/stainless-sdks/beeper-desktop-api-go/option"
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/packages/respjson"
 )
 
 // Operations related to the current access token

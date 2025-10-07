@@ -3,8 +3,8 @@ package apijson_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/apijson"
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/packages/param"
 	"reflect"
 	"testing"
 )

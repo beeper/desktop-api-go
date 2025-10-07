@@ -3,7 +3,7 @@
 package shared
 
 import (
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/param"
 )
 
 // aliased to make [param.APIUnion] private when embedding

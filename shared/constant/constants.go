@@ -3,7 +3,7 @@
 package constant
 
 import (
-	shimjson "github.com/stainless-sdks/beeper-desktop-api-go/internal/encoding/json"
+	shimjson "github.com/beeper/desktop-api-go/internal/encoding/json"
 )
 
 type Constant[T any] interface {

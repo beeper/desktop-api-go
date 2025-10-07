@@ -2,7 +2,7 @@ package apijson
 
 import (
 	"errors"
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/param"
 	"reflect"
 
 	"github.com/tidwall/gjson"
