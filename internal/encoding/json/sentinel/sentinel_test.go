@@ -1,8 +1,8 @@
 package sentinel_test
 
 import (
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/encoding/json/sentinel"
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/internal/encoding/json/sentinel"
+	"github.com/beeper/desktop-api-go/packages/param"
 	"reflect"
 	"slices"
 	"testing"

@@ -2,8 +2,8 @@ package apijson_test
 
 import (
 	"encoding/json"
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/apijson"
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/packages/respjson"
 	"testing"
 )
 

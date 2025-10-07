@@ -1,7 +1,7 @@
 package sentinel
 
 import (
-	"github.com/stainless-sdks/beeper-desktop-api-go/internal/encoding/json/shims"
+	"github.com/beeper/desktop-api-go/internal/encoding/json/shims"
 	"reflect"
 	"sync"
 )

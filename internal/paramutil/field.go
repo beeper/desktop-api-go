@@ -1,8 +1,8 @@
 package paramutil
 
 import (
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/param"
-	"github.com/stainless-sdks/beeper-desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/respjson"
 )
 
 func AddrIfPresent[T comparable](v param.Opt[T]) *T {

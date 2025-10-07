@@ -3,7 +3,7 @@ package param
 import (
 	"encoding/json"
 	"fmt"
-	shimjson "github.com/stainless-sdks/beeper-desktop-api-go/internal/encoding/json"
+	shimjson "github.com/beeper/desktop-api-go/internal/encoding/json"
 	"time"
 )
 
