@@ -3,7 +3,6 @@
 package shared
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
@@ -116,18 +115,16 @@ func (r *BaseResponse) UnmarshalJSON(data []byte) error {
 }
 
 type Message struct {
-	// Stable message ID for cursor pagination.
+	// Message ID.
 	ID string `json:"id,required"`
 	// Beeper account ID the message belongs to.
 	AccountID string `json:"accountID,required"`
-	// Beeper chat/thread/room ID.
+	// Unique identifier of the chat.
 	ChatID string `json:"chatID,required"`
-	// Stable message ID (same as id).
-	MessageID string `json:"messageID,required"`
 	// Sender user ID.
 	SenderID string `json:"senderID,required"`
 	// A unique key used to sort messages
-	SortKey MessageSortKeyUnion `json:"sortKey,required"`
+	SortKey string `json:"sortKey,required"`
 	// Message timestamp.
 	Timestamp time.Time `json:"timestamp,required" format:"date-time"`
 	// Attachments included with this message, if any.
@@ -148,7 +145,6 @@ type Message struct {
 		ID          respjson.Field
 		AccountID   respjson.Field
 		ChatID      respjson.Field
-		MessageID   respjson.Field
 		SenderID    respjson.Field
 		SortKey     respjson.Field
 		Timestamp   respjson.Field
@@ -166,42 +162,6 @@ type Message struct {
 // Returns the unmodified JSON received from the API
 func (r Message) RawJSON() string { return r.JSON.raw }
 func (r *Message) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// MessageSortKeyUnion contains all possible properties and values from [string],
-// [float64].
-//
-// Use the methods beginning with 'As' to cast the union to one of its variants.
-//
-// If the underlying value is not a json object, one of the following properties
-// will be valid: OfString OfFloat]
-type MessageSortKeyUnion struct {
-	// This field will be present if the value is a [string] instead of an object.
-	OfString string `json:",inline"`
-	// This field will be present if the value is a [float64] instead of an object.
-	OfFloat float64 `json:",inline"`
-	JSON    struct {
-		OfString respjson.Field
-		OfFloat  respjson.Field
-		raw      string
-	} `json:"-"`
-}
-
-func (u MessageSortKeyUnion) AsString() (v string) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-func (u MessageSortKeyUnion) AsFloat() (v float64) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-// Returns the unmodified JSON received from the API
-func (u MessageSortKeyUnion) RawJSON() string { return u.JSON.raw }
-
-func (r *MessageSortKeyUnion) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
