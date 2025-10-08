@@ -5,6 +5,7 @@ package beeperdesktopapi
 import (
 	"context"
 	"net/http"
+	"slices"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
@@ -37,7 +38,7 @@ func NewAccountService(opts ...option.RequestOption) (r AccountService) {
 // Lists chat accounts across networks (WhatsApp, Telegram, Twitter/X, etc.)
 // actively connected to this Beeper Desktop instance
 func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption) (res *[]Account, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/accounts"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return

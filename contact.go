@@ -6,6 +6,7 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"slices"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/apiquery"
@@ -39,7 +40,7 @@ func NewContactService(opts ...option.RequestOption) (r ContactService) {
 // Search contacts across on a specific account using the network's search API.
 // Only use for creating new chats.
 func (r *ContactService) Search(ctx context.Context, query ContactSearchParams, opts ...option.RequestOption) (res *ContactSearchResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/contacts/search"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return

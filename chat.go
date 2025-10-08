@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
@@ -48,7 +49,7 @@ func NewChatService(opts ...option.RequestOption) (r ChatService) {
 // Create a single or group chat on a specific account using participant IDs and
 // optional title.
 func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...option.RequestOption) (res *ChatNewResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	path := "v1/chats"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
@@ -56,7 +57,7 @@ func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...optio
 
 // Retrieve chat details including metadata, participants, and latest message
 func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParams, opts ...option.RequestOption) (res *Chat, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
@@ -70,7 +71,7 @@ func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParam
 // accounts into a single paginated list.
 func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...option.RequestOption) (res *pagination.CursorList[ChatListResponse], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/chats"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -94,7 +95,7 @@ func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, 
 // Archive or unarchive a chat. Set archived=true to move to archive,
 // archived=false to move back to inbox
 func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
@@ -108,7 +109,7 @@ func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchi
 // algorithm.
 func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) (res *pagination.CursorSearch[Chat], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/chats/search"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)

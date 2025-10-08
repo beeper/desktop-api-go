@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
@@ -38,7 +39,7 @@ func NewChatReminderService(opts ...option.RequestOption) (r ChatReminderService
 
 // Set a reminder for a chat at a specific time
 func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
@@ -50,7 +51,7 @@ func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatR
 
 // Clear an existing reminder from a chat
 func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return

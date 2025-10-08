@@ -1,6 +1,10 @@
 # Beeper Desktop Go API Library
 
+<!-- x-release-please-start-version -->
+
 <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go"><img src="https://pkg.go.dev/badge/github.com/beeper/desktop-api-go.svg" alt="Go Reference"></a>
+
+<!-- x-release-please-end -->
 
 The Beeper Desktop Go library provides convenient access to the [Beeper Desktop REST API](https://developers.beeper.com/desktop-api/)
 from applications written in Go.
@@ -29,7 +33,7 @@ go get -u 'github.com/beeper/desktop-api-go@v0.0.1'
 
 ## Requirements
 
-This library requires Go 1.18+.
+This library requires Go 1.22+.
 
 ## Usage
 
