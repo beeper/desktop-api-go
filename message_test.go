@@ -89,7 +89,7 @@ func TestMessageSendWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Messages.Send(context.TODO(), beeperdesktopapi.MessageSendParams{
-		ChatID:           "!NCdzlIaMjZUmvmvyHU:beeper.com",
+		ChatID:           beeperdesktopapi.String("!NCdzlIaMjZUmvmvyHU:beeper.com"),
 		ReplyToMessageID: beeperdesktopapi.String("replyToMessageID"),
 		Text:             beeperdesktopapi.String("text"),
 	})

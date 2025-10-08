@@ -333,7 +333,7 @@ To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
 _, err := client.Messages.Send(context.TODO(), beeperdesktopapi.MessageSendParams{
-	ChatID: "1229391",
+	ChatID: beeperdesktopapi.String("1229391"),
 	Text:   beeperdesktopapi.String("Hello! Just checking in on the project status."),
 })
 if err != nil {
