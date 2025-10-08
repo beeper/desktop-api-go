@@ -24,13 +24,9 @@ func TestUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
-		IncludeMuted: beeperdesktopapi.Bool(true),
-		Limit:        beeperdesktopapi.Int(3),
-		Type:         beeperdesktopapi.ChatSearchParamsTypeSingle,
-	})
+	accounts, err := client.Accounts.List(context.TODO())
 	if err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
-	t.Logf("%+v\n", page)
+	t.Logf("%+v\n", accounts)
 }

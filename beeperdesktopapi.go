@@ -32,8 +32,8 @@ func (r *DownloadAssetResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Response indicating successful app opening.
-type OpenResponse struct {
+// Response indicating successful app focus action.
+type FocusResponse struct {
 	// Whether the app was successfully opened/focused.
 	Success bool `json:"success,required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -45,8 +45,8 @@ type OpenResponse struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r OpenResponse) RawJSON() string { return r.JSON.raw }
-func (r *OpenResponse) UnmarshalJSON(data []byte) error {
+func (r FocusResponse) RawJSON() string { return r.JSON.raw }
+func (r *FocusResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
@@ -133,7 +133,7 @@ func (r *DownloadAssetParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type OpenParams struct {
+type FocusParams struct {
 	// Optional Beeper chat ID (or local chat ID) to focus after opening the app. If
 	// omitted, only opens/focuses the app.
 	ChatID param.Opt[string] `json:"chatID,omitzero"`
@@ -146,11 +146,11 @@ type OpenParams struct {
 	paramObj
 }
 
-func (r OpenParams) MarshalJSON() (data []byte, err error) {
-	type shadow OpenParams
+func (r FocusParams) MarshalJSON() (data []byte, err error) {
+	type shadow FocusParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *OpenParams) UnmarshalJSON(data []byte) error {
+func (r *FocusParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 

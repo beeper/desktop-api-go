@@ -47,11 +47,6 @@ type BaseResponse = shared.BaseResponse
 // This is an alias to an internal type.
 type Message = shared.Message
 
-// A unique key used to sort messages
-//
-// This is an alias to an internal type.
-type MessageSortKeyUnion = shared.MessageSortKeyUnion
-
 // This is an alias to an internal type.
 type Reaction = shared.Reaction
 

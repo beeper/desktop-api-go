@@ -30,7 +30,7 @@ func TestMessageListWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"!NCdzlIaMjZUmvmvyHU:beeper.com",
 		beeperdesktopapi.MessageListParams{
-			Cursor:    beeperdesktopapi.String("821744079"),
+			Cursor:    beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
 			Direction: beeperdesktopapi.MessageListParamsDirectionBefore,
 		},
 	)

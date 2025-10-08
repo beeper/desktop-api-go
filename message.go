@@ -74,7 +74,7 @@ func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, 
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
-	path := "v1/messages/search"
+	path := "v1/search/messages"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
 	if err != nil {
 		return nil, err
@@ -127,11 +127,10 @@ func (r *MessageSendResponse) UnmarshalJSON(data []byte) error {
 }
 
 type MessageListParams struct {
-	// Message cursor for pagination. Use with direction to navigate results.
+	// Opaque pagination cursor; do not inspect. Use together with 'direction'.
 	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
-	// Pagination direction used with 'cursor': 'before' fetches older messages,
-	// 'after' fetches newer messages. Defaults to 'before' when only 'cursor' is
-	// provided.
+	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+	// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
 	//
 	// Any of "after", "before".
 	Direction MessageListParamsDirection `query:"direction,omitzero" json:"-"`
@@ -146,9 +145,8 @@ func (r MessageListParams) URLQuery() (v url.Values, err error) {
 	})
 }
 
-// Pagination direction used with 'cursor': 'before' fetches older messages,
-// 'after' fetches newer messages. Defaults to 'before' when only 'cursor' is
-// provided.
+// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
 type MessageListParamsDirection string
 
 const (

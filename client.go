@@ -19,8 +19,7 @@ type Client struct {
 	Options []option.RequestOption
 	// Manage connected chat accounts
 	Accounts AccountService
-	// Contacts operations
-	Contacts ContactService
+	Search   SearchService
 	// Chats operations
 	Chats ChatService
 	// Messages operations
@@ -50,7 +49,7 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r = Client{Options: opts}
 
 	r.Accounts = NewAccountService(opts...)
-	r.Contacts = NewContactService(opts...)
+	r.Search = NewSearchService(opts...)
 	r.Chats = NewChatService(opts...)
 	r.Messages = NewMessageService(opts...)
 
@@ -135,11 +134,11 @@ func (r *Client) DownloadAsset(ctx context.Context, body DownloadAssetParams, op
 	return
 }
 
-// Open Beeper Desktop and optionally navigate to a specific chat, message, or
+// Focus Beeper Desktop and optionally navigate to a specific chat, message, or
 // pre-fill draft text and attachment.
-func (r *Client) Open(ctx context.Context, body OpenParams, opts ...option.RequestOption) (res *OpenResponse, err error) {
+func (r *Client) Focus(ctx context.Context, body FocusParams, opts ...option.RequestOption) (res *FocusResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	path := "v1/open"
+	path := "v1/focus"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
