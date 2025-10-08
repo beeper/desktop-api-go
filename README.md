@@ -332,17 +332,20 @@ When the API returns a non-success status code, we return an error with type
 To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
-_, err := client.Messages.Send(context.TODO(), beeperdesktopapi.MessageSendParams{
-	ChatID: beeperdesktopapi.String("1229391"),
-	Text:   beeperdesktopapi.String("Hello! Just checking in on the project status."),
-})
+_, err := client.Messages.Send(
+	context.TODO(),
+	"1229391",
+	beeperdesktopapi.MessageSendParams{
+		Text: beeperdesktopapi.String("Hello! Just checking in on the project status."),
+	},
+)
 if err != nil {
 	var apierr *beeperdesktopapi.Error
 	if errors.As(err, &apierr) {
 		println(string(apierr.DumpRequest(true)))  // Prints the serialized HTTP request
 		println(string(apierr.DumpResponse(true))) // Prints the serialized HTTP response
 	}
-	panic(err.Error()) // GET "/v1/messages": 400 Bad Request { ... }
+	panic(err.Error()) // GET "/v1/chats/{chatID}/messages": 400 Bad Request { ... }
 }
 ```
 

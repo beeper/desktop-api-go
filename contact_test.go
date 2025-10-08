@@ -25,10 +25,13 @@ func TestContactSearch(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Contacts.Search(context.TODO(), beeperdesktopapi.ContactSearchParams{
-		AccountID: "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc",
-		Query:     "x",
-	})
+	_, err := client.Contacts.Search(
+		context.TODO(),
+		"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc",
+		beeperdesktopapi.ContactSearchParams{
+			Query: "x",
+		},
+	)
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {

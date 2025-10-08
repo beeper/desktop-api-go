@@ -4,6 +4,8 @@ package beeperdesktopapi
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -41,11 +43,30 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 }
 
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
-func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *MessageListResponse, err error) {
+func (r *MessageService) List(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) (res *pagination.CursorList[shared.Message], err error) {
+	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
-	path := "v1/messages"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/chats/%s/messages", chatID)
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// List all messages in a chat with cursor-based pagination. Sorted by timestamp.
+func (r *MessageService) ListAutoPaging(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) *pagination.CursorListAutoPager[shared.Message] {
+	return pagination.NewCursorListAutoPager(r.List(ctx, chatID, query, opts...))
 }
 
 // Search messages across chats using Beeper's message index
@@ -73,32 +94,15 @@ func (r *MessageService) SearchAutoPaging(ctx context.Context, query MessageSear
 
 // Send a text message to a specific chat. Supports replying to existing messages.
 // Returns the sent message ID.
-func (r *MessageService) Send(ctx context.Context, body MessageSendParams, opts ...option.RequestOption) (res *MessageSendResponse, err error) {
+func (r *MessageService) Send(ctx context.Context, chatID string, body MessageSendParams, opts ...option.RequestOption) (res *MessageSendResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	path := "v1/messages"
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/chats/%s/messages", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
-}
-
-type MessageListResponse struct {
-	// True if additional results can be fetched.
-	HasMore bool `json:"hasMore,required"`
-	// Messages from the chat, sorted by timestamp. Use message.sortKey as cursor for
-	// pagination.
-	Items []shared.Message `json:"items,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		HasMore     respjson.Field
-		Items       respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r MessageListResponse) RawJSON() string { return r.JSON.raw }
-func (r *MessageListResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
 }
 
 type MessageSendResponse struct {
@@ -123,8 +127,6 @@ func (r *MessageSendResponse) UnmarshalJSON(data []byte) error {
 }
 
 type MessageListParams struct {
-	// Chat ID to list messages from
-	ChatID string `query:"chatID,required" json:"-"`
 	// Message cursor for pagination. Use with direction to navigate results.
 	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
 	// Pagination direction used with 'cursor': 'before' fetches older messages,
@@ -235,8 +237,6 @@ const (
 )
 
 type MessageSendParams struct {
-	// Unique identifier of the chat.
-	ChatID param.Opt[string] `json:"chatID,omitzero"`
 	// Provide a message ID to send this as a reply to an existing message
 	ReplyToMessageID param.Opt[string] `json:"replyToMessageID,omitzero"`
 	// Text content of the message you want to send. You may use markdown.

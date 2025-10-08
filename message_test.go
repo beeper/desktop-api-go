@@ -26,11 +26,14 @@ func TestMessageListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.List(context.TODO(), beeperdesktopapi.MessageListParams{
-		ChatID:    "!NCdzlIaMjZUmvmvyHU:beeper.com",
-		Cursor:    beeperdesktopapi.String("821744079"),
-		Direction: beeperdesktopapi.MessageListParamsDirectionBefore,
-	})
+	_, err := client.Messages.List(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.MessageListParams{
+			Cursor:    beeperdesktopapi.String("821744079"),
+			Direction: beeperdesktopapi.MessageListParamsDirectionBefore,
+		},
+	)
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
@@ -88,11 +91,14 @@ func TestMessageSendWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.Send(context.TODO(), beeperdesktopapi.MessageSendParams{
-		ChatID:           beeperdesktopapi.String("!NCdzlIaMjZUmvmvyHU:beeper.com"),
-		ReplyToMessageID: beeperdesktopapi.String("replyToMessageID"),
-		Text:             beeperdesktopapi.String("text"),
-	})
+	_, err := client.Messages.Send(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.MessageSendParams{
+			ReplyToMessageID: beeperdesktopapi.String("replyToMessageID"),
+			Text:             beeperdesktopapi.String("text"),
+		},
+	)
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {

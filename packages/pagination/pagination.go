@@ -4,6 +4,7 @@ package pagination
 
 import (
 	"net/http"
+	"reflect"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
@@ -127,18 +128,14 @@ func (r *CursorSearchAutoPager[T]) Index() int {
 }
 
 type CursorList[T any] struct {
-	Items        []T    `json:"items"`
-	HasMore      bool   `json:"hasMore"`
-	OldestCursor string `json:"oldestCursor,nullable"`
-	NewestCursor string `json:"newestCursor,nullable"`
+	Items   []T  `json:"items"`
+	HasMore bool `json:"hasMore"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		Items        respjson.Field
-		HasMore      respjson.Field
-		OldestCursor respjson.Field
-		NewestCursor respjson.Field
-		ExtraFields  map[string]respjson.Field
-		raw          string
+		Items       respjson.Field
+		HasMore     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
 	} `json:"-"`
 	cfg *requestconfig.RequestConfig
 	res *http.Response
@@ -161,12 +158,14 @@ func (r *CursorList[T]) GetNextPage() (res *CursorList[T], err error) {
 	if r.JSON.HasMore.Valid() && r.HasMore == false {
 		return nil, nil
 	}
-	next := r.OldestCursor
-	if len(next) == 0 {
+	items := r.Items
+	if items == nil || len(items) == 0 {
 		return nil, nil
 	}
 	cfg := r.cfg.Clone(r.cfg.Context)
-	err = cfg.Apply(option.WithQuery("cursor", next))
+	value := reflect.ValueOf(items[len(items)-1])
+	field := value.FieldByName("SortKey")
+	err = cfg.Apply(option.WithQuery("cursor", field.Interface().(string)))
 	if err != nil {
 		return nil, err
 	}
