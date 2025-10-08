@@ -41,26 +41,11 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 }
 
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
-func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *pagination.CursorList[shared.Message], err error) {
-	var raw *http.Response
+func (r *MessageService) List(ctx context.Context, query MessageListParams, opts ...option.RequestOption) (res *MessageListResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	path := "v1/messages"
-	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
-	if err != nil {
-		return nil, err
-	}
-	err = cfg.Execute()
-	if err != nil {
-		return nil, err
-	}
-	res.SetPageConfig(cfg, raw)
-	return res, nil
-}
-
-// List all messages in a chat with cursor-based pagination. Sorted by timestamp.
-func (r *MessageService) ListAutoPaging(ctx context.Context, query MessageListParams, opts ...option.RequestOption) *pagination.CursorListAutoPager[shared.Message] {
-	return pagination.NewCursorListAutoPager(r.List(ctx, query, opts...))
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
 }
 
 // Search messages across chats using Beeper's message index
@@ -93,6 +78,27 @@ func (r *MessageService) Send(ctx context.Context, body MessageSendParams, opts 
 	path := "v1/messages"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
+}
+
+type MessageListResponse struct {
+	// True if additional results can be fetched.
+	HasMore bool `json:"hasMore,required"`
+	// Messages from the chat, sorted by timestamp. Use message.sortKey as cursor for
+	// pagination.
+	Items []shared.Message `json:"items,required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		HasMore     respjson.Field
+		Items       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r MessageListResponse) RawJSON() string { return r.JSON.raw }
+func (r *MessageListResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 type MessageSendResponse struct {
@@ -163,8 +169,7 @@ type MessageSearchParams struct {
 	// Only include messages with timestamp strictly before this ISO 8601 datetime
 	// (e.g., '2024-07-31T23:59:59Z' or '2024-07-31T23:59:59+02:00').
 	DateBefore param.Opt[time.Time] `query:"dateBefore,omitzero" format:"date-time" json:"-"`
-	// Maximum number of messages to return (1–500). Defaults to 20. The current
-	// implementation caps each page at 20 items even if a higher limit is requested.
+	// Maximum number of messages to return.
 	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
 	// Literal word search (NOT semantic). Finds messages containing these EXACT words
 	// in any order. Use single words users actually type, not concepts or phrases.
@@ -231,7 +236,7 @@ const (
 
 type MessageSendParams struct {
 	// Unique identifier of the chat.
-	ChatID string `json:"chatID,required"`
+	ChatID param.Opt[string] `json:"chatID,omitzero"`
 	// Provide a message ID to send this as a reply to an existing message
 	ReplyToMessageID param.Opt[string] `json:"replyToMessageID,omitzero"`
 	// Text content of the message you want to send. You may use markdown.
