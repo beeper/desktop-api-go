@@ -4,6 +4,8 @@ package beeperdesktopapi
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"slices"
@@ -39,9 +41,13 @@ func NewContactService(opts ...option.RequestOption) (r ContactService) {
 
 // Search contacts across on a specific account using the network's search API.
 // Only use for creating new chats.
-func (r *ContactService) Search(ctx context.Context, query ContactSearchParams, opts ...option.RequestOption) (res *ContactSearchResponse, err error) {
+func (r *ContactService) Search(ctx context.Context, accountID string, query ContactSearchParams, opts ...option.RequestOption) (res *ContactSearchResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	path := "v1/contacts/search"
+	if accountID == "" {
+		err = errors.New("missing required accountID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/accounts/%s/contacts/search", accountID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
 	return
 }
@@ -63,8 +69,6 @@ func (r *ContactSearchResponse) UnmarshalJSON(data []byte) error {
 }
 
 type ContactSearchParams struct {
-	// Account ID this resource belongs to.
-	AccountID string `query:"accountID,required" json:"-"`
 	// Text to search users by. Network-specific behavior.
 	Query string `query:"query,required" json:"-"`
 	paramObj
