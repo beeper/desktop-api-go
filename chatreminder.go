@@ -13,10 +13,9 @@ import (
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/beeper/desktop-api-go/option"
 	"github.com/beeper/desktop-api-go/packages/param"
-	"github.com/beeper/desktop-api-go/shared"
 )
 
-// Reminders operations
+// Manage reminders for chats
 //
 // ChatReminderService contains methods and other services that help with
 // interacting with the beeperdesktop API.
@@ -38,26 +37,28 @@ func NewChatReminderService(opts ...option.RequestOption) (r ChatReminderService
 }
 
 // Set a reminder for a chat at a specific time
-func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 
 // Clear an existing reminder from a chat
-func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
 	return
 }
 

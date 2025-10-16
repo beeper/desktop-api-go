@@ -42,9 +42,6 @@ const AttachmentTypeAudio = shared.AttachmentTypeAudio
 type AttachmentSize = shared.AttachmentSize
 
 // This is an alias to an internal type.
-type BaseResponse = shared.BaseResponse
-
-// This is an alias to an internal type.
 type Message = shared.Message
 
 // This is an alias to an internal type.
