@@ -4,7 +4,6 @@ package beeperdesktopapi
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -22,7 +21,7 @@ import (
 	"github.com/beeper/desktop-api-go/shared"
 )
 
-// Chats operations
+// Manage chats
 //
 // ChatService contains methods and other services that help with interacting with
 // the beeperdesktop API.
@@ -32,7 +31,7 @@ import (
 // the [NewChatService] method instead.
 type ChatService struct {
 	Options []option.RequestOption
-	// Reminders operations
+	// Manage reminders for chats
 	Reminders ChatReminderService
 }
 
@@ -69,7 +68,7 @@ func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParam
 
 // List all chats sorted by last activity (most recent first). Combines all
 // accounts into a single paginated list.
-func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...option.RequestOption) (res *pagination.CursorList[ChatListResponse], err error) {
+func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...option.RequestOption) (res *pagination.CursorNoLimit[ChatListResponse], err error) {
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -88,29 +87,57 @@ func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...op
 
 // List all chats sorted by last activity (most recent first). Combines all
 // accounts into a single paginated list.
-func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, opts ...option.RequestOption) *pagination.CursorListAutoPager[ChatListResponse] {
-	return pagination.NewCursorListAutoPager(r.List(ctx, query, opts...))
+func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, opts ...option.RequestOption) *pagination.CursorNoLimitAutoPager[ChatListResponse] {
+	return pagination.NewCursorNoLimitAutoPager(r.List(ctx, query, opts...))
 }
 
 // Archive or unarchive a chat. Set archived=true to move to archive,
 // archived=false to move back to inbox
-func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
+func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/chats/%s/archive", chatID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 
+// Search chats by title/network or participants using Beeper Desktop's renderer
+// algorithm.
+func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) (res *pagination.CursorSearch[Chat], err error) {
+	var raw *http.Response
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	path := "v1/chats/search"
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Search chats by title/network or participants using Beeper Desktop's renderer
+// algorithm.
+func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) *pagination.CursorSearchAutoPager[Chat] {
+	return pagination.NewCursorSearchAutoPager(r.Search(ctx, query, opts...))
+}
+
 type Chat struct {
-	// Unique identifier of the chat (room/thread ID, same as id) across Beeper.
+	// Unique identifier of the chat across Beeper.
 	ID string `json:"id,required"`
-	// Beeper account ID this chat belongs to.
+	// Account ID this chat belongs to.
 	AccountID string `json:"accountID,required"`
 	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
+	//
+	// Deprecated: deprecated
 	Network string `json:"network,required"`
 	// Chat participants information.
 	Participants ChatParticipants `json:"participants,required"`
@@ -128,11 +155,10 @@ type Chat struct {
 	IsMuted bool `json:"isMuted"`
 	// True if chat is pinned.
 	IsPinned bool `json:"isPinned"`
-	// Timestamp of last activity. Chats with more recent activity are often more
-	// important.
+	// Timestamp of last activity.
 	LastActivity time.Time `json:"lastActivity" format:"date-time"`
-	// Last read message sortKey (hsOrder). Used to compute 'isUnread'.
-	LastReadMessageSortKey ChatLastReadMessageSortKeyUnion `json:"lastReadMessageSortKey"`
+	// Last read message sortKey.
+	LastReadMessageSortKey string `json:"lastReadMessageSortKey"`
 	// Local chat ID specific to this Beeper Desktop installation.
 	LocalChatID string `json:"localChatID,nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -193,52 +219,15 @@ const (
 	ChatTypeGroup  ChatType = "group"
 )
 
-// ChatLastReadMessageSortKeyUnion contains all possible properties and values from
-// [int64], [string].
-//
-// Use the methods beginning with 'As' to cast the union to one of its variants.
-//
-// If the underlying value is not a json object, one of the following properties
-// will be valid: OfInt OfString]
-type ChatLastReadMessageSortKeyUnion struct {
-	// This field will be present if the value is a [int64] instead of an object.
-	OfInt int64 `json:",inline"`
-	// This field will be present if the value is a [string] instead of an object.
-	OfString string `json:",inline"`
-	JSON     struct {
-		OfInt    respjson.Field
-		OfString respjson.Field
-		raw      string
-	} `json:"-"`
-}
-
-func (u ChatLastReadMessageSortKeyUnion) AsInt() (v int64) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-func (u ChatLastReadMessageSortKeyUnion) AsString() (v string) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-// Returns the unmodified JSON received from the API
-func (u ChatLastReadMessageSortKeyUnion) RawJSON() string { return u.JSON.raw }
-
-func (r *ChatLastReadMessageSortKeyUnion) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 type ChatNewResponse struct {
-	// Newly created chat if available.
-	ChatID string `json:"chatID"`
+	// Newly created chat ID.
+	ChatID string `json:"chatID,required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID      respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
-	shared.BaseResponse
 }
 
 // Returns the unmodified JSON received from the API
@@ -301,7 +290,7 @@ const (
 
 type ChatGetParams struct {
 	// Maximum number of participants to return. Use -1 for all; otherwise 0–500.
-	// Defaults to 20.
+	// Defaults to all (-1).
 	MaxParticipantCount param.Opt[int64] `query:"maxParticipantCount,omitzero" json:"-"`
 	paramObj
 }
@@ -357,3 +346,94 @@ func (r ChatArchiveParams) MarshalJSON() (data []byte, err error) {
 func (r *ChatArchiveParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
+
+type ChatSearchParams struct {
+	// Include chats marked as Muted by the user, which are usually less important.
+	// Default: true. Set to false if the user wants a more refined search.
+	IncludeMuted param.Opt[bool] `query:"includeMuted,omitzero" json:"-"`
+	// Set to true to only retrieve chats that have unread messages
+	UnreadOnly param.Opt[bool] `query:"unreadOnly,omitzero" json:"-"`
+	// Opaque pagination cursor; do not inspect. Use together with 'direction'.
+	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
+	// Provide an ISO datetime string to only retrieve chats with last activity after
+	// this time
+	LastActivityAfter param.Opt[time.Time] `query:"lastActivityAfter,omitzero" format:"date-time" json:"-"`
+	// Provide an ISO datetime string to only retrieve chats with last activity before
+	// this time
+	LastActivityBefore param.Opt[time.Time] `query:"lastActivityBefore,omitzero" format:"date-time" json:"-"`
+	// Set the maximum number of chats to retrieve. Valid range: 1-200, default is 50
+	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
+	// Literal token search (non-semantic). Use single words users type (e.g.,
+	// "dinner"). When multiple words provided, ALL must match. Case-insensitive.
+	Query param.Opt[string] `query:"query,omitzero" json:"-"`
+	// Provide an array of account IDs to filter chats from specific messaging accounts
+	// only
+	AccountIDs []string `query:"accountIDs,omitzero" json:"-"`
+	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+	// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+	//
+	// Any of "after", "before".
+	Direction ChatSearchParamsDirection `query:"direction,omitzero" json:"-"`
+	// Filter by inbox type: "primary" (non-archived, non-low-priority),
+	// "low-priority", or "archive". If not specified, shows all chats.
+	//
+	// Any of "primary", "low-priority", "archive".
+	Inbox ChatSearchParamsInbox `query:"inbox,omitzero" json:"-"`
+	// Search scope: 'titles' matches title + network; 'participants' matches
+	// participant names.
+	//
+	// Any of "titles", "participants".
+	Scope ChatSearchParamsScope `query:"scope,omitzero" json:"-"`
+	// Specify the type of chats to retrieve: use "single" for direct messages, "group"
+	// for group chats, or "any" to get all types
+	//
+	// Any of "single", "group", "any".
+	Type ChatSearchParamsType `query:"type,omitzero" json:"-"`
+	paramObj
+}
+
+// URLQuery serializes [ChatSearchParams]'s query parameters as `url.Values`.
+func (r ChatSearchParams) URLQuery() (v url.Values, err error) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+type ChatSearchParamsDirection string
+
+const (
+	ChatSearchParamsDirectionAfter  ChatSearchParamsDirection = "after"
+	ChatSearchParamsDirectionBefore ChatSearchParamsDirection = "before"
+)
+
+// Filter by inbox type: "primary" (non-archived, non-low-priority),
+// "low-priority", or "archive". If not specified, shows all chats.
+type ChatSearchParamsInbox string
+
+const (
+	ChatSearchParamsInboxPrimary     ChatSearchParamsInbox = "primary"
+	ChatSearchParamsInboxLowPriority ChatSearchParamsInbox = "low-priority"
+	ChatSearchParamsInboxArchive     ChatSearchParamsInbox = "archive"
+)
+
+// Search scope: 'titles' matches title + network; 'participants' matches
+// participant names.
+type ChatSearchParamsScope string
+
+const (
+	ChatSearchParamsScopeTitles       ChatSearchParamsScope = "titles"
+	ChatSearchParamsScopeParticipants ChatSearchParamsScope = "participants"
+)
+
+// Specify the type of chats to retrieve: use "single" for direct messages, "group"
+// for group chats, or "any" to get all types
+type ChatSearchParamsType string
+
+const (
+	ChatSearchParamsTypeSingle ChatSearchParamsType = "single"
+	ChatSearchParamsTypeGroup  ChatSearchParamsType = "group"
+	ChatSearchParamsTypeAny    ChatSearchParamsType = "any"
+)

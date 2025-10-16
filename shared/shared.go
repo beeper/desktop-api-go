@@ -96,24 +96,6 @@ func (r *AttachmentSize) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type BaseResponse struct {
-	Success bool   `json:"success,required"`
-	Error   string `json:"error"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Success     respjson.Field
-		Error       respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r BaseResponse) RawJSON() string { return r.JSON.raw }
-func (r *BaseResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 type Message struct {
 	// Message ID.
 	ID string `json:"id,required"`
@@ -123,7 +105,7 @@ type Message struct {
 	ChatID string `json:"chatID,required"`
 	// Sender user ID.
 	SenderID string `json:"senderID,required"`
-	// A unique key used to sort messages
+	// A unique, sortable key used to sort messages.
 	SortKey string `json:"sortKey,required"`
 	// Message timestamp.
 	Timestamp time.Time `json:"timestamp,required" format:"date-time"`

@@ -12,7 +12,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestUsage(t *testing.T) {
+func TestAutoPagination(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -24,13 +24,17 @@ func TestUsage(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
-		IncludeMuted: beeperdesktopapi.Bool(true),
-		Limit:        beeperdesktopapi.Int(3),
-		Type:         beeperdesktopapi.ChatSearchParamsTypeSingle,
+	iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
+		AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+		Limit:      beeperdesktopapi.Int(10),
+		Query:      beeperdesktopapi.String("deployment"),
 	})
-	if err != nil {
+	// Prism mock isn't going to give us real pagination
+	for i := 0; i < 3 && iter.Next(); i++ {
+		message := iter.Current()
+		t.Logf("%+v\n", message.ID)
+	}
+	if err := iter.Err(); err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
-	t.Logf("%+v\n", page)
 }

@@ -54,11 +54,15 @@ func main() {
 	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"), // defaults to os.LookupEnv("BEEPER_ACCESS_TOKEN")
 	)
-	accounts, err := client.Accounts.List(context.TODO())
+	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
+		IncludeMuted: beeperdesktopapi.Bool(true),
+		Limit:        beeperdesktopapi.Int(3),
+		Type:         beeperdesktopapi.ChatSearchParamsTypeSingle,
+	})
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Printf("%+v\n", accounts)
+	fmt.Printf("%+v\n", page)
 }
 
 ```
@@ -282,8 +286,41 @@ This library provides some conveniences for working with paginated list endpoint
 
 You can use `.ListAutoPaging()` methods to iterate through items across all pages:
 
+```go
+iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
+	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+	Limit:      beeperdesktopapi.Int(10),
+	Query:      beeperdesktopapi.String("deployment"),
+})
+// Automatically fetches more pages as needed.
+for iter.Next() {
+	message := iter.Current()
+	fmt.Printf("%+v\n", message)
+}
+if err := iter.Err(); err != nil {
+	panic(err.Error())
+}
+```
+
 Or you can use simple `.List()` methods to fetch a single page and receive a standard response object
 with additional helper methods like `.GetNextPage()`, e.g.:
+
+```go
+page, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
+	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+	Limit:      beeperdesktopapi.Int(10),
+	Query:      beeperdesktopapi.String("deployment"),
+})
+for page != nil {
+	for _, message := range page.Items {
+		fmt.Printf("%+v\n", message)
+	}
+	page, err = page.GetNextPage()
+}
+if err != nil {
+	panic(err.Error())
+}
+```
 
 ### Errors
 
@@ -295,20 +332,14 @@ When the API returns a non-success status code, we return an error with type
 To handle errors, we recommend that you use the `errors.As` pattern:
 
 ```go
-_, err := client.Messages.Send(
-	context.TODO(),
-	"1229391",
-	beeperdesktopapi.MessageSendParams{
-		Text: beeperdesktopapi.String("Hello! Just checking in on the project status."),
-	},
-)
+_, err := client.Accounts.List(context.TODO())
 if err != nil {
 	var apierr *beeperdesktopapi.Error
 	if errors.As(err, &apierr) {
 		println(string(apierr.DumpRequest(true)))  // Prints the serialized HTTP request
 		println(string(apierr.DumpResponse(true))) // Prints the serialized HTTP response
 	}
-	panic(err.Error()) // GET "/v1/chats/{chatID}/messages": 400 Bad Request { ... }
+	panic(err.Error()) // GET "/v1/accounts": 400 Bad Request { ... }
 }
 ```
 

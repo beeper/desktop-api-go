@@ -21,7 +21,7 @@ import (
 	"github.com/beeper/desktop-api-go/shared"
 )
 
-// Messages operations
+// Manage messages in chats
 //
 // MessageService contains methods and other services that help with interacting
 // with the beeperdesktop API.
@@ -43,7 +43,7 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 }
 
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
-func (r *MessageService) List(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) (res *pagination.CursorList[shared.Message], err error) {
+func (r *MessageService) List(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) (res *pagination.CursorSortKey[shared.Message], err error) {
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -65,8 +65,8 @@ func (r *MessageService) List(ctx context.Context, chatID string, query MessageL
 }
 
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
-func (r *MessageService) ListAutoPaging(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) *pagination.CursorListAutoPager[shared.Message] {
-	return pagination.NewCursorListAutoPager(r.List(ctx, chatID, query, opts...))
+func (r *MessageService) ListAutoPaging(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) *pagination.CursorSortKeyAutoPager[shared.Message] {
+	return pagination.NewCursorSortKeyAutoPager(r.List(ctx, chatID, query, opts...))
 }
 
 // Search messages across chats using Beeper's message index
@@ -74,7 +74,7 @@ func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, 
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
-	path := "v1/search/messages"
+	path := "v1/messages/search"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
 	if err != nil {
 		return nil, err
@@ -117,7 +117,6 @@ type MessageSendResponse struct {
 		ExtraFields      map[string]respjson.Field
 		raw              string
 	} `json:"-"`
-	shared.BaseResponse
 }
 
 // Returns the unmodified JSON received from the API

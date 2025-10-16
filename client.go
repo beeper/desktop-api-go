@@ -19,11 +19,12 @@ type Client struct {
 	Options []option.RequestOption
 	// Manage connected chat accounts
 	Accounts AccountService
-	Search   SearchService
-	// Chats operations
+	// Manage chats
 	Chats ChatService
-	// Messages operations
+	// Manage messages in chats
 	Messages MessageService
+	// Manage assets in Beeper Desktop, like message attachments
+	Assets AssetService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
@@ -49,9 +50,9 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r = Client{Options: opts}
 
 	r.Accounts = NewAccountService(opts...)
-	r.Search = NewSearchService(opts...)
 	r.Chats = NewChatService(opts...)
 	r.Messages = NewMessageService(opts...)
+	r.Assets = NewAssetService(opts...)
 
 	return
 }
@@ -123,15 +124,6 @@ func (r *Client) Patch(ctx context.Context, path string, params any, res any, op
 // response.
 func (r *Client) Delete(ctx context.Context, path string, params any, res any, opts ...option.RequestOption) error {
 	return r.Execute(ctx, http.MethodDelete, path, params, res, opts...)
-}
-
-// Download a Matrix asset using its mxc:// or localmxc:// URL and return the local
-// file URL.
-func (r *Client) DownloadAsset(ctx context.Context, body DownloadAssetParams, opts ...option.RequestOption) (res *DownloadAssetResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
-	path := "v1/download-asset"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
 }
 
 // Focus Beeper Desktop and optionally navigate to a specific chat, message, or

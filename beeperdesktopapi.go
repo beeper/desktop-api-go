@@ -12,26 +12,6 @@ import (
 	"github.com/beeper/desktop-api-go/shared"
 )
 
-type DownloadAssetResponse struct {
-	// Error message if the download failed.
-	Error string `json:"error"`
-	// Local file URL to the downloaded asset.
-	SrcURL string `json:"srcURL"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Error       respjson.Field
-		SrcURL      respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r DownloadAssetResponse) RawJSON() string { return r.JSON.raw }
-func (r *DownloadAssetResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 // Response indicating successful app focus action.
 type FocusResponse struct {
 	// Whether the app was successfully opened/focused.
@@ -116,20 +96,6 @@ type SearchResponseResultsMessages struct {
 // Returns the unmodified JSON received from the API
 func (r SearchResponseResultsMessages) RawJSON() string { return r.JSON.raw }
 func (r *SearchResponseResultsMessages) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-type DownloadAssetParams struct {
-	// Matrix content URL (mxc:// or localmxc://) for the asset to download.
-	URL string `json:"url,required"`
-	paramObj
-}
-
-func (r DownloadAssetParams) MarshalJSON() (data []byte, err error) {
-	type shadow DownloadAssetParams
-	return param.MarshalObject(r, (*shadow)(&r))
-}
-func (r *DownloadAssetParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 

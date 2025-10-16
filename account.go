@@ -24,6 +24,8 @@ import (
 // the [NewAccountService] method instead.
 type AccountService struct {
 	Options []option.RequestOption
+	// Manage contacts on a specific account
+	Contacts AccountContactService
 }
 
 // NewAccountService generates a new service that applies the given options to each
@@ -32,6 +34,7 @@ type AccountService struct {
 func NewAccountService(opts ...option.RequestOption) (r AccountService) {
 	r = AccountService{}
 	r.Options = opts
+	r.Contacts = NewAccountContactService(opts...)
 	return
 }
 
@@ -49,6 +52,8 @@ type Account struct {
 	// Chat account added to Beeper. Use this to route account-scoped actions.
 	AccountID string `json:"accountID,required"`
 	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
+	//
+	// Deprecated: deprecated
 	Network string `json:"network,required"`
 	// User the account belongs to.
 	User shared.User `json:"user,required"`
