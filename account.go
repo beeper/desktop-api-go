@@ -1,19 +1,20 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo
+package beeperdesktopapi
 
 import (
 	"context"
 	"net/http"
+	"slices"
 
-	"github.com/beeper/beeper-desktop-api-go/internal/apijson"
-	"github.com/beeper/beeper-desktop-api-go/internal/requestconfig"
-	"github.com/beeper/beeper-desktop-api-go/option"
-	"github.com/beeper/beeper-desktop-api-go/packages/respjson"
-	"github.com/beeper/beeper-desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/shared"
 )
 
-// Manage and list connected messaging accounts
+// Manage connected chat accounts
 //
 // AccountService contains methods and other services that help with interacting
 // with the beeperdesktop API.
@@ -23,6 +24,8 @@ import (
 // the [NewAccountService] method instead.
 type AccountService struct {
 	Options []option.RequestOption
+	// Manage contacts on a specific account
+	Contacts AccountContactService
 }
 
 // NewAccountService generates a new service that applies the given options to each
@@ -31,17 +34,15 @@ type AccountService struct {
 func NewAccountService(opts ...option.RequestOption) (r AccountService) {
 	r = AccountService{}
 	r.Options = opts
+	r.Contacts = NewAccountContactService(opts...)
 	return
 }
 
-// List connected Beeper accounts available on this device.
-//
-//   - When to use: select account context before account-scoped operations.
-//   - Scope: only accounts currently Connected on this device are included. Returns:
-//     connected accounts.
-func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption) (res *AccountsResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/get-accounts"
+// Lists chat accounts across networks (WhatsApp, Telegram, Twitter/X, etc.)
+// actively connected to this Beeper Desktop instance
+func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption) (res *[]Account, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/accounts"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return
 }
@@ -50,11 +51,11 @@ func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption)
 type Account struct {
 	// Chat account added to Beeper. Use this to route account-scoped actions.
 	AccountID string `json:"accountID,required"`
-	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger'). You
-	// MUST use 'accountID' to perform actions.
+	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
+	//
+	// Deprecated: deprecated
 	Network string `json:"network,required"`
-	// A person on or reachable through Beeper. Values are best-effort and can vary by
-	// network.
+	// User the account belongs to.
 	User shared.User `json:"user,required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -69,24 +70,5 @@ type Account struct {
 // Returns the unmodified JSON received from the API
 func (r Account) RawJSON() string { return r.JSON.raw }
 func (r *Account) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Response payload for listing connected Beeper accounts.
-type AccountsResponse struct {
-	// Connected accounts the user can act through. Includes accountID, network, and
-	// user identity.
-	Accounts []Account `json:"accounts,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Accounts    respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r AccountsResponse) RawJSON() string { return r.JSON.raw }
-func (r *AccountsResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

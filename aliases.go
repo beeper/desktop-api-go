@@ -1,11 +1,11 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo
+package beeperdesktopapi
 
 import (
-	"github.com/beeper/beeper-desktop-api-go/internal/apierror"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
-	"github.com/beeper/beeper-desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/internal/apierror"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/shared"
 )
 
 // aliased to make [param.APIUnion] private when embedding
@@ -42,13 +42,12 @@ const AttachmentTypeAudio = shared.AttachmentTypeAudio
 type AttachmentSize = shared.AttachmentSize
 
 // This is an alias to an internal type.
-type BaseResponse = shared.BaseResponse
+type Message = shared.Message
 
 // This is an alias to an internal type.
 type Reaction = shared.Reaction
 
-// A person on or reachable through Beeper. Values are best-effort and can vary by
-// network.
+// User the account belongs to.
 //
 // This is an alias to an internal type.
 type User = shared.User

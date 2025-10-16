@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package beeperdesktopapi_test
 
 import (
 	"context"
@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/beeper/beeper-desktop-api-go"
-	"github.com/beeper/beeper-desktop-api-go/internal/testutil"
-	"github.com/beeper/beeper-desktop-api-go/option"
+	"github.com/beeper/desktop-api-go"
+	"github.com/beeper/desktop-api-go/internal/testutil"
+	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestMessageDraftWithOptionalParams(t *testing.T) {
+func TestMessageListWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -22,17 +22,20 @@ func TestMessageDraftWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.Draft(context.TODO(), githubcombeeperbeeperdesktopapigo.MessageDraftParams{
-		ChatID:   "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		FocusApp: githubcombeeperbeeperdesktopapigo.Bool(true),
-		Text:     githubcombeeperbeeperdesktopapigo.String("text"),
-	})
+	_, err := client.Messages.List(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.MessageListParams{
+			Cursor:    beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
+			Direction: beeperdesktopapi.MessageListParamsDirectionBefore,
+		},
+	)
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -48,31 +51,27 @@ func TestMessageSearchWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.Search(context.TODO(), githubcombeeperbeeperdesktopapigo.MessageSearchParams{
-		AccountIDs:         []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
-		ChatIDs:            []string{"!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost"},
-		ChatType:           githubcombeeperbeeperdesktopapigo.MessageSearchParamsChatTypeGroup,
-		DateAfter:          githubcombeeperbeeperdesktopapigo.Time(time.Now()),
-		DateBefore:         githubcombeeperbeeperdesktopapigo.Time(time.Now()),
-		EndingBefore:       githubcombeeperbeeperdesktopapigo.String("872739"),
-		ExcludeLowPriority: githubcombeeperbeeperdesktopapigo.Bool(true),
-		IncludeMuted:       githubcombeeperbeeperdesktopapigo.Bool(true),
-		Limit:              githubcombeeperbeeperdesktopapigo.Int(50),
-		OnlyWithFile:       githubcombeeperbeeperdesktopapigo.Bool(true),
-		OnlyWithImage:      githubcombeeperbeeperdesktopapigo.Bool(true),
-		OnlyWithLink:       githubcombeeperbeeperdesktopapigo.Bool(true),
-		OnlyWithMedia:      githubcombeeperbeeperdesktopapigo.Bool(true),
-		OnlyWithVideo:      githubcombeeperbeeperdesktopapigo.Bool(true),
-		Query:              githubcombeeperbeeperdesktopapigo.String("dinner"),
-		Sender:             githubcombeeperbeeperdesktopapigo.MessageSearchParamsSenderMe,
-		StartingAfter:      githubcombeeperbeeperdesktopapigo.String("196640"),
+	_, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
+		AccountIDs:         []string{"whatsapp", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
+		ChatIDs:            []string{"!NCdzlIaMjZUmvmvyHU:beeper.com", "1231073"},
+		ChatType:           beeperdesktopapi.MessageSearchParamsChatTypeGroup,
+		Cursor:             beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
+		DateAfter:          beeperdesktopapi.Time(time.Now()),
+		DateBefore:         beeperdesktopapi.Time(time.Now()),
+		Direction:          beeperdesktopapi.MessageSearchParamsDirectionBefore,
+		ExcludeLowPriority: beeperdesktopapi.Bool(true),
+		IncludeMuted:       beeperdesktopapi.Bool(true),
+		Limit:              beeperdesktopapi.Int(20),
+		MediaTypes:         []string{"any"},
+		Query:              beeperdesktopapi.String("dinner"),
+		Sender:             beeperdesktopapi.MessageSearchParamsSenderMe,
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -88,17 +87,20 @@ func TestMessageSendWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Messages.Send(context.TODO(), githubcombeeperbeeperdesktopapigo.MessageSendParams{
-		ChatID:           "!-5hI_iHR5vSDCtI8PzSDQT0H_3I:ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc.local-whatsapp.localhost",
-		ReplyToMessageID: githubcombeeperbeeperdesktopapigo.String("replyToMessageID"),
-		Text:             githubcombeeperbeeperdesktopapigo.String("text"),
-	})
+	_, err := client.Messages.Send(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.MessageSendParams{
+			ReplyToMessageID: beeperdesktopapi.String("replyToMessageID"),
+			Text:             beeperdesktopapi.String("text"),
+		},
+	)
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}

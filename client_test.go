@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package beeperdesktopapi_test
 
 import (
 	"context"
@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/beeper/beeper-desktop-api-go"
-	"github.com/beeper/beeper-desktop-api-go/internal"
-	"github.com/beeper/beeper-desktop-api-go/option"
+	"github.com/beeper/desktop-api-go"
+	"github.com/beeper/desktop-api-go/internal"
+	"github.com/beeper/desktop-api-go/option"
 )
 
 type closureTransport struct {
@@ -25,7 +25,7 @@ func (t *closureTransport) RoundTrip(req *http.Request) (*http.Response, error) 
 
 func TestUserAgentHeader(t *testing.T) {
 	var userAgent string
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"),
 		option.WithHTTPClient(&http.Client{
 			Transport: &closureTransport{
@@ -46,7 +46,7 @@ func TestUserAgentHeader(t *testing.T) {
 
 func TestRetryAfter(t *testing.T) {
 	retryCountHeaders := make([]string, 0)
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"),
 		option.WithHTTPClient(&http.Client{
 			Transport: &closureTransport{
@@ -68,11 +68,11 @@ func TestRetryAfter(t *testing.T) {
 	}
 
 	attempts := len(retryCountHeaders)
-	if attempts != 4 {
-		t.Errorf("Expected %d attempts, got %d", 4, attempts)
+	if attempts != 3 {
+		t.Errorf("Expected %d attempts, got %d", 3, attempts)
 	}
 
-	expectedRetryCountHeaders := []string{"0", "1", "2", "3"}
+	expectedRetryCountHeaders := []string{"0", "1", "2"}
 	if !reflect.DeepEqual(retryCountHeaders, expectedRetryCountHeaders) {
 		t.Errorf("Expected %v retry count headers, got %v", expectedRetryCountHeaders, retryCountHeaders)
 	}
@@ -80,7 +80,7 @@ func TestRetryAfter(t *testing.T) {
 
 func TestDeleteRetryCountHeader(t *testing.T) {
 	retryCountHeaders := make([]string, 0)
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"),
 		option.WithHTTPClient(&http.Client{
 			Transport: &closureTransport{
@@ -102,7 +102,7 @@ func TestDeleteRetryCountHeader(t *testing.T) {
 		t.Error("Expected there to be a cancel error")
 	}
 
-	expectedRetryCountHeaders := []string{"", "", "", ""}
+	expectedRetryCountHeaders := []string{"", "", ""}
 	if !reflect.DeepEqual(retryCountHeaders, expectedRetryCountHeaders) {
 		t.Errorf("Expected %v retry count headers, got %v", expectedRetryCountHeaders, retryCountHeaders)
 	}
@@ -110,7 +110,7 @@ func TestDeleteRetryCountHeader(t *testing.T) {
 
 func TestOverwriteRetryCountHeader(t *testing.T) {
 	retryCountHeaders := make([]string, 0)
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"),
 		option.WithHTTPClient(&http.Client{
 			Transport: &closureTransport{
@@ -132,7 +132,7 @@ func TestOverwriteRetryCountHeader(t *testing.T) {
 		t.Error("Expected there to be a cancel error")
 	}
 
-	expectedRetryCountHeaders := []string{"42", "42", "42", "42"}
+	expectedRetryCountHeaders := []string{"42", "42", "42"}
 	if !reflect.DeepEqual(retryCountHeaders, expectedRetryCountHeaders) {
 		t.Errorf("Expected %v retry count headers, got %v", expectedRetryCountHeaders, retryCountHeaders)
 	}
@@ -140,7 +140,7 @@ func TestOverwriteRetryCountHeader(t *testing.T) {
 
 func TestRetryAfterMs(t *testing.T) {
 	attempts := 0
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"),
 		option.WithHTTPClient(&http.Client{
 			Transport: &closureTransport{
@@ -160,13 +160,13 @@ func TestRetryAfterMs(t *testing.T) {
 	if err == nil {
 		t.Error("Expected there to be a cancel error")
 	}
-	if want := 4; attempts != want {
+	if want := 3; attempts != want {
 		t.Errorf("Expected %d attempts, got %d", want, attempts)
 	}
 }
 
 func TestContextCancel(t *testing.T) {
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"),
 		option.WithHTTPClient(&http.Client{
 			Transport: &closureTransport{
@@ -186,7 +186,7 @@ func TestContextCancel(t *testing.T) {
 }
 
 func TestContextCancelDelay(t *testing.T) {
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithAccessToken("My Access Token"),
 		option.WithHTTPClient(&http.Client{
 			Transport: &closureTransport{
@@ -214,7 +214,7 @@ func TestContextDeadline(t *testing.T) {
 	defer cancel()
 
 	go func() {
-		client := githubcombeeperbeeperdesktopapigo.NewClient(
+		client := beeperdesktopapi.NewClient(
 			option.WithAccessToken("My Access Token"),
 			option.WithHTTPClient(&http.Client{
 				Transport: &closureTransport{

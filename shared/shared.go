@@ -3,9 +3,11 @@
 package shared
 
 import (
-	"github.com/beeper/beeper-desktop-api-go/internal/apijson"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
-	"github.com/beeper/beeper-desktop-api-go/packages/respjson"
+	"time"
+
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/respjson"
 )
 
 // aliased to make [param.APIUnion] private when embedding
@@ -94,21 +96,54 @@ func (r *AttachmentSize) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type BaseResponse struct {
-	Success bool   `json:"success,required"`
-	Error   string `json:"error"`
+type Message struct {
+	// Message ID.
+	ID string `json:"id,required"`
+	// Beeper account ID the message belongs to.
+	AccountID string `json:"accountID,required"`
+	// Unique identifier of the chat.
+	ChatID string `json:"chatID,required"`
+	// Sender user ID.
+	SenderID string `json:"senderID,required"`
+	// A unique, sortable key used to sort messages.
+	SortKey string `json:"sortKey,required"`
+	// Message timestamp.
+	Timestamp time.Time `json:"timestamp,required" format:"date-time"`
+	// Attachments included with this message, if any.
+	Attachments []Attachment `json:"attachments"`
+	// True if the authenticated user sent the message.
+	IsSender bool `json:"isSender"`
+	// True if the message is unread for the authenticated user. May be omitted.
+	IsUnread bool `json:"isUnread"`
+	// Reactions to the message, if any.
+	Reactions []Reaction `json:"reactions"`
+	// Resolved sender display name (impersonator/full name/username/participant name).
+	SenderName string `json:"senderName"`
+	// Plain-text body if present. May include a JSON fallback with text entities for
+	// rich messages.
+	Text string `json:"text"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		Success     respjson.Field
-		Error       respjson.Field
+		ID          respjson.Field
+		AccountID   respjson.Field
+		ChatID      respjson.Field
+		SenderID    respjson.Field
+		SortKey     respjson.Field
+		Timestamp   respjson.Field
+		Attachments respjson.Field
+		IsSender    respjson.Field
+		IsUnread    respjson.Field
+		Reactions   respjson.Field
+		SenderName  respjson.Field
+		Text        respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
 }
 
 // Returns the unmodified JSON received from the API
-func (r BaseResponse) RawJSON() string { return r.JSON.raw }
-func (r *BaseResponse) UnmarshalJSON(data []byte) error {
+func (r Message) RawJSON() string { return r.JSON.raw }
+func (r *Message) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
@@ -144,8 +179,7 @@ func (r *Reaction) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// A person on or reachable through Beeper. Values are best-effort and can vary by
-// network.
+// User the account belongs to.
 type User struct {
 	// Stable Beeper user ID. Use as the primary key when referencing a person.
 	ID string `json:"id,required"`
@@ -155,7 +189,7 @@ type User struct {
 	// Email address if known. Not guaranteed verified.
 	Email string `json:"email"`
 	// Display name as shown in clients (e.g., 'Alice Example'). May include emojis.
-	FullName string `json:"fullName,nullable"`
+	FullName string `json:"fullName"`
 	// Avatar image URL if available. May be temporary or local-only to this device;
 	// download promptly if durable access is needed.
 	ImgURL string `json:"imgURL"`

@@ -1,6 +1,6 @@
-module github.com/beeper/beeper-desktop-api-go
+module github.com/beeper/desktop-api-go
 
-go 1.21
+go 1.22
 
 require (
 	github.com/tidwall/gjson v1.14.4

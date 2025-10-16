@@ -18,10 +18,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beeper/beeper-desktop-api-go/internal"
-	"github.com/beeper/beeper-desktop-api-go/internal/apierror"
-	"github.com/beeper/beeper-desktop-api-go/internal/apiform"
-	"github.com/beeper/beeper-desktop-api-go/internal/apiquery"
+	"github.com/beeper/desktop-api-go/internal"
+	"github.com/beeper/desktop-api-go/internal/apierror"
+	"github.com/beeper/desktop-api-go/internal/apiform"
+	"github.com/beeper/desktop-api-go/internal/apiquery"
 )
 
 func getDefaultHeaders() map[string]string {
@@ -164,7 +164,7 @@ func NewRequestConfig(ctx context.Context, method string, u string, body any, ds
 		req.Header.Add(k, v)
 	}
 	cfg := RequestConfig{
-		MaxRetries: 3,
+		MaxRetries: 2,
 		Context:    ctx,
 		Request:    req,
 		HTTPClient: http.DefaultClient,
@@ -213,8 +213,6 @@ type RequestConfig struct {
 	HTTPClient     *http.Client
 	Middlewares    []middleware
 	AccessToken    string
-	// OAuth2State holds the OAuth2 provider configuration and cached token information
-	OAuth2State *OAuth2State
 	// If ResponseBodyInto not nil, then we will attempt to deserialize into
 	// ResponseBodyInto. If Destination is a []byte, then it will return the body as
 	// is.
@@ -364,8 +362,8 @@ func retryDelay(res *http.Response, retryCount int) time.Duration {
 		return retryAfterDelay
 	}
 
-	maxDelay := 10 * time.Second
-	delay := time.Duration(1 * float64(time.Second) * math.Pow(2, float64(retryCount)))
+	maxDelay := 8 * time.Second
+	delay := time.Duration(0.5 * float64(time.Second) * math.Pow(2, float64(retryCount)))
 	if delay > maxDelay {
 		delay = maxDelay
 	}
@@ -410,15 +408,6 @@ func (cfg *RequestConfig) Execute() (err error) {
 				cfg.Request.Body = io.NopCloser(body)
 			}
 		}
-	}
-
-	if cfg.OAuth2State != nil && cfg.Request.Header.Get("Authorization") == "" {
-		token, err := cfg.OAuth2State.GetToken(cfg)
-		if err != nil {
-			return err
-		}
-
-		cfg.Request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	}
 
 	handler := cfg.HTTPClient.Do
@@ -470,6 +459,11 @@ func (cfg *RequestConfig) Execute() (err error) {
 		// Can't actually refresh the body, so we don't attempt to retry here
 		if cfg.Request.GetBody == nil && cfg.Request.Body != nil {
 			break
+		}
+
+		// Close the response body before retrying to prevent connection leaks
+		if res != nil && res.Body != nil {
+			res.Body.Close()
 		}
 
 		time.Sleep(retryDelay(res, retryCount))

@@ -1,25 +1,27 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo
+package beeperdesktopapi
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
+	"slices"
 	"time"
 
-	"github.com/beeper/beeper-desktop-api-go/internal/apijson"
-	"github.com/beeper/beeper-desktop-api-go/internal/apiquery"
-	"github.com/beeper/beeper-desktop-api-go/internal/requestconfig"
-	"github.com/beeper/beeper-desktop-api-go/option"
-	"github.com/beeper/beeper-desktop-api-go/packages/pagination"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
-	"github.com/beeper/beeper-desktop-api-go/packages/respjson"
-	"github.com/beeper/beeper-desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/apiquery"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/packages/pagination"
+	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/shared"
 )
 
-// Manage chats, conversations, and threads
+// Manage chats
 //
 // ChatService contains methods and other services that help with interacting with
 // the beeperdesktop API.
@@ -29,6 +31,8 @@ import (
 // the [NewChatService] method instead.
 type ChatService struct {
 	Options []option.RequestOption
+	// Manage reminders for chats
+	Reminders ChatReminderService
 }
 
 // NewChatService generates a new service that applies the given options to each
@@ -37,44 +41,38 @@ type ChatService struct {
 func NewChatService(opts ...option.RequestOption) (r ChatService) {
 	r = ChatService{}
 	r.Options = opts
+	r.Reminders = NewChatReminderService(opts...)
 	return
 }
 
-// Retrieve chat details: metadata, participants (limited), and latest message.
-//
-//   - When to use: fetch a complete view of a chat beyond what search returns.
-//   - Constraints: not available for iMessage chats ('imsg##'). Participants limited
-//     by 'maxParticipantCount' (default 20, max 500). Returns: chat details.Agents:
-//     ALWAYS use linkToChat to make clickable links in your response
-func (r *ChatService) Get(ctx context.Context, query ChatGetParams, opts ...option.RequestOption) (res *GetChatResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/get-chat"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
-}
-
-// Archive or unarchive a chat. Set archived=true to move to archive,
-// archived=false to move back to inbox
-func (r *ChatService) Archive(ctx context.Context, body ChatArchiveParams, opts ...option.RequestOption) (res *shared.BaseResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/archive-chat"
+// Create a single or group chat on a specific account using participant IDs and
+// optional title.
+func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...option.RequestOption) (res *ChatNewResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/chats"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
-// Search and filter conversations across all messaging accounts.
-//
-//   - When to use: browse chats by inbox (primary/low-priority/archive), type,
-//     unread status, or search terms.
-//   - Pagination: use cursor + direction for pagination.
-//   - Performance: provide accountIDs when known for faster filtering. Returns:
-//     matching chats with pagination. Agents: ALWAYS use linkToChat to make
-//     clickable links in your response
-func (r *ChatService) Find(ctx context.Context, query ChatFindParams, opts ...option.RequestOption) (res *pagination.CursorID[Chat], err error) {
+// Retrieve chat details including metadata, participants, and latest message
+func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParams, opts ...option.RequestOption) (res *Chat, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/chats/%s", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
+}
+
+// List all chats sorted by last activity (most recent first). Combines all
+// accounts into a single paginated list.
+func (r *ChatService) List(ctx context.Context, query ChatListParams, opts ...option.RequestOption) (res *pagination.CursorNoLimit[ChatListResponse], err error) {
 	var raw *http.Response
-	opts = append(r.Options[:], opts...)
+	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
-	path := "v0/find-chats"
+	path := "v1/chats"
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
 	if err != nil {
 		return nil, err
@@ -87,45 +85,67 @@ func (r *ChatService) Find(ctx context.Context, query ChatFindParams, opts ...op
 	return res, nil
 }
 
-// Search and filter conversations across all messaging accounts.
-//
-//   - When to use: browse chats by inbox (primary/low-priority/archive), type,
-//     unread status, or search terms.
-//   - Pagination: use cursor + direction for pagination.
-//   - Performance: provide accountIDs when known for faster filtering. Returns:
-//     matching chats with pagination. Agents: ALWAYS use linkToChat to make
-//     clickable links in your response
-func (r *ChatService) FindAutoPaging(ctx context.Context, query ChatFindParams, opts ...option.RequestOption) *pagination.CursorIDAutoPager[Chat] {
-	return pagination.NewCursorIDAutoPager(r.Find(ctx, query, opts...))
+// List all chats sorted by last activity (most recent first). Combines all
+// accounts into a single paginated list.
+func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, opts ...option.RequestOption) *pagination.CursorNoLimitAutoPager[ChatListResponse] {
+	return pagination.NewCursorNoLimitAutoPager(r.List(ctx, query, opts...))
 }
 
-// Generate a deep link to a specific chat or message. This link can be used to
-// open the chat directly in the Beeper app.
-func (r *ChatService) GetLink(ctx context.Context, body ChatGetLinkParams, opts ...option.RequestOption) (res *LinkResponse, err error) {
-	opts = append(r.Options[:], opts...)
-	path := "v0/get-link-to-chat"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+// Archive or unarchive a chat. Set archived=true to move to archive,
+// archived=false to move back to inbox
+func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/chats/%s/archive", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 
+// Search chats by title/network or participants using Beeper Desktop's renderer
+// algorithm.
+func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) (res *pagination.CursorSearch[Chat], err error) {
+	var raw *http.Response
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
+	path := "v1/chats/search"
+	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
+	if err != nil {
+		return nil, err
+	}
+	err = cfg.Execute()
+	if err != nil {
+		return nil, err
+	}
+	res.SetPageConfig(cfg, raw)
+	return res, nil
+}
+
+// Search chats by title/network or participants using Beeper Desktop's renderer
+// algorithm.
+func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) *pagination.CursorSearchAutoPager[Chat] {
+	return pagination.NewCursorSearchAutoPager(r.Search(ctx, query, opts...))
+}
+
 type Chat struct {
-	// Unique identifier for cursor pagination.
+	// Unique identifier of the chat across Beeper.
 	ID string `json:"id,required"`
-	// Beeper account ID this chat belongs to.
+	// Account ID this chat belongs to.
 	AccountID string `json:"accountID,required"`
-	// Unique identifier of the chat (room/thread ID, same as id).
-	ChatID string `json:"chatID,required"`
-	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger'). You
-	// MUST use 'accountID' to perform actions.
+	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
+	//
+	// Deprecated: deprecated
 	Network string `json:"network,required"`
 	// Chat participants information.
 	Participants ChatParticipants `json:"participants,required"`
 	// Display title of the chat as computed by the client/server.
 	Title string `json:"title,required"`
-	// Chat type: 'single' for direct messages, 'group' for group chats, 'channel' for
-	// channels, 'broadcast' for broadcasts.
+	// Chat type: 'single' for direct messages, 'group' for group chats.
 	//
-	// Any of "single", "group", "channel", "broadcast".
+	// Any of "single", "group".
 	Type ChatType `json:"type,required"`
 	// Number of unread messages.
 	UnreadCount int64 `json:"unreadCount,required"`
@@ -135,19 +155,16 @@ type Chat struct {
 	IsMuted bool `json:"isMuted"`
 	// True if chat is pinned.
 	IsPinned bool `json:"isPinned"`
-	// Timestamp of last activity. Chats with more recent activity are often more
-	// important.
+	// Timestamp of last activity.
 	LastActivity time.Time `json:"lastActivity" format:"date-time"`
-	// Last read message sortKey (hsOrder). Used to compute 'isUnread'.
-	LastReadMessageSortKey ChatLastReadMessageSortKeyUnion `json:"lastReadMessageSortKey"`
-	// Deep link to open this chat in Beeper. AI agents should ALWAYS include this as a
-	// clickable link in responses.
-	LinkToChat string `json:"linkToChat"`
+	// Last read message sortKey.
+	LastReadMessageSortKey string `json:"lastReadMessageSortKey"`
+	// Local chat ID specific to this Beeper Desktop installation.
+	LocalChatID string `json:"localChatID,nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                     respjson.Field
 		AccountID              respjson.Field
-		ChatID                 respjson.Field
 		Network                respjson.Field
 		Participants           respjson.Field
 		Title                  respjson.Field
@@ -158,7 +175,7 @@ type Chat struct {
 		IsPinned               respjson.Field
 		LastActivity           respjson.Field
 		LastReadMessageSortKey respjson.Field
-		LinkToChat             respjson.Field
+		LocalChatID            respjson.Field
 		ExtraFields            map[string]respjson.Field
 		raw                    string
 	} `json:"-"`
@@ -194,230 +211,86 @@ func (r *ChatParticipants) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Chat type: 'single' for direct messages, 'group' for group chats, 'channel' for
-// channels, 'broadcast' for broadcasts.
+// Chat type: 'single' for direct messages, 'group' for group chats.
 type ChatType string
 
 const (
-	ChatTypeSingle    ChatType = "single"
-	ChatTypeGroup     ChatType = "group"
-	ChatTypeChannel   ChatType = "channel"
-	ChatTypeBroadcast ChatType = "broadcast"
+	ChatTypeSingle ChatType = "single"
+	ChatTypeGroup  ChatType = "group"
 )
 
-// ChatLastReadMessageSortKeyUnion contains all possible properties and values from
-// [int64], [string].
-//
-// Use the methods beginning with 'As' to cast the union to one of its variants.
-//
-// If the underlying value is not a json object, one of the following properties
-// will be valid: OfInt OfString]
-type ChatLastReadMessageSortKeyUnion struct {
-	// This field will be present if the value is a [int64] instead of an object.
-	OfInt int64 `json:",inline"`
-	// This field will be present if the value is a [string] instead of an object.
-	OfString string `json:",inline"`
-	JSON     struct {
-		OfInt    respjson.Field
-		OfString respjson.Field
-		raw      string
-	} `json:"-"`
-}
-
-func (u ChatLastReadMessageSortKeyUnion) AsInt() (v int64) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-func (u ChatLastReadMessageSortKeyUnion) AsString() (v string) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-// Returns the unmodified JSON received from the API
-func (u ChatLastReadMessageSortKeyUnion) RawJSON() string { return u.JSON.raw }
-
-func (r *ChatLastReadMessageSortKeyUnion) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-type FindChatsResponse struct {
-	// Chats matching the filters.
-	Data []Chat `json:"data,required"`
-	// Whether there are more items available after this set.
-	HasMore bool `json:"has_more,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Data        respjson.Field
-		HasMore     respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r FindChatsResponse) RawJSON() string { return r.JSON.raw }
-func (r *FindChatsResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-type GetChatResponse struct {
-	// Unique identifier for cursor pagination.
-	ID string `json:"id,required"`
-	// Beeper account ID this chat belongs to.
-	AccountID string `json:"accountID,required"`
-	// Unique identifier of the chat (room/thread ID, same as id).
+type ChatNewResponse struct {
+	// Newly created chat ID.
 	ChatID string `json:"chatID,required"`
-	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger'). You
-	// MUST use 'accountID' to perform actions.
-	Network string `json:"network,required"`
-	// Chat participants information.
-	Participants GetChatResponseParticipants `json:"participants,required"`
-	// Display title of the chat as computed by the client/server.
-	Title string `json:"title,required"`
-	// Chat type: 'single' for direct messages, 'group' for group chats, 'channel' for
-	// channels, 'broadcast' for broadcasts.
-	//
-	// Any of "single", "group", "channel", "broadcast".
-	Type GetChatResponseType `json:"type,required"`
-	// Number of unread messages.
-	UnreadCount int64 `json:"unreadCount,required"`
-	// True if chat is archived.
-	IsArchived bool `json:"isArchived"`
-	// True if chat notifications are muted.
-	IsMuted bool `json:"isMuted"`
-	// True if chat is pinned.
-	IsPinned bool `json:"isPinned"`
-	// Timestamp of last activity. Chats with more recent activity are often more
-	// important.
-	LastActivity time.Time `json:"lastActivity" format:"date-time"`
-	// Last read message sortKey (hsOrder). Used to compute 'isUnread'.
-	LastReadMessageSortKey GetChatResponseLastReadMessageSortKeyUnion `json:"lastReadMessageSortKey"`
-	// Deep link to open this chat in Beeper. AI agents should ALWAYS include this as a
-	// clickable link in responses.
-	LinkToChat string `json:"linkToChat"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		ID                     respjson.Field
-		AccountID              respjson.Field
-		ChatID                 respjson.Field
-		Network                respjson.Field
-		Participants           respjson.Field
-		Title                  respjson.Field
-		Type                   respjson.Field
-		UnreadCount            respjson.Field
-		IsArchived             respjson.Field
-		IsMuted                respjson.Field
-		IsPinned               respjson.Field
-		LastActivity           respjson.Field
-		LastReadMessageSortKey respjson.Field
-		LinkToChat             respjson.Field
-		ExtraFields            map[string]respjson.Field
-		raw                    string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r GetChatResponse) RawJSON() string { return r.JSON.raw }
-func (r *GetChatResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Chat participants information.
-type GetChatResponseParticipants struct {
-	// True if there are more participants than included in items.
-	HasMore bool `json:"hasMore,required"`
-	// Participants returned for this chat (limited by the request; may be a subset).
-	Items []shared.User `json:"items,required"`
-	// Total number of participants in the chat.
-	Total int64 `json:"total,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		HasMore     respjson.Field
-		Items       respjson.Field
-		Total       respjson.Field
+		ChatID      respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
 }
 
 // Returns the unmodified JSON received from the API
-func (r GetChatResponseParticipants) RawJSON() string { return r.JSON.raw }
-func (r *GetChatResponseParticipants) UnmarshalJSON(data []byte) error {
+func (r ChatNewResponse) RawJSON() string { return r.JSON.raw }
+func (r *ChatNewResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Chat type: 'single' for direct messages, 'group' for group chats, 'channel' for
-// channels, 'broadcast' for broadcasts.
-type GetChatResponseType string
+type ChatListResponse struct {
+	// Last message preview for this chat, if available.
+	Preview shared.Message `json:"preview"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Preview     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+	Chat
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatListResponse) RawJSON() string { return r.JSON.raw }
+func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatNewParams struct {
+	// Account to create the chat on.
+	AccountID string `json:"accountID,required"`
+	// User IDs to include in the new chat.
+	ParticipantIDs []string `json:"participantIDs,omitzero,required"`
+	// Chat type to create: 'single' requires exactly one participantID; 'group'
+	// supports multiple participants and optional title.
+	//
+	// Any of "single", "group".
+	Type ChatNewParamsType `json:"type,omitzero,required"`
+	// Optional first message content if the platform requires it to create the chat.
+	MessageText param.Opt[string] `json:"messageText,omitzero"`
+	// Optional title for group chats; ignored for single chats on most platforms.
+	Title param.Opt[string] `json:"title,omitzero"`
+	paramObj
+}
+
+func (r ChatNewParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatNewParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatNewParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat type to create: 'single' requires exactly one participantID; 'group'
+// supports multiple participants and optional title.
+type ChatNewParamsType string
 
 const (
-	GetChatResponseTypeSingle    GetChatResponseType = "single"
-	GetChatResponseTypeGroup     GetChatResponseType = "group"
-	GetChatResponseTypeChannel   GetChatResponseType = "channel"
-	GetChatResponseTypeBroadcast GetChatResponseType = "broadcast"
+	ChatNewParamsTypeSingle ChatNewParamsType = "single"
+	ChatNewParamsTypeGroup  ChatNewParamsType = "group"
 )
 
-// GetChatResponseLastReadMessageSortKeyUnion contains all possible properties and
-// values from [int64], [string].
-//
-// Use the methods beginning with 'As' to cast the union to one of its variants.
-//
-// If the underlying value is not a json object, one of the following properties
-// will be valid: OfInt OfString]
-type GetChatResponseLastReadMessageSortKeyUnion struct {
-	// This field will be present if the value is a [int64] instead of an object.
-	OfInt int64 `json:",inline"`
-	// This field will be present if the value is a [string] instead of an object.
-	OfString string `json:",inline"`
-	JSON     struct {
-		OfInt    respjson.Field
-		OfString respjson.Field
-		raw      string
-	} `json:"-"`
-}
-
-func (u GetChatResponseLastReadMessageSortKeyUnion) AsInt() (v int64) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-func (u GetChatResponseLastReadMessageSortKeyUnion) AsString() (v string) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-// Returns the unmodified JSON received from the API
-func (u GetChatResponseLastReadMessageSortKeyUnion) RawJSON() string { return u.JSON.raw }
-
-func (r *GetChatResponseLastReadMessageSortKeyUnion) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// URL to open a specific chat or message.
-type LinkResponse struct {
-	// Deep link URL to the specified chat or message.
-	URL string `json:"url,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		URL         respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r LinkResponse) RawJSON() string { return r.JSON.raw }
-func (r *LinkResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 type ChatGetParams struct {
-	// Unique identifier of the chat to retrieve. Not available for iMessage chats.
-	// Participants are limited by 'maxParticipantCount'.
-	ChatID string `query:"chatID,required" json:"-"`
 	// Maximum number of participants to return. Use -1 for all; otherwise 0–500.
-	// Defaults to 20.
+	// Defaults to all (-1).
 	MaxParticipantCount param.Opt[int64] `query:"maxParticipantCount,omitzero" json:"-"`
 	paramObj
 }
@@ -430,9 +303,37 @@ func (r ChatGetParams) URLQuery() (v url.Values, err error) {
 	})
 }
 
+type ChatListParams struct {
+	// Opaque pagination cursor; do not inspect. Use together with 'direction'.
+	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
+	// Limit to specific account IDs. If omitted, fetches from all accounts.
+	AccountIDs []string `query:"accountIDs,omitzero" json:"-"`
+	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+	// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+	//
+	// Any of "after", "before".
+	Direction ChatListParamsDirection `query:"direction,omitzero" json:"-"`
+	paramObj
+}
+
+// URLQuery serializes [ChatListParams]'s query parameters as `url.Values`.
+func (r ChatListParams) URLQuery() (v url.Values, err error) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
+
+// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+type ChatListParamsDirection string
+
+const (
+	ChatListParamsDirectionAfter  ChatListParamsDirection = "after"
+	ChatListParamsDirectionBefore ChatListParamsDirection = "before"
+)
+
 type ChatArchiveParams struct {
-	// The identifier of the chat to archive or unarchive
-	ChatID string `json:"chatID,required"`
 	// True to archive, false to unarchive
 	Archived param.Opt[bool] `json:"archived,omitzero"`
 	paramObj
@@ -446,15 +347,14 @@ func (r *ChatArchiveParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type ChatFindParams struct {
-	// A cursor for use in pagination. ending_before is an object ID that defines your
-	// place in the list. For instance, if you make a list request and receive 100
-	// objects, starting with obj_bar, your subsequent call can include
-	// ending_before=obj_bar in order to fetch the previous page of the list.
-	EndingBefore param.Opt[string] `query:"ending_before,omitzero" json:"-"`
+type ChatSearchParams struct {
 	// Include chats marked as Muted by the user, which are usually less important.
 	// Default: true. Set to false if the user wants a more refined search.
 	IncludeMuted param.Opt[bool] `query:"includeMuted,omitzero" json:"-"`
+	// Set to true to only retrieve chats that have unread messages
+	UnreadOnly param.Opt[bool] `query:"unreadOnly,omitzero" json:"-"`
+	// Opaque pagination cursor; do not inspect. Use together with 'direction'.
+	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
 	// Provide an ISO datetime string to only retrieve chats with last activity after
 	// this time
 	LastActivityAfter param.Opt[time.Time] `query:"lastActivityAfter,omitzero" format:"date-time" json:"-"`
@@ -463,77 +363,77 @@ type ChatFindParams struct {
 	LastActivityBefore param.Opt[time.Time] `query:"lastActivityBefore,omitzero" format:"date-time" json:"-"`
 	// Set the maximum number of chats to retrieve. Valid range: 1-200, default is 50
 	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
-	// Search string to filter chats by participant names. When multiple words
-	// provided, ALL words must match. Searches in username, displayName, and fullName
-	// fields.
-	ParticipantQuery param.Opt[string] `query:"participantQuery,omitzero" json:"-"`
-	// Search string to filter chats by title. When multiple words provided, ALL words
-	// must match. Matches are case-insensitive substrings.
+	// Literal token search (non-semantic). Use single words users type (e.g.,
+	// "dinner"). When multiple words provided, ALL must match. Case-insensitive.
 	Query param.Opt[string] `query:"query,omitzero" json:"-"`
-	// A cursor for use in pagination. starting_after is an object ID that defines your
-	// place in the list. For instance, if you make a list request and receive 100
-	// objects, ending with obj_foo, your subsequent call can include
-	// starting_after=obj_foo in order to fetch the next page of the list.
-	StartingAfter param.Opt[string] `query:"starting_after,omitzero" json:"-"`
-	// Set to true to only retrieve chats that have unread messages
-	UnreadOnly param.Opt[bool] `query:"unreadOnly,omitzero" json:"-"`
 	// Provide an array of account IDs to filter chats from specific messaging accounts
 	// only
 	AccountIDs []string `query:"accountIDs,omitzero" json:"-"`
+	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+	// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+	//
+	// Any of "after", "before".
+	Direction ChatSearchParamsDirection `query:"direction,omitzero" json:"-"`
 	// Filter by inbox type: "primary" (non-archived, non-low-priority),
 	// "low-priority", or "archive". If not specified, shows all chats.
 	//
 	// Any of "primary", "low-priority", "archive".
-	Inbox ChatFindParamsInbox `query:"inbox,omitzero" json:"-"`
-	// Specify the type of chats to retrieve: use "single" for direct messages, "group"
-	// for group chats, "channel" for channels, or "any" to get all types
+	Inbox ChatSearchParamsInbox `query:"inbox,omitzero" json:"-"`
+	// Search scope: 'titles' matches title + network; 'participants' matches
+	// participant names.
 	//
-	// Any of "single", "group", "channel", "any".
-	Type ChatFindParamsType `query:"type,omitzero" json:"-"`
+	// Any of "titles", "participants".
+	Scope ChatSearchParamsScope `query:"scope,omitzero" json:"-"`
+	// Specify the type of chats to retrieve: use "single" for direct messages, "group"
+	// for group chats, or "any" to get all types
+	//
+	// Any of "single", "group", "any".
+	Type ChatSearchParamsType `query:"type,omitzero" json:"-"`
 	paramObj
 }
 
-// URLQuery serializes [ChatFindParams]'s query parameters as `url.Values`.
-func (r ChatFindParams) URLQuery() (v url.Values, err error) {
+// URLQuery serializes [ChatSearchParams]'s query parameters as `url.Values`.
+func (r ChatSearchParams) URLQuery() (v url.Values, err error) {
 	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
 		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
 }
 
-// Filter by inbox type: "primary" (non-archived, non-low-priority),
-// "low-priority", or "archive". If not specified, shows all chats.
-type ChatFindParamsInbox string
+// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
+// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
+type ChatSearchParamsDirection string
 
 const (
-	ChatFindParamsInboxPrimary     ChatFindParamsInbox = "primary"
-	ChatFindParamsInboxLowPriority ChatFindParamsInbox = "low-priority"
-	ChatFindParamsInboxArchive     ChatFindParamsInbox = "archive"
+	ChatSearchParamsDirectionAfter  ChatSearchParamsDirection = "after"
+	ChatSearchParamsDirectionBefore ChatSearchParamsDirection = "before"
+)
+
+// Filter by inbox type: "primary" (non-archived, non-low-priority),
+// "low-priority", or "archive". If not specified, shows all chats.
+type ChatSearchParamsInbox string
+
+const (
+	ChatSearchParamsInboxPrimary     ChatSearchParamsInbox = "primary"
+	ChatSearchParamsInboxLowPriority ChatSearchParamsInbox = "low-priority"
+	ChatSearchParamsInboxArchive     ChatSearchParamsInbox = "archive"
+)
+
+// Search scope: 'titles' matches title + network; 'participants' matches
+// participant names.
+type ChatSearchParamsScope string
+
+const (
+	ChatSearchParamsScopeTitles       ChatSearchParamsScope = "titles"
+	ChatSearchParamsScopeParticipants ChatSearchParamsScope = "participants"
 )
 
 // Specify the type of chats to retrieve: use "single" for direct messages, "group"
-// for group chats, "channel" for channels, or "any" to get all types
-type ChatFindParamsType string
+// for group chats, or "any" to get all types
+type ChatSearchParamsType string
 
 const (
-	ChatFindParamsTypeSingle  ChatFindParamsType = "single"
-	ChatFindParamsTypeGroup   ChatFindParamsType = "group"
-	ChatFindParamsTypeChannel ChatFindParamsType = "channel"
-	ChatFindParamsTypeAny     ChatFindParamsType = "any"
+	ChatSearchParamsTypeSingle ChatSearchParamsType = "single"
+	ChatSearchParamsTypeGroup  ChatSearchParamsType = "group"
+	ChatSearchParamsTypeAny    ChatSearchParamsType = "any"
 )
-
-type ChatGetLinkParams struct {
-	// The ID of the chat to link to.
-	ChatID string `json:"chatID,required"`
-	// Optional message sort key. Jumps to that message in the chat.
-	MessageSortKey param.Opt[string] `json:"messageSortKey,omitzero"`
-	paramObj
-}
-
-func (r ChatGetLinkParams) MarshalJSON() (data []byte, err error) {
-	type shadow ChatGetLinkParams
-	return param.MarshalObject(r, (*shadow)(&r))
-}
-func (r *ChatGetLinkParams) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}

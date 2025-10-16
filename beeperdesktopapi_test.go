@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo_test
+package beeperdesktopapi_test
 
 import (
 	"context"
@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/beeper-desktop-api-go"
-	"github.com/beeper/beeper-desktop-api-go/internal/testutil"
-	"github.com/beeper/beeper-desktop-api-go/option"
+	"github.com/beeper/desktop-api-go"
+	"github.com/beeper/desktop-api-go/internal/testutil"
+	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestOAuthGetUserInfo(t *testing.T) {
+func TestBeeperdesktopapiFocusWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -21,13 +21,18 @@ func TestOAuthGetUserInfo(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.OAuth.GetUserInfo(context.TODO())
+	_, err := client.Focus(context.TODO(), beeperdesktopapi.FocusParams{
+		ChatID:              beeperdesktopapi.String("!NCdzlIaMjZUmvmvyHU:beeper.com"),
+		DraftAttachmentPath: beeperdesktopapi.String("draftAttachmentPath"),
+		DraftText:           beeperdesktopapi.String("draftText"),
+		MessageID:           beeperdesktopapi.String("messageID"),
+	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}
@@ -35,7 +40,7 @@ func TestOAuthGetUserInfo(t *testing.T) {
 	}
 }
 
-func TestOAuthRevokeTokenWithOptionalParams(t *testing.T) {
+func TestBeeperdesktopapiSearch(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -43,16 +48,15 @@ func TestOAuthRevokeTokenWithOptionalParams(t *testing.T) {
 	if !testutil.CheckTestServer(t, baseURL) {
 		return
 	}
-	client := githubcombeeperbeeperdesktopapigo.NewClient(
+	client := beeperdesktopapi.NewClient(
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	err := client.OAuth.RevokeToken(context.TODO(), githubcombeeperbeeperdesktopapigo.OAuthRevokeTokenParams{
-		Token:         "token",
-		TokenTypeHint: githubcombeeperbeeperdesktopapigo.OAuthRevokeTokenParamsTokenTypeHintAccessToken,
+	_, err := client.Search(context.TODO(), beeperdesktopapi.SearchParams{
+		Query: "x",
 	})
 	if err != nil {
-		var apierr *githubcombeeperbeeperdesktopapigo.Error
+		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
 			t.Log(string(apierr.DumpRequest(true)))
 		}

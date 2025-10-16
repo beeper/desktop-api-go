@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beeper/beeper-desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/tidwall/sjson"
 )
 
@@ -19,7 +19,7 @@ import (
 // which can be supplied to clients, services, and methods. You can read more about this functional
 // options pattern in our [README].
 //
-// [README]: https://pkg.go.dev/github.com/beeper/beeper-desktop-api-go#readme-requestoptions
+// [README]: https://pkg.go.dev/github.com/beeper/desktop-api-go#readme-requestoptions
 type RequestOption = requestconfig.RequestOption
 
 // WithBaseURL returns a RequestOption that sets the BaseURL for the client.
@@ -263,7 +263,7 @@ func WithRequestTimeout(dur time.Duration) RequestOption {
 // environment to be the "local" environment. An environment specifies which base URL
 // to use by default.
 func WithEnvironmentLocal() RequestOption {
-	return requestconfig.WithDefaultBaseURL("http://localhost:23374/")
+	return requestconfig.WithDefaultBaseURL("http://localhost:23373/")
 }
 
 // WithAccessToken returns a RequestOption that sets the client setting "access_token".

@@ -1,14 +1,15 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-package githubcombeeperbeeperdesktopapigo
+package beeperdesktopapi
 
 import (
 	"context"
 	"net/http"
 	"os"
+	"slices"
 
-	"github.com/beeper/beeper-desktop-api-go/internal/requestconfig"
-	"github.com/beeper/beeper-desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/option"
 )
 
 // Client creates a struct with services and top level methods that help with
@@ -16,25 +17,21 @@ import (
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
 	Options []option.RequestOption
-	// Manage and list connected messaging accounts
+	// Manage connected chat accounts
 	Accounts AccountService
-	// Control the Beeper Desktop application
-	App AppService
-	// Send, draft, and search messages across all chat networks
-	Messages MessageService
-	// Manage chats, conversations, and threads
+	// Manage chats
 	Chats ChatService
-	// Set and clear reminders for chats
-	Reminders ReminderService
-	// OAuth2 authentication and token management
-	OAuth OAuthService
+	// Manage messages in chats
+	Messages MessageService
+	// Manage assets in Beeper Desktop, like message attachments
+	Assets AssetService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
-// BEEPER-DESKTOP_BASE_URL). This should be used to initialize new clients.
+// BEEPER_DESKTOP_BASE_URL). This should be used to initialize new clients.
 func DefaultClientOptions() []option.RequestOption {
 	defaults := []option.RequestOption{option.WithEnvironmentLocal()}
-	if o, ok := os.LookupEnv("BEEPER-DESKTOP_BASE_URL"); ok {
+	if o, ok := os.LookupEnv("BEEPER_DESKTOP_BASE_URL"); ok {
 		defaults = append(defaults, option.WithBaseURL(o))
 	}
 	if o, ok := os.LookupEnv("BEEPER_ACCESS_TOKEN"); ok {
@@ -44,7 +41,7 @@ func DefaultClientOptions() []option.RequestOption {
 }
 
 // NewClient generates a new client with the default option read from the
-// environment (BEEPER_ACCESS_TOKEN, BEEPER-DESKTOP_BASE_URL). The option passed in
+// environment (BEEPER_ACCESS_TOKEN, BEEPER_DESKTOP_BASE_URL). The option passed in
 // as arguments are applied after these default arguments, and all option will be
 // passed down to the services and requests that this client makes.
 func NewClient(opts ...option.RequestOption) (r Client) {
@@ -53,11 +50,9 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r = Client{Options: opts}
 
 	r.Accounts = NewAccountService(opts...)
-	r.App = NewAppService(opts...)
-	r.Messages = NewMessageService(opts...)
 	r.Chats = NewChatService(opts...)
-	r.Reminders = NewReminderService(opts...)
-	r.OAuth = NewOAuthService(opts...)
+	r.Messages = NewMessageService(opts...)
+	r.Assets = NewAssetService(opts...)
 
 	return
 }
@@ -94,7 +89,7 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 // For even greater flexibility, see [option.WithResponseInto] and
 // [option.WithResponseBodyInto].
 func (r *Client) Execute(ctx context.Context, method string, path string, params any, res any, opts ...option.RequestOption) error {
-	opts = append(r.Options, opts...)
+	opts = slices.Concat(r.Options, opts)
 	return requestconfig.ExecuteNewRequest(ctx, method, path, params, res, opts...)
 }
 
@@ -129,4 +124,23 @@ func (r *Client) Patch(ctx context.Context, path string, params any, res any, op
 // response.
 func (r *Client) Delete(ctx context.Context, path string, params any, res any, opts ...option.RequestOption) error {
 	return r.Execute(ctx, http.MethodDelete, path, params, res, opts...)
+}
+
+// Focus Beeper Desktop and optionally navigate to a specific chat, message, or
+// pre-fill draft text and attachment.
+func (r *Client) Focus(ctx context.Context, body FocusParams, opts ...option.RequestOption) (res *FocusResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/focus"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Returns matching chats, participant name matches in groups, and the first page
+// of messages in one call. Paginate messages via search-messages. Paginate chats
+// via search-chats. Uses the same sorting as the chat search in the app.
+func (r *Client) Search(ctx context.Context, query SearchParams, opts ...option.RequestOption) (res *SearchResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/search"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return
 }

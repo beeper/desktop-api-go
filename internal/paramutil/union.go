@@ -2,7 +2,7 @@ package paramutil
 
 import (
 	"fmt"
-	"github.com/beeper/beeper-desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/param"
 	"reflect"
 )
 
