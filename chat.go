@@ -141,19 +141,19 @@ type Chat struct {
 	Network string `json:"network,required"`
 	// Chat participants information.
 	Participants ChatParticipants `json:"participants,required"`
-	// Display title of the chat as computed by the client/server.
-	Title string `json:"title,required"`
 	// Chat type: 'single' for direct messages, 'group' for group chats.
 	//
 	// Any of "single", "group".
 	Type ChatType `json:"type,required"`
 	// Number of unread messages.
 	UnreadCount int64 `json:"unreadCount,required"`
+	// Description of the chat.
+	Description string `json:"description,nullable"`
 	// True if chat is archived.
 	IsArchived bool `json:"isArchived"`
-	// True if chat notifications are muted.
+	// True if the chat is muted.
 	IsMuted bool `json:"isMuted"`
-	// True if chat is pinned.
+	// True if the chat is pinned.
 	IsPinned bool `json:"isPinned"`
 	// Timestamp of last activity.
 	LastActivity time.Time `json:"lastActivity" format:"date-time"`
@@ -161,21 +161,24 @@ type Chat struct {
 	LastReadMessageSortKey string `json:"lastReadMessageSortKey"`
 	// Local chat ID specific to this Beeper Desktop installation.
 	LocalChatID string `json:"localChatID,nullable"`
+	// Display title of the chat.
+	Title string `json:"title,nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                     respjson.Field
 		AccountID              respjson.Field
 		Network                respjson.Field
 		Participants           respjson.Field
-		Title                  respjson.Field
 		Type                   respjson.Field
 		UnreadCount            respjson.Field
+		Description            respjson.Field
 		IsArchived             respjson.Field
 		IsMuted                respjson.Field
 		IsPinned               respjson.Field
 		LastActivity           respjson.Field
 		LastReadMessageSortKey respjson.Field
 		LocalChatID            respjson.Field
+		Title                  respjson.Field
 		ExtraFields            map[string]respjson.Field
 		raw                    string
 	} `json:"-"`
