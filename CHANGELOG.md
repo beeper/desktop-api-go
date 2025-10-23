@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2025-10-23)
+
+Full Changelog: [v0.1.0...v0.2.0](https://github.com/beeper/desktop-api-go/compare/v0.1.0...v0.2.0)
+
+### Features
+
+* **api:** add `description` field to chats, make `title` optional ([fbf0470](https://github.com/beeper/desktop-api-go/commit/fbf047029f11c57542963ed3446ab191ae738643))
+
 ## 0.1.0 (2025-10-16)
 
 Full Changelog: [v0.0.1...v0.1.0](https://github.com/beeper/desktop-api-go/compare/v0.0.1...v0.1.0)
