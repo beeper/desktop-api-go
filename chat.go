@@ -95,7 +95,7 @@ func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, 
 // archived=false to move back to inbox
 func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
