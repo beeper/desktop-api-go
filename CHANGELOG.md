@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.2.0 (2025-11-19)
+
+Full Changelog: [v0.1.0...v0.2.0](https://github.com/beeper/desktop-api-go/compare/v0.1.0...v0.2.0)
+
+### Features
+
+* **api:** add `description` field to chats, make `title` optional ([fbf0470](https://github.com/beeper/desktop-api-go/commit/fbf047029f11c57542963ed3446ab191ae738643))
+
+
+### Bug Fixes
+
+* **client:** correctly specify Accept header with */* instead of empty ([2bcd6c1](https://github.com/beeper/desktop-api-go/commit/2bcd6c1aaaf2b7e6e554d8a87743d2593856f678))
+
+
+### Chores
+
+* bump gjson version ([1194594](https://github.com/beeper/desktop-api-go/commit/1194594b4e0744f59f66e0cda1929e75eb8973a2))
+* **internal:** grammar fix (it's -&gt; its) ([60171f3](https://github.com/beeper/desktop-api-go/commit/60171f3c6eed029a5689bc8ac58656baf63d88f3))
+
 ## 0.1.0 (2025-10-16)
 
 Full Changelog: [v0.0.1...v0.1.0](https://github.com/beeper/desktop-api-go/compare/v0.0.1...v0.1.0)
