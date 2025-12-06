@@ -39,7 +39,7 @@ func NewChatReminderService(opts ...option.RequestOption) (r ChatReminderService
 // Set a reminder for a chat at a specific time
 func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
@@ -52,7 +52,7 @@ func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatR
 // Clear an existing reminder from a chat
 func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
