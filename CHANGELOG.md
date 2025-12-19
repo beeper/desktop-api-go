@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.2.0 (2025-12-19)
+
+Full Changelog: [v0.1.0...v0.2.0](https://github.com/beeper/desktop-api-go/compare/v0.1.0...v0.2.0)
+
+### Features
+
+* **api:** add `description` field to chats, make `title` optional ([fbf0470](https://github.com/beeper/desktop-api-go/commit/fbf047029f11c57542963ed3446ab191ae738643))
+* **encoder:** support bracket encoding form-data object members ([a338742](https://github.com/beeper/desktop-api-go/commit/a33874294b78dc962f1acf74668ab59697d61711))
+
+
+### Bug Fixes
+
+* **client:** correctly specify Accept header with */* instead of empty ([2bcd6c1](https://github.com/beeper/desktop-api-go/commit/2bcd6c1aaaf2b7e6e554d8a87743d2593856f678))
+* **mcp:** correct code tool API endpoint ([568939e](https://github.com/beeper/desktop-api-go/commit/568939eff6ad5bcdcd42d7bae3439af3389e4b8a))
+* rename param to avoid collision ([d304cbe](https://github.com/beeper/desktop-api-go/commit/d304cbe9e74f9486567156cb28a60cf7cee5b053))
+
+
+### Chores
+
+* add float64 to valid types for RegisterFieldValidator ([4658d5c](https://github.com/beeper/desktop-api-go/commit/4658d5c7d11ff703a1b7e5ccfb594b22f2ee5144))
+* bump gjson version ([1194594](https://github.com/beeper/desktop-api-go/commit/1194594b4e0744f59f66e0cda1929e75eb8973a2))
+* elide duplicate aliases ([fa3d456](https://github.com/beeper/desktop-api-go/commit/fa3d4564c46606bcb63fd98906eb0687758ac059))
+* **internal:** codegen related update ([77a6d60](https://github.com/beeper/desktop-api-go/commit/77a6d605f55019d31fba8ed59ddc5232f527f9ff))
+* **internal:** grammar fix (it's -&gt; its) ([60171f3](https://github.com/beeper/desktop-api-go/commit/60171f3c6eed029a5689bc8ac58656baf63d88f3))
+
 ## 0.1.0 (2025-10-16)
 
 Full Changelog: [v0.0.1...v0.1.0](https://github.com/beeper/desktop-api-go/compare/v0.0.1...v0.1.0)
