@@ -42,6 +42,23 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 	return
 }
 
+// Edit the text content of an existing message. Messages with attachments cannot
+// be edited.
+func (r *MessageService) Update(ctx context.Context, messageID string, params MessageUpdateParams, opts ...option.RequestOption) (res *MessageUpdateResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if params.ChatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return
+	}
+	if messageID == "" {
+		err = errors.New("missing required messageID parameter")
+		return
+	}
+	path := fmt.Sprintf("v1/chats/%s/messages/%s", params.ChatID, messageID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, params, &res, opts...)
+	return
+}
+
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
 func (r *MessageService) List(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) (res *pagination.CursorSortKey[shared.Message], err error) {
 	var raw *http.Response
@@ -93,7 +110,7 @@ func (r *MessageService) SearchAutoPaging(ctx context.Context, query MessageSear
 }
 
 // Send a text message to a specific chat. Supports replying to existing messages.
-// Returns the sent message ID.
+// Returns a pending message ID.
 func (r *MessageService) Send(ctx context.Context, chatID string, body MessageSendParams, opts ...option.RequestOption) (res *MessageSendResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
@@ -103,6 +120,29 @@ func (r *MessageService) Send(ctx context.Context, chatID string, body MessageSe
 	path := fmt.Sprintf("v1/chats/%s/messages", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
+}
+
+type MessageUpdateResponse struct {
+	// Unique identifier of the chat.
+	ChatID string `json:"chatID,required"`
+	// Message ID.
+	MessageID string `json:"messageID,required"`
+	// Whether the message was successfully edited
+	Success bool `json:"success,required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ChatID      respjson.Field
+		MessageID   respjson.Field
+		Success     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r MessageUpdateResponse) RawJSON() string { return r.JSON.raw }
+func (r *MessageUpdateResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 type MessageSendResponse struct {
@@ -122,6 +162,22 @@ type MessageSendResponse struct {
 // Returns the unmodified JSON received from the API
 func (r MessageSendResponse) RawJSON() string { return r.JSON.raw }
 func (r *MessageSendResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type MessageUpdateParams struct {
+	// Unique identifier of the chat.
+	ChatID string `path:"chatID,required" json:"-"`
+	// New text content for the message
+	Text string `json:"text,required"`
+	paramObj
+}
+
+func (r MessageUpdateParams) MarshalJSON() (data []byte, err error) {
+	type shadow MessageUpdateParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *MessageUpdateParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
@@ -170,7 +226,7 @@ type MessageSearchParams struct {
 	DateBefore param.Opt[time.Time] `query:"dateBefore,omitzero" format:"date-time" json:"-"`
 	// Maximum number of messages to return.
 	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
-	// Literal word search (NOT semantic). Finds messages containing these EXACT words
+	// Literal word search (non-semantic). Finds messages containing these EXACT words
 	// in any order. Use single words users actually type, not concepts or phrases.
 	// Example: use "dinner" not "dinner plans", use "sick" not "health issues". If
 	// omitted, returns results filtered only by other parameters.
@@ -238,6 +294,8 @@ type MessageSendParams struct {
 	ReplyToMessageID param.Opt[string] `json:"replyToMessageID,omitzero"`
 	// Text content of the message you want to send. You may use markdown.
 	Text param.Opt[string] `json:"text,omitzero"`
+	// Single attachment to send with the message
+	Attachment MessageSendParamsAttachment `json:"attachment,omitzero"`
 	paramObj
 }
 
@@ -246,5 +304,58 @@ func (r MessageSendParams) MarshalJSON() (data []byte, err error) {
 	return param.MarshalObject(r, (*shadow)(&r))
 }
 func (r *MessageSendParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Single attachment to send with the message
+//
+// The property UploadID is required.
+type MessageSendParamsAttachment struct {
+	// Upload ID from uploadAsset endpoint. Required to reference uploaded files.
+	UploadID string `json:"uploadID,required"`
+	// Duration in seconds (optional override of cached value)
+	Duration param.Opt[float64] `json:"duration,omitzero"`
+	// Filename (optional override of cached value)
+	FileName param.Opt[string] `json:"fileName,omitzero"`
+	// MIME type (optional override of cached value)
+	MimeType param.Opt[string] `json:"mimeType,omitzero"`
+	// Dimensions (optional override of cached value)
+	Size MessageSendParamsAttachmentSize `json:"size,omitzero"`
+	// Special attachment type (gif, voiceNote, sticker). If omitted, auto-detected
+	// from mimeType
+	//
+	// Any of "gif", "voiceNote", "sticker".
+	Type string `json:"type,omitzero"`
+	paramObj
+}
+
+func (r MessageSendParamsAttachment) MarshalJSON() (data []byte, err error) {
+	type shadow MessageSendParamsAttachment
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *MessageSendParamsAttachment) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func init() {
+	apijson.RegisterFieldValidator[MessageSendParamsAttachment](
+		"type", "gif", "voiceNote", "sticker",
+	)
+}
+
+// Dimensions (optional override of cached value)
+//
+// The properties Height, Width are required.
+type MessageSendParamsAttachmentSize struct {
+	Height float64 `json:"height,required"`
+	Width  float64 `json:"width,required"`
+	paramObj
+}
+
+func (r MessageSendParamsAttachmentSize) MarshalJSON() (data []byte, err error) {
+	type shadow MessageSendParamsAttachmentSize
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *MessageSendParamsAttachmentSize) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

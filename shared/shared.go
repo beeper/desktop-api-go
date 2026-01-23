@@ -21,6 +21,9 @@ type Attachment struct {
 	//
 	// Any of "unknown", "img", "video", "audio".
 	Type AttachmentType `json:"type,required"`
+	// Attachment identifier (typically an mxc:// URL). Use with /v1/assets/download to
+	// get a local file path.
+	ID string `json:"id"`
 	// Duration in seconds (audio/video).
 	Duration float64 `json:"duration"`
 	// Original filename if available.
@@ -46,6 +49,7 @@ type Attachment struct {
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Type        respjson.Field
+		ID          respjson.Field
 		Duration    respjson.Field
 		FileName    respjson.Field
 		FileSize    respjson.Field
@@ -115,6 +119,8 @@ type Message struct {
 	IsSender bool `json:"isSender"`
 	// True if the message is unread for the authenticated user. May be omitted.
 	IsUnread bool `json:"isUnread"`
+	// ID of the message this is a reply to, if any.
+	LinkedMessageID string `json:"linkedMessageID"`
 	// Reactions to the message, if any.
 	Reactions []Reaction `json:"reactions"`
 	// Resolved sender display name (impersonator/full name/username/participant name).
@@ -122,22 +128,30 @@ type Message struct {
 	// Plain-text body if present. May include a JSON fallback with text entities for
 	// rich messages.
 	Text string `json:"text"`
+	// Message content type. Useful for distinguishing reactions, media messages, and
+	// state events from regular text messages.
+	//
+	// Any of "TEXT", "NOTICE", "IMAGE", "VIDEO", "VOICE", "AUDIO", "FILE", "STICKER",
+	// "LOCATION", "REACTION".
+	Type MessageType `json:"type"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		ID          respjson.Field
-		AccountID   respjson.Field
-		ChatID      respjson.Field
-		SenderID    respjson.Field
-		SortKey     respjson.Field
-		Timestamp   respjson.Field
-		Attachments respjson.Field
-		IsSender    respjson.Field
-		IsUnread    respjson.Field
-		Reactions   respjson.Field
-		SenderName  respjson.Field
-		Text        respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
+		ID              respjson.Field
+		AccountID       respjson.Field
+		ChatID          respjson.Field
+		SenderID        respjson.Field
+		SortKey         respjson.Field
+		Timestamp       respjson.Field
+		Attachments     respjson.Field
+		IsSender        respjson.Field
+		IsUnread        respjson.Field
+		LinkedMessageID respjson.Field
+		Reactions       respjson.Field
+		SenderName      respjson.Field
+		Text            respjson.Field
+		Type            respjson.Field
+		ExtraFields     map[string]respjson.Field
+		raw             string
 	} `json:"-"`
 }
 
@@ -146,6 +160,23 @@ func (r Message) RawJSON() string { return r.JSON.raw }
 func (r *Message) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
+
+// Message content type. Useful for distinguishing reactions, media messages, and
+// state events from regular text messages.
+type MessageType string
+
+const (
+	MessageTypeText     MessageType = "TEXT"
+	MessageTypeNotice   MessageType = "NOTICE"
+	MessageTypeImage    MessageType = "IMAGE"
+	MessageTypeVideo    MessageType = "VIDEO"
+	MessageTypeVoice    MessageType = "VOICE"
+	MessageTypeAudio    MessageType = "AUDIO"
+	MessageTypeFile     MessageType = "FILE"
+	MessageTypeSticker  MessageType = "STICKER"
+	MessageTypeLocation MessageType = "LOCATION"
+	MessageTypeReaction MessageType = "REACTION"
+)
 
 type Reaction struct {
 	// Reaction ID, typically ${participantID}${reactionKey} if multiple reactions
