@@ -3,8 +3,10 @@
 package beeperdesktopapi_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
+	"io"
 	"os"
 	"testing"
 
@@ -50,6 +52,32 @@ func TestAssetUploadWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Assets.Upload(context.TODO(), beeperdesktopapi.AssetUploadParams{
+		File:     io.Reader(bytes.NewBuffer([]byte("some file contents"))),
+		FileName: beeperdesktopapi.String("fileName"),
+		MimeType: beeperdesktopapi.String("mimeType"),
+	})
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestAssetUploadBase64WithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Assets.UploadBase64(context.TODO(), beeperdesktopapi.AssetUploadBase64Params{
 		Content:  "x",
 		FileName: beeperdesktopapi.String("fileName"),
 		MimeType: beeperdesktopapi.String("mimeType"),
