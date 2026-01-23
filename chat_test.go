@@ -83,7 +83,7 @@ func TestChatListWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Chats.List(context.TODO(), beeperdesktopapi.ChatListParams{
-		AccountIDs: []string{"whatsapp", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
+		AccountIDs: []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
 		Cursor:     beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
 		Direction:  beeperdesktopapi.ChatListParamsDirectionBefore,
 	})
