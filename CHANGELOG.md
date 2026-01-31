@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.2.0 (2026-01-31)
+
+Full Changelog: [v0.1.0...v0.2.0](https://github.com/beeper/desktop-api-go/compare/v0.1.0...v0.2.0)
+
+### Features
+
+* **api:** add `description` field to chats, make `title` optional ([fbf0470](https://github.com/beeper/desktop-api-go/commit/fbf047029f11c57542963ed3446ab191ae738643))
+* **api:** add upload asset and edit message endpoints ([6d37bf4](https://github.com/beeper/desktop-api-go/commit/6d37bf45aeaeef173628d7bd16ecb5fcfe49ca1e))
+* **api:** manual updates ([d52c6cb](https://github.com/beeper/desktop-api-go/commit/d52c6cbcfa8217c6fde16793dac7ed98d2c61348))
+* **api:** manual updates ([782c77d](https://github.com/beeper/desktop-api-go/commit/782c77d0de3e076765031d3b311c81f55a82b02b))
+* **api:** remove mcp for now ([0cf432f](https://github.com/beeper/desktop-api-go/commit/0cf432f5b3aa26727a571becd287501776a58726))
+* **client:** add a convenient param.SetJSON helper ([9ea70da](https://github.com/beeper/desktop-api-go/commit/9ea70da2a4b22a60440ca738ba6367037de2b63b))
+* **encoder:** support bracket encoding form-data object members ([a338742](https://github.com/beeper/desktop-api-go/commit/a33874294b78dc962f1acf74668ab59697d61711))
+
+
+### Bug Fixes
+
+* **client:** correctly specify Accept header with */* instead of empty ([2bcd6c1](https://github.com/beeper/desktop-api-go/commit/2bcd6c1aaaf2b7e6e554d8a87743d2593856f678))
+* **docs:** add missing pointer prefix to api.md return types ([9fd334b](https://github.com/beeper/desktop-api-go/commit/9fd334be8ea4e83d5414c7d044cd326643137685))
+* fix for namespace collisions with client and resource test methods ([7454269](https://github.com/beeper/desktop-api-go/commit/7454269a9eb54a359ce5efdfe31c4f036251707a))
+* **mcp:** correct code tool API endpoint ([568939e](https://github.com/beeper/desktop-api-go/commit/568939eff6ad5bcdcd42d7bae3439af3389e4b8a))
+* rename param to avoid collision ([d304cbe](https://github.com/beeper/desktop-api-go/commit/d304cbe9e74f9486567156cb28a60cf7cee5b053))
+
+
+### Chores
+
+* add float64 to valid types for RegisterFieldValidator ([4658d5c](https://github.com/beeper/desktop-api-go/commit/4658d5c7d11ff703a1b7e5ccfb594b22f2ee5144))
+* bump gjson version ([1194594](https://github.com/beeper/desktop-api-go/commit/1194594b4e0744f59f66e0cda1929e75eb8973a2))
+* configure new SDK language ([ebb892c](https://github.com/beeper/desktop-api-go/commit/ebb892cd8a5b4bad877c0b88724a9a55f43dac94))
+* elide duplicate aliases ([fa3d456](https://github.com/beeper/desktop-api-go/commit/fa3d4564c46606bcb63fd98906eb0687758ac059))
+* **internal:** codegen related update ([f2d3a30](https://github.com/beeper/desktop-api-go/commit/f2d3a30447ffaae00b456f610aba7afee08d32f0))
+* **internal:** codegen related update ([77a6d60](https://github.com/beeper/desktop-api-go/commit/77a6d605f55019d31fba8ed59ddc5232f527f9ff))
+* **internal:** grammar fix (it's -&gt; its) ([60171f3](https://github.com/beeper/desktop-api-go/commit/60171f3c6eed029a5689bc8ac58656baf63d88f3))
+* **internal:** update `actions/checkout` version ([1f84ff0](https://github.com/beeper/desktop-api-go/commit/1f84ff0e78592fb0b97fb1185dbe049a298af53d))
+
+
+### Documentation
+
+* prominently feature MCP server setup in root SDK readmes ([fcad6f3](https://github.com/beeper/desktop-api-go/commit/fcad6f33198927cfd1e144648a38fb43b1d43f06))
+
 ## 0.1.0 (2025-10-16)
 
 Full Changelog: [v0.0.1...v0.1.0](https://github.com/beeper/desktop-api-go/compare/v0.0.1...v0.1.0)
