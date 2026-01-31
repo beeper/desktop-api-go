@@ -8,10 +8,12 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"slices"
 
 	"github.com/beeper/desktop-api-go/internal/apiform"
 	"github.com/beeper/desktop-api-go/internal/apijson"
+	"github.com/beeper/desktop-api-go/internal/apiquery"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/beeper/desktop-api-go/option"
 	"github.com/beeper/desktop-api-go/packages/param"
@@ -45,6 +47,16 @@ func (r *AssetService) Download(ctx context.Context, body AssetDownloadParams, o
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/assets/download"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return
+}
+
+// Stream a file given an mxc://, localmxc://, or file:// URL. Downloads first if
+// not cached. Supports Range requests for seeking in large files.
+func (r *AssetService) Serve(ctx context.Context, query AssetServeParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	path := "v1/assets/serve"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
 	return
 }
 
@@ -181,6 +193,20 @@ func (r AssetDownloadParams) MarshalJSON() (data []byte, err error) {
 }
 func (r *AssetDownloadParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
+}
+
+type AssetServeParams struct {
+	// Asset URL to serve. Accepts mxc://, localmxc://, or file:// URLs.
+	URL string `query:"url,required" json:"-"`
+	paramObj
+}
+
+// URLQuery serializes [AssetServeParams]'s query parameters as `url.Values`.
+func (r AssetServeParams) URLQuery() (v url.Values, err error) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
 }
 
 type AssetUploadParams struct {

@@ -108,7 +108,7 @@ func TestChatArchiveWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	err := client.Chats.Archive(
+	_, err := client.Chats.Archive(
 		context.TODO(),
 		"!NCdzlIaMjZUmvmvyHU:beeper.com",
 		beeperdesktopapi.ChatArchiveParams{

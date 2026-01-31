@@ -13,6 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/beeper/desktop-api-go/option"
 	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/packages/respjson"
 )
 
 // Manage reminders for chats
@@ -37,29 +38,65 @@ func NewChatReminderService(opts ...option.RequestOption) (r ChatReminderService
 }
 
 // Set a reminder for a chat at a specific time
-func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (err error) {
+func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (res *ChatReminderNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
 // Clear an existing reminder from a chat
-func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (err error) {
+func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (res *ChatReminderDeleteResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return
+}
+
+type ChatReminderNewResponse struct {
+	// Indicates the operation completed successfully
+	//
+	// Any of true.
+	Success bool `json:"success,required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Success     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatReminderNewResponse) RawJSON() string { return r.JSON.raw }
+func (r *ChatReminderNewResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatReminderDeleteResponse struct {
+	// Indicates the operation completed successfully
+	//
+	// Any of true.
+	Success bool `json:"success,required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Success     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatReminderDeleteResponse) RawJSON() string { return r.JSON.raw }
+func (r *ChatReminderDeleteResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 type ChatReminderNewParams struct {
