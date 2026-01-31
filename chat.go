@@ -93,15 +93,14 @@ func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, 
 
 // Archive or unarchive a chat. Set archived=true to move to archive,
 // archived=false to move back to inbox
-func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (err error) {
+func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (res *ChatArchiveResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/chats/%s/archive", chatID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return
 }
 
@@ -135,10 +134,6 @@ type Chat struct {
 	ID string `json:"id,required"`
 	// Account ID this chat belongs to.
 	AccountID string `json:"accountID,required"`
-	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
-	//
-	// Deprecated: deprecated
-	Network string `json:"network,required"`
 	// Chat participants information.
 	Participants ChatParticipants `json:"participants,required"`
 	// Display title of the chat as computed by the client/server.
@@ -165,7 +160,6 @@ type Chat struct {
 	JSON struct {
 		ID                     respjson.Field
 		AccountID              respjson.Field
-		Network                respjson.Field
 		Participants           respjson.Field
 		Title                  respjson.Field
 		Type                   respjson.Field
@@ -251,6 +245,25 @@ type ChatListResponse struct {
 // Returns the unmodified JSON received from the API
 func (r ChatListResponse) RawJSON() string { return r.JSON.raw }
 func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatArchiveResponse struct {
+	// Indicates the operation completed successfully
+	//
+	// Any of true.
+	Success bool `json:"success,required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Success     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatArchiveResponse) RawJSON() string { return r.JSON.raw }
+func (r *ChatArchiveResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
