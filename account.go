@@ -52,8 +52,6 @@ type Account struct {
 	// Chat account added to Beeper. Use this to route account-scoped actions.
 	AccountID string `json:"accountID,required"`
 	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
-	//
-	// Deprecated: deprecated
 	Network string `json:"network,required"`
 	// User the account belongs to.
 	User shared.User `json:"user,required"`

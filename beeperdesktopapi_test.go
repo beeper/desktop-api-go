@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestBeeperdesktopapiFocusWithOptionalParams(t *testing.T) {
+func TestFocusWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -40,7 +40,7 @@ func TestBeeperdesktopapiFocusWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestBeeperdesktopapiSearch(t *testing.T) {
+func TestSearch(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL

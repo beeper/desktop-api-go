@@ -121,7 +121,7 @@ func (r *FocusParams) UnmarshalJSON(data []byte) error {
 }
 
 type SearchParams struct {
-	// User-typed search text. Literal word matching (NOT semantic).
+	// User-typed search text. Literal word matching (non-semantic).
 	Query string `query:"query,required" json:"-"`
 	paramObj
 }

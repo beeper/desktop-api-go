@@ -26,7 +26,7 @@ Or to pin the version:
 <!-- x-release-please-start-version -->
 
 ```sh
-go get -u 'github.com/beeper/desktop-api-go@v0.1.0'
+go get -u 'github.com/beeper/desktop-api-go@v0.2.0'
 ```
 
 <!-- x-release-please-end -->
@@ -127,7 +127,7 @@ custom := param.Override[beeperdesktopapi.FooParams](12)
 
 ### Request unions
 
-Unions are represented as a struct with fields prefixed by "Of" for each of it's variants,
+Unions are represented as a struct with fields prefixed by "Of" for each of its variants,
 only one field can be non-zero. The non-zero field will be serialized.
 
 Sub-properties of the union can be accessed via methods on the union struct.
@@ -376,6 +376,24 @@ file returned by `os.Open` will be sent with the file name on disk.
 
 We also provide a helper `beeperdesktopapi.File(reader io.Reader, filename string, contentType string)`
 which can be used to wrap any `io.Reader` with the appropriate file name and content type.
+
+```go
+// A file from the file system
+file, err := os.Open("/path/to/file")
+beeperdesktopapi.AssetUploadParams{
+	File: file,
+}
+
+// A file from a string
+beeperdesktopapi.AssetUploadParams{
+	File: strings.NewReader("my file contents"),
+}
+
+// With a custom filename and contentType
+beeperdesktopapi.AssetUploadParams{
+	File: beeperdesktopapi.File(strings.NewReader(`{"hello": "foo"}`), "file.go", "application/json"),
+}
+```
 
 ### Retries
 

@@ -25,7 +25,7 @@ func TestChatReminderNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	err := client.Chats.Reminders.New(
+	_, err := client.Chats.Reminders.New(
 		context.TODO(),
 		"!NCdzlIaMjZUmvmvyHU:beeper.com",
 		beeperdesktopapi.ChatReminderNewParams{
@@ -56,7 +56,7 @@ func TestChatReminderDelete(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	err := client.Chats.Reminders.Delete(context.TODO(), "!NCdzlIaMjZUmvmvyHU:beeper.com")
+	_, err := client.Chats.Reminders.Delete(context.TODO(), "!NCdzlIaMjZUmvmvyHU:beeper.com")
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
