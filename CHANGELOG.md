@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.1 (2026-02-11)
+
+Full Changelog: [v0.2.0...v0.2.1](https://github.com/beeper/desktop-api-go/compare/v0.2.0...v0.2.1)
+
+### Bug Fixes
+
+* **encoder:** correctly serialize NullStruct ([02a2004](https://github.com/beeper/desktop-api-go/commit/02a200495a4ba9845597c70ffb4ee3cbdd5ccf86))
+
 ## 0.2.0 (2026-01-31)
 
 Full Changelog: [v0.1.0...v0.2.0](https://github.com/beeper/desktop-api-go/compare/v0.1.0...v0.2.0)
