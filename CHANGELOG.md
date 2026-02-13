@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 (2026-02-13)
+
+Full Changelog: [v0.2.1...v0.3.0](https://github.com/beeper/desktop-api-go/compare/v0.2.1...v0.3.0)
+
+### Features
+
+* **api:** add reactions ([cb4b3e1](https://github.com/beeper/desktop-api-go/commit/cb4b3e1606a309e3c21d929998b99e30483f97b3))
+
 ## 0.2.1 (2026-02-11)
 
 Full Changelog: [v0.2.0...v0.2.1](https://github.com/beeper/desktop-api-go/compare/v0.2.0...v0.2.1)
