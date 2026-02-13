@@ -137,7 +137,7 @@ func (r *Client) Focus(ctx context.Context, body FocusParams, opts ...option.Req
 
 // Returns matching chats, participant name matches in groups, and the first page
 // of messages in one call. Paginate messages via search-messages. Paginate chats
-// via search-chats. Uses the same sorting as the chat search in the app.
+// via search-chats.
 func (r *Client) Search(ctx context.Context, query SearchParams, opts ...option.RequestOption) (res *SearchResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/search"

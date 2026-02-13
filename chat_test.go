@@ -27,11 +27,14 @@ func TestChatNewWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Chats.New(context.TODO(), beeperdesktopapi.ChatNewParams{
-		AccountID:      "accountID",
-		ParticipantIDs: []string{"string"},
-		Type:           beeperdesktopapi.ChatNewParamsTypeSingle,
-		MessageText:    beeperdesktopapi.String("messageText"),
-		Title:          beeperdesktopapi.String("title"),
+		OfObject: &beeperdesktopapi.ChatNewParamsBodyObject{
+			AccountID:      "accountID",
+			ParticipantIDs: []string{"string"},
+			Type:           "single",
+			MessageText:    beeperdesktopapi.String("messageText"),
+			Mode:           "create",
+			Title:          beeperdesktopapi.String("title"),
+		},
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
@@ -108,7 +111,7 @@ func TestChatArchiveWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Chats.Archive(
+	err := client.Chats.Archive(
 		context.TODO(),
 		"!NCdzlIaMjZUmvmvyHU:beeper.com",
 		beeperdesktopapi.ChatArchiveParams{
