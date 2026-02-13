@@ -39,8 +39,8 @@ func NewAccountContactService(opts ...option.RequestOption) (r AccountContactSer
 	return
 }
 
-// Search contacts on a specific account using the network's search API. Only use
-// for creating new chats.
+// Search contacts on a specific account using merged account contacts, network
+// search, and exact identifier lookup.
 func (r *AccountContactService) Search(ctx context.Context, accountID string, query AccountContactSearchParams, opts ...option.RequestOption) (res *AccountContactSearchResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if accountID == "" {

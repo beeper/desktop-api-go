@@ -45,8 +45,8 @@ func NewChatService(opts ...option.RequestOption) (r ChatService) {
 	return
 }
 
-// Create a single or group chat on a specific account using participant IDs and
-// optional title.
+// Create a single/group chat (mode='create') or start a direct chat from merged
+// user data (mode='start').
 func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...option.RequestOption) (res *ChatNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/chats"
@@ -93,14 +93,15 @@ func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, 
 
 // Archive or unarchive a chat. Set archived=true to move to archive,
 // archived=false to move back to inbox
-func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (res *ChatArchiveResponse, err error) {
+func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return
 	}
 	path := fmt.Sprintf("v1/chats/%s/archive", chatID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
 	return
 }
 
@@ -134,6 +135,10 @@ type Chat struct {
 	ID string `json:"id,required"`
 	// Account ID this chat belongs to.
 	AccountID string `json:"accountID,required"`
+	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
+	//
+	// Deprecated: deprecated
+	Network string `json:"network,required"`
 	// Chat participants information.
 	Participants ChatParticipants `json:"participants,required"`
 	// Display title of the chat as computed by the client/server.
@@ -160,6 +165,7 @@ type Chat struct {
 	JSON struct {
 		ID                     respjson.Field
 		AccountID              respjson.Field
+		Network                respjson.Field
 		Participants           respjson.Field
 		Title                  respjson.Field
 		Type                   respjson.Field
@@ -216,9 +222,15 @@ const (
 type ChatNewResponse struct {
 	// Newly created chat ID.
 	ChatID string `json:"chatID,required"`
+	// Only returned in start mode. 'existing' means an existing chat was reused;
+	// 'created' means a new chat was created.
+	//
+	// Any of "existing", "created".
+	Status ChatNewResponseStatus `json:"status"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID      respjson.Field
+		Status      respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
@@ -229,6 +241,15 @@ func (r ChatNewResponse) RawJSON() string { return r.JSON.raw }
 func (r *ChatNewResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
+
+// Only returned in start mode. 'existing' means an existing chat was reused;
+// 'created' means a new chat was created.
+type ChatNewResponseStatus string
+
+const (
+	ChatNewResponseStatusExisting ChatNewResponseStatus = "existing"
+	ChatNewResponseStatusCreated  ChatNewResponseStatus = "created"
+)
 
 type ChatListResponse struct {
 	// Last message preview for this chat, if available.
@@ -248,26 +269,29 @@ func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type ChatArchiveResponse struct {
-	// Indicates the operation completed successfully
+type ChatNewParams struct {
+
 	//
-	// Any of true.
-	Success bool `json:"success,required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Success     respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
+	// Request body variants
+	//
+
+	// This field is a request body variant, only one variant field can be set.
+	OfObject *ChatNewParamsBodyObject `json:",inline"`
+	// This field is a request body variant, only one variant field can be set.
+	OfChatNewsBodyObject *ChatNewParamsBodyObject `json:",inline"`
+
+	paramObj
 }
 
-// Returns the unmodified JSON received from the API
-func (r ChatArchiveResponse) RawJSON() string { return r.JSON.raw }
-func (r *ChatArchiveResponse) UnmarshalJSON(data []byte) error {
+func (u ChatNewParams) MarshalJSON() ([]byte, error) {
+	return param.MarshalUnion(u, u.OfObject, u.OfChatNewsBodyObject)
+}
+func (r *ChatNewParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type ChatNewParams struct {
+// The properties AccountID, ParticipantIDs, Type are required.
+type ChatNewParamsBodyObject struct {
 	// Account to create the chat on.
 	AccountID string `json:"accountID,required"`
 	// User IDs to include in the new chat.
@@ -276,30 +300,34 @@ type ChatNewParams struct {
 	// supports multiple participants and optional title.
 	//
 	// Any of "single", "group".
-	Type ChatNewParamsType `json:"type,omitzero,required"`
+	Type string `json:"type,omitzero,required"`
 	// Optional first message content if the platform requires it to create the chat.
 	MessageText param.Opt[string] `json:"messageText,omitzero"`
 	// Optional title for group chats; ignored for single chats on most platforms.
 	Title param.Opt[string] `json:"title,omitzero"`
+	// Create mode. Defaults to 'create' when omitted.
+	//
+	// Any of "create".
+	Mode string `json:"mode,omitzero"`
 	paramObj
 }
 
-func (r ChatNewParams) MarshalJSON() (data []byte, err error) {
-	type shadow ChatNewParams
+func (r ChatNewParamsBodyObject) MarshalJSON() (data []byte, err error) {
+	type shadow ChatNewParamsBodyObject
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ChatNewParams) UnmarshalJSON(data []byte) error {
+func (r *ChatNewParamsBodyObject) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Chat type to create: 'single' requires exactly one participantID; 'group'
-// supports multiple participants and optional title.
-type ChatNewParamsType string
-
-const (
-	ChatNewParamsTypeSingle ChatNewParamsType = "single"
-	ChatNewParamsTypeGroup  ChatNewParamsType = "group"
-)
+func init() {
+	apijson.RegisterFieldValidator[ChatNewParamsBodyObject](
+		"type", "single", "group",
+	)
+	apijson.RegisterFieldValidator[ChatNewParamsBodyObject](
+		"mode", "create",
+	)
+}
 
 type ChatGetParams struct {
 	// Maximum number of participants to return. Use -1 for all; otherwise 0–500.
