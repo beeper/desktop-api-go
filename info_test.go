@@ -4,6 +4,7 @@ package beeperdesktopapi_test
 
 import (
 	"context"
+	"errors"
 	"os"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestAutoPagination(t *testing.T) {
+func TestInfoGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -24,17 +25,12 @@ func TestAutoPagination(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
-		AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
-		Limit:      beeperdesktopapi.Int(10),
-		Query:      beeperdesktopapi.String("deployment"),
-	})
-	// The mock server isn't going to give us real pagination
-	for i := 0; i < 3 && iter.Next(); i++ {
-		message := iter.Current()
-		t.Logf("%+v\n", message.ID)
-	}
-	if err := iter.Err(); err != nil {
+	_, err := client.Info.Get(context.TODO())
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
 		t.Fatalf("err should be nil: %s", err.Error())
 	}
 }

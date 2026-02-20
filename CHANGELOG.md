@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.4.0 (2026-02-20)
+
+Full Changelog: [v0.3.0...v0.4.0](https://github.com/beeper/desktop-api-go/compare/v0.3.0...v0.4.0)
+
+### Features
+
+* **api:** api update ([d93212e](https://github.com/beeper/desktop-api-go/commit/d93212edc1831f66dd2bdcf90f4b8129c0421561))
+* **api:** api update ([090b9fa](https://github.com/beeper/desktop-api-go/commit/090b9fa8ed3a2bdeed47184d45ee55f3af920f1a))
+* **api:** api update ([42ed730](https://github.com/beeper/desktop-api-go/commit/42ed7302937ab09fcf9c4137c292148ed5c27e4f))
+* **api:** manual updates ([12bb117](https://github.com/beeper/desktop-api-go/commit/12bb11703a14d86f4b2d9f6c46a85b10349edaa9))
+* **api:** manual updates ([bdbbdba](https://github.com/beeper/desktop-api-go/commit/bdbbdbab6e3ab56d5d259991c8ce0f7e35b8a729))
+
+
+### Bug Fixes
+
+* allow canceling a request while it is waiting to retry ([2c85b3b](https://github.com/beeper/desktop-api-go/commit/2c85b3bcc3fb6cc4cc4aeca6708a6642dc6c4586))
+
+
+### Chores
+
+* update mock server docs ([1c67766](https://github.com/beeper/desktop-api-go/commit/1c67766069b0a877174acdacb45ab88824038f9c))
+
 ## 0.3.0 (2026-02-13)
 
 Full Changelog: [v0.2.1...v0.3.0](https://github.com/beeper/desktop-api-go/compare/v0.2.1...v0.3.0)

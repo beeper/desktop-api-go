@@ -35,6 +35,7 @@ Response Types:
 
 Methods:
 
+- <code title="get /v1/accounts/{accountID}/contacts/list">client.Accounts.Contacts.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AccountContactService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, accountID <a href="https://pkg.go.dev/builtin#string">string</a>, query <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AccountContactListParams">AccountContactListParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/packages/pagination">pagination</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/packages/pagination#CursorSearch">CursorSearch</a>[<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/shared">shared</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/shared#User">User</a>], <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="get /v1/accounts/{accountID}/contacts">client.Accounts.Contacts.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AccountContactService.Search">Search</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, accountID <a href="https://pkg.go.dev/builtin#string">string</a>, query <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AccountContactSearchParams">AccountContactSearchParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AccountContactSearchResponse">AccountContactSearchResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 # Chats
@@ -59,6 +60,20 @@ Methods:
 
 - <code title="post /v1/chats/{chatID}/reminders">client.Chats.Reminders.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatReminderService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, chatID <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatReminderNewParams">ChatReminderNewParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
 - <code title="delete /v1/chats/{chatID}/reminders">client.Chats.Reminders.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatReminderService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, chatID <a href="https://pkg.go.dev/builtin#string">string</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+
+## Messages
+
+### Reactions
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionDeleteResponse">ChatMessageReactionDeleteResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionAddResponse">ChatMessageReactionAddResponse</a>
+
+Methods:
+
+- <code title="delete /v1/chats/{chatID}/messages/{messageID}/reactions">client.Chats.Messages.Reactions.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionService.Delete">Delete</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, messageID <a href="https://pkg.go.dev/builtin#string">string</a>, params <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionDeleteParams">ChatMessageReactionDeleteParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionDeleteResponse">ChatMessageReactionDeleteResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/chats/{chatID}/messages/{messageID}/reactions">client.Chats.Messages.Reactions.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionService.Add">Add</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, messageID <a href="https://pkg.go.dev/builtin#string">string</a>, params <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionAddParams">ChatMessageReactionAddParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#ChatMessageReactionAddResponse">ChatMessageReactionAddResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 # Messages
 
@@ -88,3 +103,13 @@ Methods:
 - <code title="get /v1/assets/serve">client.Assets.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetService.Serve">Serve</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, query <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetServeParams">AssetServeParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
 - <code title="post /v1/assets/upload">client.Assets.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetService.Upload">Upload</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetUploadParams">AssetUploadParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetUploadResponse">AssetUploadResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 - <code title="post /v1/assets/upload/base64">client.Assets.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetService.UploadBase64">UploadBase64</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetUploadBase64Params">AssetUploadBase64Params</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#AssetUploadBase64Response">AssetUploadBase64Response</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
+# Info
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#InfoGetResponse">InfoGetResponse</a>
+
+Methods:
+
+- <code title="get /v1/info">client.Info.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#InfoService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go#InfoGetResponse">InfoGetResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>

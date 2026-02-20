@@ -97,7 +97,7 @@ func TestMessageSearchWithOptionalParams(t *testing.T) {
 		Limit:              beeperdesktopapi.Int(20),
 		MediaTypes:         []string{"any"},
 		Query:              beeperdesktopapi.String("dinner"),
-		Sender:             beeperdesktopapi.MessageSearchParamsSenderMe,
+		Sender:             beeperdesktopapi.String("sender"),
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
