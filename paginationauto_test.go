@@ -29,7 +29,7 @@ func TestAutoPagination(t *testing.T) {
 		Limit:      beeperdesktopapi.Int(10),
 		Query:      beeperdesktopapi.String("deployment"),
 	})
-	// Prism mock isn't going to give us real pagination
+	// The mock server isn't going to give us real pagination
 	for i := 0; i < 3 && iter.Next(); i++ {
 		message := iter.Current()
 		t.Logf("%+v\n", message.ID)
