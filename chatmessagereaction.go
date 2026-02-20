@@ -79,8 +79,6 @@ type ChatMessageReactionDeleteResponse struct {
 	// Reaction key that was removed
 	ReactionKey string `json:"reactionKey,required"`
 	// Whether the reaction was successfully removed
-	//
-	// Any of true.
 	Success bool `json:"success,required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -107,8 +105,6 @@ type ChatMessageReactionAddResponse struct {
 	// Reaction key that was added
 	ReactionKey string `json:"reactionKey,required"`
 	// Whether the reaction was successfully added
-	//
-	// Any of true.
 	Success bool `json:"success,required"`
 	// Transaction ID used for the reaction event
 	TransactionID string `json:"transactionID,required"`
