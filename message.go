@@ -231,6 +231,9 @@ type MessageSearchParams struct {
 	// Example: use "dinner" not "dinner plans", use "sick" not "health issues". If
 	// omitted, returns results filtered only by other parameters.
 	Query param.Opt[string] `query:"query,omitzero" json:"-"`
+	// Filter by sender: 'me' (messages sent by the authenticated user), 'others'
+	// (messages sent by others), or a specific user ID string (user.id).
+	Sender param.Opt[string] `query:"sender,omitzero" json:"-"`
 	// Limit search to specific account IDs.
 	AccountIDs []string `query:"accountIDs,omitzero" json:"-"`
 	// Limit search to specific chat IDs.
@@ -249,9 +252,6 @@ type MessageSearchParams struct {
 	//
 	// Any of "any", "video", "image", "link", "file".
 	MediaTypes []string `query:"mediaTypes,omitzero" json:"-"`
-	// Filter by sender: 'me' (messages sent by the authenticated user), 'others'
-	// (messages sent by others), or a specific user ID string (user.id).
-	Sender MessageSearchParamsSender `query:"sender,omitzero" json:"-"`
 	paramObj
 }
 
@@ -278,15 +278,6 @@ type MessageSearchParamsDirection string
 const (
 	MessageSearchParamsDirectionAfter  MessageSearchParamsDirection = "after"
 	MessageSearchParamsDirectionBefore MessageSearchParamsDirection = "before"
-)
-
-// Filter by sender: 'me' (messages sent by the authenticated user), 'others'
-// (messages sent by others), or a specific user ID string (user.id).
-type MessageSearchParamsSender string
-
-const (
-	MessageSearchParamsSenderMe     MessageSearchParamsSender = "me"
-	MessageSearchParamsSenderOthers MessageSearchParamsSender = "others"
 )
 
 type MessageSendParams struct {
