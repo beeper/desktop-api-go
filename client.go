@@ -25,6 +25,7 @@ type Client struct {
 	Messages MessageService
 	// Manage assets in Beeper Desktop, like message attachments
 	Assets AssetService
+	Info   InfoService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
@@ -53,6 +54,7 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r.Chats = NewChatService(opts...)
 	r.Messages = NewMessageService(opts...)
 	r.Assets = NewAssetService(opts...)
+	r.Info = NewInfoService(opts...)
 
 	return
 }

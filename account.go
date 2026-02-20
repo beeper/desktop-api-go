@@ -51,16 +51,11 @@ func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption)
 type Account struct {
 	// Chat account added to Beeper. Use this to route account-scoped actions.
 	AccountID string `json:"accountID,required"`
-	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
-	//
-	// Deprecated: deprecated
-	Network string `json:"network,required"`
 	// User the account belongs to.
 	User shared.User `json:"user,required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		AccountID   respjson.Field
-		Network     respjson.Field
 		User        respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string

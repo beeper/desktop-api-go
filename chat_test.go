@@ -27,7 +27,7 @@ func TestChatNewWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Chats.New(context.TODO(), beeperdesktopapi.ChatNewParams{
-		OfObject: &beeperdesktopapi.ChatNewParamsBodyObject{
+		OfObject: &beeperdesktopapi.ChatNewParamsChatObject{
 			AccountID:      "accountID",
 			ParticipantIDs: []string{"string"},
 			Type:           "single",

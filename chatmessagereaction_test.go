@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
-func TestAccountContactListWithOptionalParams(t *testing.T) {
+func TestChatMessageReactionDelete(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,14 +25,12 @@ func TestAccountContactListWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Accounts.Contacts.List(
+	_, err := client.Chats.Messages.Reactions.Delete(
 		context.TODO(),
-		"accountID",
-		beeperdesktopapi.AccountContactListParams{
-			Cursor:    beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
-			Direction: beeperdesktopapi.AccountContactListParamsDirectionBefore,
-			Limit:     beeperdesktopapi.Int(1),
-			Query:     beeperdesktopapi.String("x"),
+		"messageID",
+		beeperdesktopapi.ChatMessageReactionDeleteParams{
+			ChatID:      "!NCdzlIaMjZUmvmvyHU:beeper.com",
+			ReactionKey: "x",
 		},
 	)
 	if err != nil {
@@ -44,7 +42,7 @@ func TestAccountContactListWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestAccountContactSearch(t *testing.T) {
+func TestChatMessageReactionAddWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -56,11 +54,13 @@ func TestAccountContactSearch(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Accounts.Contacts.Search(
+	_, err := client.Chats.Messages.Reactions.Add(
 		context.TODO(),
-		"accountID",
-		beeperdesktopapi.AccountContactSearchParams{
-			Query: "x",
+		"messageID",
+		beeperdesktopapi.ChatMessageReactionAddParams{
+			ChatID:        "!NCdzlIaMjZUmvmvyHU:beeper.com",
+			ReactionKey:   "x",
+			TransactionID: beeperdesktopapi.String("transactionID"),
 		},
 	)
 	if err != nil {
