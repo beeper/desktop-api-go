@@ -35,7 +35,7 @@ Or to pin the version:
 <!-- x-release-please-start-version -->
 
 ```sh
-go get -u 'github.com/beeper/desktop-api-go@v0.3.0'
+go get -u 'github.com/beeper/desktop-api-go@v0.4.0'
 ```
 
 <!-- x-release-please-end -->
