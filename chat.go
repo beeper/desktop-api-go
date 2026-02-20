@@ -33,6 +33,8 @@ type ChatService struct {
 	Options []option.RequestOption
 	// Manage reminders for chats
 	Reminders ChatReminderService
+	// Manage chat messages
+	Messages ChatMessageService
 }
 
 // NewChatService generates a new service that applies the given options to each
@@ -42,6 +44,7 @@ func NewChatService(opts ...option.RequestOption) (r ChatService) {
 	r = ChatService{}
 	r.Options = opts
 	r.Reminders = NewChatReminderService(opts...)
+	r.Messages = NewChatMessageService(opts...)
 	return
 }
 
@@ -135,10 +138,6 @@ type Chat struct {
 	ID string `json:"id,required"`
 	// Account ID this chat belongs to.
 	AccountID string `json:"accountID,required"`
-	// Display-only human-readable network name (e.g., 'WhatsApp', 'Messenger').
-	//
-	// Deprecated: deprecated
-	Network string `json:"network,required"`
 	// Chat participants information.
 	Participants ChatParticipants `json:"participants,required"`
 	// Display title of the chat as computed by the client/server.
@@ -165,7 +164,6 @@ type Chat struct {
 	JSON struct {
 		ID                     respjson.Field
 		AccountID              respjson.Field
-		Network                respjson.Field
 		Participants           respjson.Field
 		Title                  respjson.Field
 		Type                   respjson.Field
@@ -276,22 +274,22 @@ type ChatNewParams struct {
 	//
 
 	// This field is a request body variant, only one variant field can be set.
-	OfObject *ChatNewParamsBodyObject `json:",inline"`
+	OfObject *ChatNewParamsChatObject `json:",inline"`
 	// This field is a request body variant, only one variant field can be set.
-	OfChatNewsBodyObject *ChatNewParamsBodyObject `json:",inline"`
+	OfChatNewsChatObject *ChatNewParamsChatObject `json:",inline"`
 
 	paramObj
 }
 
 func (u ChatNewParams) MarshalJSON() ([]byte, error) {
-	return param.MarshalUnion(u, u.OfObject, u.OfChatNewsBodyObject)
+	return param.MarshalUnion(u, u.OfObject, u.OfChatNewsChatObject)
 }
 func (r *ChatNewParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // The properties AccountID, ParticipantIDs, Type are required.
-type ChatNewParamsBodyObject struct {
+type ChatNewParamsChatObject struct {
 	// Account to create the chat on.
 	AccountID string `json:"accountID,required"`
 	// User IDs to include in the new chat.
@@ -312,19 +310,19 @@ type ChatNewParamsBodyObject struct {
 	paramObj
 }
 
-func (r ChatNewParamsBodyObject) MarshalJSON() (data []byte, err error) {
-	type shadow ChatNewParamsBodyObject
+func (r ChatNewParamsChatObject) MarshalJSON() (data []byte, err error) {
+	type shadow ChatNewParamsChatObject
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ChatNewParamsBodyObject) UnmarshalJSON(data []byte) error {
+func (r *ChatNewParamsChatObject) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 func init() {
-	apijson.RegisterFieldValidator[ChatNewParamsBodyObject](
+	apijson.RegisterFieldValidator[ChatNewParamsChatObject](
 		"type", "single", "group",
 	)
-	apijson.RegisterFieldValidator[ChatNewParamsBodyObject](
+	apijson.RegisterFieldValidator[ChatNewParamsChatObject](
 		"mode", "create",
 	)
 }
