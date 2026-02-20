@@ -27,13 +27,21 @@ func TestChatNewWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Chats.New(context.TODO(), beeperdesktopapi.ChatNewParams{
-		OfObject: &beeperdesktopapi.ChatNewParamsChatObject{
+		Chat: beeperdesktopapi.ChatNewParamsChat{
 			AccountID:      "accountID",
-			ParticipantIDs: []string{"string"},
-			Type:           "single",
+			AllowInvite:    beeperdesktopapi.Bool(true),
 			MessageText:    beeperdesktopapi.String("messageText"),
 			Mode:           "create",
+			ParticipantIDs: []string{"string"},
 			Title:          beeperdesktopapi.String("title"),
+			Type:           "single",
+			User: beeperdesktopapi.ChatNewParamsChatUser{
+				ID:          beeperdesktopapi.String("id"),
+				Email:       beeperdesktopapi.String("email"),
+				FullName:    beeperdesktopapi.String("fullName"),
+				PhoneNumber: beeperdesktopapi.String("phoneNumber"),
+				Username:    beeperdesktopapi.String("username"),
+			},
 		},
 	})
 	if err != nil {
