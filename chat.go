@@ -4,6 +4,7 @@ package beeperdesktopapi
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/apiquery"
+	shimjson "github.com/beeper/desktop-api-go/internal/encoding/json"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/beeper/desktop-api-go/option"
 	"github.com/beeper/desktop-api-go/packages/pagination"
@@ -268,63 +270,85 @@ func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
 }
 
 type ChatNewParams struct {
-
-	//
-	// Request body variants
-	//
-
-	// This field is a request body variant, only one variant field can be set.
-	OfObject *ChatNewParamsChatObject `json:",inline"`
-	// This field is a request body variant, only one variant field can be set.
-	OfChatNewsChatObject *ChatNewParamsChatObject `json:",inline"`
-
+	Chat ChatNewParamsChat
 	paramObj
 }
 
-func (u ChatNewParams) MarshalJSON() ([]byte, error) {
-	return param.MarshalUnion(u, u.OfObject, u.OfChatNewsChatObject)
+func (r ChatNewParams) MarshalJSON() (data []byte, err error) {
+	return shimjson.Marshal(r.Chat)
 }
 func (r *ChatNewParams) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
+	return json.Unmarshal(data, &r.Chat)
 }
 
-// The properties AccountID, ParticipantIDs, Type are required.
-type ChatNewParamsChatObject struct {
-	// Account to create the chat on.
+// The property AccountID is required.
+type ChatNewParamsChat struct {
+	// Account to create or start the chat on.
 	AccountID string `json:"accountID,required"`
-	// User IDs to include in the new chat.
-	ParticipantIDs []string `json:"participantIDs,omitzero,required"`
-	// Chat type to create: 'single' requires exactly one participantID; 'group'
-	// supports multiple participants and optional title.
-	//
-	// Any of "single", "group".
-	Type string `json:"type,omitzero,required"`
+	// Whether invite-based DM creation is allowed when required by the platform. Used
+	// for mode='start'.
+	AllowInvite param.Opt[bool] `json:"allowInvite,omitzero"`
 	// Optional first message content if the platform requires it to create the chat.
 	MessageText param.Opt[string] `json:"messageText,omitzero"`
-	// Optional title for group chats; ignored for single chats on most platforms.
+	// Optional title for group chats when mode='create'; ignored for single chats on
+	// most platforms.
 	Title param.Opt[string] `json:"title,omitzero"`
-	// Create mode. Defaults to 'create' when omitted.
+	// Operation mode. Defaults to 'create' when omitted.
 	//
-	// Any of "create".
+	// Any of "create", "start".
 	Mode string `json:"mode,omitzero"`
+	// Required when mode='create'. User IDs to include in the new chat.
+	ParticipantIDs []string `json:"participantIDs,omitzero"`
+	// Required when mode='create'. 'single' requires exactly one participantID;
+	// 'group' supports multiple participants and optional title.
+	//
+	// Any of "single", "group".
+	Type string `json:"type,omitzero"`
+	// Required when mode='start'. Merged user-like contact payload used to resolve the
+	// best identifier.
+	User ChatNewParamsChatUser `json:"user,omitzero"`
 	paramObj
 }
 
-func (r ChatNewParamsChatObject) MarshalJSON() (data []byte, err error) {
-	type shadow ChatNewParamsChatObject
+func (r ChatNewParamsChat) MarshalJSON() (data []byte, err error) {
+	type shadow ChatNewParamsChat
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *ChatNewParamsChatObject) UnmarshalJSON(data []byte) error {
+func (r *ChatNewParamsChat) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 func init() {
-	apijson.RegisterFieldValidator[ChatNewParamsChatObject](
+	apijson.RegisterFieldValidator[ChatNewParamsChat](
+		"mode", "create", "start",
+	)
+	apijson.RegisterFieldValidator[ChatNewParamsChat](
 		"type", "single", "group",
 	)
-	apijson.RegisterFieldValidator[ChatNewParamsChatObject](
-		"mode", "create",
-	)
+}
+
+// Required when mode='start'. Merged user-like contact payload used to resolve the
+// best identifier.
+type ChatNewParamsChatUser struct {
+	// Known user ID when available.
+	ID param.Opt[string] `json:"id,omitzero"`
+	// Email candidate.
+	Email param.Opt[string] `json:"email,omitzero"`
+	// Display name hint used for ranking only.
+	FullName param.Opt[string] `json:"fullName,omitzero"`
+	// Phone number candidate (E.164 preferred).
+	PhoneNumber param.Opt[string] `json:"phoneNumber,omitzero"`
+	// Username/handle candidate.
+	Username param.Opt[string] `json:"username,omitzero"`
+	paramObj
+}
+
+func (r ChatNewParamsChatUser) MarshalJSON() (data []byte, err error) {
+	type shadow ChatNewParamsChatUser
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatNewParamsChatUser) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 type ChatGetParams struct {
