@@ -15,7 +15,7 @@ import (
 // Response indicating successful app focus action.
 type FocusResponse struct {
 	// Whether the app was successfully opened/focused.
-	Success bool `json:"success,required"`
+	Success bool `json:"success" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Success     respjson.Field
@@ -31,7 +31,7 @@ func (r *FocusResponse) UnmarshalJSON(data []byte) error {
 }
 
 type SearchResponse struct {
-	Results SearchResponseResults `json:"results,required"`
+	Results SearchResponseResults `json:"results" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Results     respjson.Field
@@ -48,10 +48,10 @@ func (r *SearchResponse) UnmarshalJSON(data []byte) error {
 
 type SearchResponseResults struct {
 	// Top chat results.
-	Chats []Chat `json:"chats,required"`
+	Chats []Chat `json:"chats" api:"required"`
 	// Top group results by participant matches.
-	InGroups []Chat                        `json:"in_groups,required"`
-	Messages SearchResponseResultsMessages `json:"messages,required"`
+	InGroups []Chat                        `json:"in_groups" api:"required"`
+	Messages SearchResponseResultsMessages `json:"messages" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Chats       respjson.Field
@@ -70,17 +70,17 @@ func (r *SearchResponseResults) UnmarshalJSON(data []byte) error {
 
 type SearchResponseResultsMessages struct {
 	// Map of chatID -> chat details for chats referenced in items.
-	Chats map[string]Chat `json:"chats,required"`
+	Chats map[string]Chat `json:"chats" api:"required"`
 	// True if additional results can be fetched using the provided cursors.
-	HasMore bool `json:"hasMore,required"`
+	HasMore bool `json:"hasMore" api:"required"`
 	// Messages matching the query and filters.
-	Items []shared.Message `json:"items,required"`
+	Items []shared.Message `json:"items" api:"required"`
 	// Cursor for fetching newer results (use with direction='after'). Opaque string;
 	// do not inspect.
-	NewestCursor string `json:"newestCursor,required"`
+	NewestCursor string `json:"newestCursor" api:"required"`
 	// Cursor for fetching older results (use with direction='before'). Opaque string;
 	// do not inspect.
-	OldestCursor string `json:"oldestCursor,required"`
+	OldestCursor string `json:"oldestCursor" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Chats        respjson.Field
@@ -122,7 +122,7 @@ func (r *FocusParams) UnmarshalJSON(data []byte) error {
 
 type SearchParams struct {
 	// User-typed search text. Literal word matching (non-semantic).
-	Query string `query:"query,required" json:"-"`
+	Query string `query:"query" api:"required" json:"-"`
 	paramObj
 }
 

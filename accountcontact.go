@@ -82,7 +82,7 @@ func (r *AccountContactService) Search(ctx context.Context, accountID string, qu
 }
 
 type AccountContactSearchResponse struct {
-	Items []shared.User `json:"items,required"`
+	Items []shared.User `json:"items" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Items       respjson.Field
@@ -132,7 +132,7 @@ const (
 
 type AccountContactSearchParams struct {
 	// Text to search users by. Network-specific behavior.
-	Query string `query:"query,required" json:"-"`
+	Query string `query:"query" api:"required" json:"-"`
 	paramObj
 }
 

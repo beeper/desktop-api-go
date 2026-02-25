@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0 (2026-02-25)
+
+Full Changelog: [v0.4.0...v0.5.0](https://github.com/beeper/desktop-api-go/compare/v0.4.0...v0.5.0)
+
+### Features
+
+* **api:** api update ([9678ceb](https://github.com/beeper/desktop-api-go/commit/9678cebd29ba5294be61472577aaea69402d31c2))
+
+
+### Chores
+
+* configure new SDK language ([789fdd6](https://github.com/beeper/desktop-api-go/commit/789fdd6dfc76338aaa39ca8af09192d7786c84c4))
+* configure new SDK language ([84875fd](https://github.com/beeper/desktop-api-go/commit/84875fdabd3b02099067f198c7329df61da103ce))
+* **internal:** move custom custom `json` tags to `api` ([579ab9f](https://github.com/beeper/desktop-api-go/commit/579ab9fa08dd35b5a9f4efbe243a06d967494c51))
+
 ## 0.4.0 (2026-02-20)
 
 Full Changelog: [v0.3.0...v0.4.0](https://github.com/beeper/desktop-api-go/compare/v0.3.0...v0.4.0)
