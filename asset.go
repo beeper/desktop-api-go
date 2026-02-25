@@ -183,7 +183,7 @@ func (r *AssetUploadBase64Response) UnmarshalJSON(data []byte) error {
 
 type AssetDownloadParams struct {
 	// Matrix content URL (mxc:// or localmxc://) for the asset to download.
-	URL string `json:"url,required"`
+	URL string `json:"url" api:"required"`
 	paramObj
 }
 
@@ -197,7 +197,7 @@ func (r *AssetDownloadParams) UnmarshalJSON(data []byte) error {
 
 type AssetServeParams struct {
 	// Asset URL to serve. Accepts mxc://, localmxc://, or file:// URLs.
-	URL string `query:"url,required" json:"-"`
+	URL string `query:"url" api:"required" json:"-"`
 	paramObj
 }
 
@@ -211,7 +211,7 @@ func (r AssetServeParams) URLQuery() (v url.Values, err error) {
 
 type AssetUploadParams struct {
 	// The file to upload (max 500 MB).
-	File io.Reader `json:"file,omitzero,required" format:"binary"`
+	File io.Reader `json:"file,omitzero" api:"required" format:"binary"`
 	// Original filename. Defaults to the uploaded file name if omitted
 	FileName param.Opt[string] `json:"fileName,omitzero"`
 	// MIME type. Auto-detected from magic bytes if omitted
@@ -239,7 +239,7 @@ func (r AssetUploadParams) MarshalMultipart() (data []byte, contentType string, 
 
 type AssetUploadBase64Params struct {
 	// Base64-encoded file content (max ~500MB decoded)
-	Content string `json:"content,required"`
+	Content string `json:"content" api:"required"`
 	// Original filename. Generated if omitted
 	FileName param.Opt[string] `json:"fileName,omitzero"`
 	// MIME type. Auto-detected from magic bytes if omitted
