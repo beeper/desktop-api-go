@@ -135,19 +135,19 @@ func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchPara
 
 type Chat struct {
 	// Unique identifier of the chat across Beeper.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Account ID this chat belongs to.
-	AccountID string `json:"accountID,required"`
+	AccountID string `json:"accountID" api:"required"`
 	// Chat participants information.
-	Participants ChatParticipants `json:"participants,required"`
+	Participants ChatParticipants `json:"participants" api:"required"`
 	// Display title of the chat as computed by the client/server.
-	Title string `json:"title,required"`
+	Title string `json:"title" api:"required"`
 	// Chat type: 'single' for direct messages, 'group' for group chats.
 	//
 	// Any of "single", "group".
-	Type ChatType `json:"type,required"`
+	Type ChatType `json:"type" api:"required"`
 	// Number of unread messages.
-	UnreadCount int64 `json:"unreadCount,required"`
+	UnreadCount int64 `json:"unreadCount" api:"required"`
 	// True if chat is archived.
 	IsArchived bool `json:"isArchived"`
 	// True if chat notifications are muted.
@@ -159,7 +159,7 @@ type Chat struct {
 	// Last read message sortKey.
 	LastReadMessageSortKey string `json:"lastReadMessageSortKey"`
 	// Local chat ID specific to this Beeper Desktop installation.
-	LocalChatID string `json:"localChatID,nullable"`
+	LocalChatID string `json:"localChatID" api:"nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                     respjson.Field
@@ -188,11 +188,11 @@ func (r *Chat) UnmarshalJSON(data []byte) error {
 // Chat participants information.
 type ChatParticipants struct {
 	// True if there are more participants than included in items.
-	HasMore bool `json:"hasMore,required"`
+	HasMore bool `json:"hasMore" api:"required"`
 	// Participants returned for this chat (limited by the request; may be a subset).
-	Items []shared.User `json:"items,required"`
+	Items []shared.User `json:"items" api:"required"`
 	// Total number of participants in the chat.
-	Total int64 `json:"total,required"`
+	Total int64 `json:"total" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		HasMore     respjson.Field
@@ -219,7 +219,7 @@ const (
 
 type ChatNewResponse struct {
 	// Newly created chat ID.
-	ChatID string `json:"chatID,required"`
+	ChatID string `json:"chatID" api:"required"`
 	// Only returned in start mode. 'existing' means an existing chat was reused;
 	// 'created' means a new chat was created.
 	//
@@ -269,7 +269,7 @@ func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
 
 type ChatNewParams struct {
 	// Account to create or start the chat on.
-	AccountID string `json:"accountID,required"`
+	AccountID string `json:"accountID" api:"required"`
 	// Whether invite-based DM creation is allowed when required by the platform. Used
 	// for mode='start'.
 	AllowInvite param.Opt[bool] `json:"allowInvite,omitzero"`

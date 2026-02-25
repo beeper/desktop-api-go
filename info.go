@@ -42,10 +42,10 @@ func (r *InfoService) Get(ctx context.Context, opts ...option.RequestOption) (re
 }
 
 type InfoGetResponse struct {
-	App       InfoGetResponseApp       `json:"app,required"`
-	Endpoints InfoGetResponseEndpoints `json:"endpoints,required"`
-	Platform  InfoGetResponsePlatform  `json:"platform,required"`
-	Server    InfoGetResponseServer    `json:"server,required"`
+	App       InfoGetResponseApp       `json:"app" api:"required"`
+	Endpoints InfoGetResponseEndpoints `json:"endpoints" api:"required"`
+	Platform  InfoGetResponsePlatform  `json:"platform" api:"required"`
+	Server    InfoGetResponseServer    `json:"server" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		App         respjson.Field
@@ -65,11 +65,11 @@ func (r *InfoGetResponse) UnmarshalJSON(data []byte) error {
 
 type InfoGetResponseApp struct {
 	// App bundle identifier
-	BundleID string `json:"bundle_id,required"`
+	BundleID string `json:"bundle_id" api:"required"`
 	// App name
-	Name string `json:"name,required"`
+	Name string `json:"name" api:"required"`
 	// App version
-	Version string `json:"version,required"`
+	Version string `json:"version" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		BundleID    respjson.Field
@@ -88,12 +88,12 @@ func (r *InfoGetResponseApp) UnmarshalJSON(data []byte) error {
 
 type InfoGetResponseEndpoints struct {
 	// MCP endpoint
-	Mcp   string                        `json:"mcp,required"`
-	OAuth InfoGetResponseEndpointsOAuth `json:"oauth,required"`
+	Mcp   string                        `json:"mcp" api:"required"`
+	OAuth InfoGetResponseEndpointsOAuth `json:"oauth" api:"required"`
 	// OpenAPI spec endpoint
-	Spec string `json:"spec,required"`
+	Spec string `json:"spec" api:"required"`
 	// WebSocket events endpoint
-	WsEvents string `json:"ws_events,required"`
+	WsEvents string `json:"ws_events" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Mcp         respjson.Field
@@ -113,17 +113,17 @@ func (r *InfoGetResponseEndpoints) UnmarshalJSON(data []byte) error {
 
 type InfoGetResponseEndpointsOAuth struct {
 	// OAuth authorization endpoint
-	AuthorizationEndpoint string `json:"authorization_endpoint,required"`
+	AuthorizationEndpoint string `json:"authorization_endpoint" api:"required"`
 	// OAuth introspection endpoint
-	IntrospectionEndpoint string `json:"introspection_endpoint,required"`
+	IntrospectionEndpoint string `json:"introspection_endpoint" api:"required"`
 	// OAuth dynamic client registration endpoint
-	RegistrationEndpoint string `json:"registration_endpoint,required"`
+	RegistrationEndpoint string `json:"registration_endpoint" api:"required"`
 	// OAuth token revocation endpoint
-	RevocationEndpoint string `json:"revocation_endpoint,required"`
+	RevocationEndpoint string `json:"revocation_endpoint" api:"required"`
 	// OAuth token endpoint
-	TokenEndpoint string `json:"token_endpoint,required"`
+	TokenEndpoint string `json:"token_endpoint" api:"required"`
 	// OAuth userinfo endpoint
-	UserinfoEndpoint string `json:"userinfo_endpoint,required"`
+	UserinfoEndpoint string `json:"userinfo_endpoint" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		AuthorizationEndpoint respjson.Field
@@ -145,9 +145,9 @@ func (r *InfoGetResponseEndpointsOAuth) UnmarshalJSON(data []byte) error {
 
 type InfoGetResponsePlatform struct {
 	// CPU architecture
-	Arch string `json:"arch,required"`
+	Arch string `json:"arch" api:"required"`
 	// Operating system identifier
-	Os string `json:"os,required"`
+	Os string `json:"os" api:"required"`
 	// Runtime release version
 	Release string `json:"release"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -168,17 +168,17 @@ func (r *InfoGetResponsePlatform) UnmarshalJSON(data []byte) error {
 
 type InfoGetResponseServer struct {
 	// Base URL of the Connect server
-	BaseURL string `json:"base_url,required"`
+	BaseURL string `json:"base_url" api:"required"`
 	// Listening host
-	Hostname string `json:"hostname,required"`
+	Hostname string `json:"hostname" api:"required"`
 	// Whether MCP endpoint is enabled
-	McpEnabled bool `json:"mcp_enabled,required"`
+	McpEnabled bool `json:"mcp_enabled" api:"required"`
 	// Listening port
-	Port int64 `json:"port,required"`
+	Port int64 `json:"port" api:"required"`
 	// Whether remote access is enabled
-	RemoteAccess bool `json:"remote_access,required"`
+	RemoteAccess bool `json:"remote_access" api:"required"`
 	// Server status
-	Status string `json:"status,required"`
+	Status string `json:"status" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		BaseURL      respjson.Field

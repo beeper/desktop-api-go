@@ -64,7 +64,7 @@ func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ..
 
 type ChatReminderNewParams struct {
 	// Reminder configuration
-	Reminder ChatReminderNewParamsReminder `json:"reminder,omitzero,required"`
+	Reminder ChatReminderNewParamsReminder `json:"reminder,omitzero" api:"required"`
 	paramObj
 }
 
@@ -81,7 +81,7 @@ func (r *ChatReminderNewParams) UnmarshalJSON(data []byte) error {
 // The property RemindAtMs is required.
 type ChatReminderNewParamsReminder struct {
 	// Unix timestamp in milliseconds when reminder should trigger
-	RemindAtMs float64 `json:"remindAtMs,required"`
+	RemindAtMs float64 `json:"remindAtMs" api:"required"`
 	// Cancel reminder if someone messages in the chat
 	DismissOnIncomingMessage param.Opt[bool] `json:"dismissOnIncomingMessage,omitzero"`
 	paramObj
