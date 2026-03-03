@@ -25,7 +25,8 @@ type Client struct {
 	Messages MessageService
 	// Manage assets in Beeper Desktop, like message attachments
 	Assets AssetService
-	Info   InfoService
+	// Control the Beeper Desktop application
+	Info InfoService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
