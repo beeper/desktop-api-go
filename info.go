@@ -13,6 +13,8 @@ import (
 	"github.com/beeper/desktop-api-go/packages/respjson"
 )
 
+// Control the Beeper Desktop application
+//
 // InfoService contains methods and other services that help with interacting with
 // the beeperdesktop API.
 //
