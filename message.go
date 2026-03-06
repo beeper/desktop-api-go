@@ -124,11 +124,11 @@ func (r *MessageService) Send(ctx context.Context, chatID string, body MessageSe
 
 type MessageUpdateResponse struct {
 	// Unique identifier of the chat.
-	ChatID string `json:"chatID,required"`
+	ChatID string `json:"chatID" api:"required"`
 	// Message ID.
-	MessageID string `json:"messageID,required"`
+	MessageID string `json:"messageID" api:"required"`
 	// Whether the message was successfully edited
-	Success bool `json:"success,required"`
+	Success bool `json:"success" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID      respjson.Field
@@ -147,9 +147,9 @@ func (r *MessageUpdateResponse) UnmarshalJSON(data []byte) error {
 
 type MessageSendResponse struct {
 	// Unique identifier of the chat.
-	ChatID string `json:"chatID,required"`
+	ChatID string `json:"chatID" api:"required"`
 	// Pending message ID
-	PendingMessageID string `json:"pendingMessageID,required"`
+	PendingMessageID string `json:"pendingMessageID" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID           respjson.Field
@@ -167,9 +167,9 @@ func (r *MessageSendResponse) UnmarshalJSON(data []byte) error {
 
 type MessageUpdateParams struct {
 	// Unique identifier of the chat.
-	ChatID string `path:"chatID,required" json:"-"`
+	ChatID string `path:"chatID" api:"required" json:"-"`
 	// New text content for the message
-	Text string `json:"text,required"`
+	Text string `json:"text" api:"required"`
 	paramObj
 }
 
@@ -303,7 +303,7 @@ func (r *MessageSendParams) UnmarshalJSON(data []byte) error {
 // The property UploadID is required.
 type MessageSendParamsAttachment struct {
 	// Upload ID from uploadAsset endpoint. Required to reference uploaded files.
-	UploadID string `json:"uploadID,required"`
+	UploadID string `json:"uploadID" api:"required"`
 	// Duration in seconds (optional override of cached value)
 	Duration param.Opt[float64] `json:"duration,omitzero"`
 	// Filename (optional override of cached value)
@@ -338,8 +338,8 @@ func init() {
 //
 // The properties Height, Width are required.
 type MessageSendParamsAttachmentSize struct {
-	Height float64 `json:"height,required"`
-	Width  float64 `json:"width,required"`
+	Height float64 `json:"height" api:"required"`
+	Width  float64 `json:"width" api:"required"`
 	paramObj
 }
 

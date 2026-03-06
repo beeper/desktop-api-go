@@ -73,13 +73,13 @@ func (r *ChatMessageReactionService) Add(ctx context.Context, messageID string, 
 
 type ChatMessageReactionDeleteResponse struct {
 	// Unique identifier of the chat.
-	ChatID string `json:"chatID,required"`
+	ChatID string `json:"chatID" api:"required"`
 	// Message ID.
-	MessageID string `json:"messageID,required"`
+	MessageID string `json:"messageID" api:"required"`
 	// Reaction key that was removed
-	ReactionKey string `json:"reactionKey,required"`
+	ReactionKey string `json:"reactionKey" api:"required"`
 	// Whether the reaction was successfully removed
-	Success bool `json:"success,required"`
+	Success bool `json:"success" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID      respjson.Field
@@ -99,15 +99,15 @@ func (r *ChatMessageReactionDeleteResponse) UnmarshalJSON(data []byte) error {
 
 type ChatMessageReactionAddResponse struct {
 	// Unique identifier of the chat.
-	ChatID string `json:"chatID,required"`
+	ChatID string `json:"chatID" api:"required"`
 	// Message ID.
-	MessageID string `json:"messageID,required"`
+	MessageID string `json:"messageID" api:"required"`
 	// Reaction key that was added
-	ReactionKey string `json:"reactionKey,required"`
+	ReactionKey string `json:"reactionKey" api:"required"`
 	// Whether the reaction was successfully added
-	Success bool `json:"success,required"`
+	Success bool `json:"success" api:"required"`
 	// Transaction ID used for the reaction event
-	TransactionID string `json:"transactionID,required"`
+	TransactionID string `json:"transactionID" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID        respjson.Field
@@ -128,9 +128,9 @@ func (r *ChatMessageReactionAddResponse) UnmarshalJSON(data []byte) error {
 
 type ChatMessageReactionDeleteParams struct {
 	// Unique identifier of the chat.
-	ChatID string `path:"chatID,required" json:"-"`
+	ChatID string `path:"chatID" api:"required" json:"-"`
 	// Reaction key to remove
-	ReactionKey string `query:"reactionKey,required" json:"-"`
+	ReactionKey string `query:"reactionKey" api:"required" json:"-"`
 	paramObj
 }
 
@@ -145,9 +145,9 @@ func (r ChatMessageReactionDeleteParams) URLQuery() (v url.Values, err error) {
 
 type ChatMessageReactionAddParams struct {
 	// Unique identifier of the chat.
-	ChatID string `path:"chatID,required" json:"-"`
+	ChatID string `path:"chatID" api:"required" json:"-"`
 	// Reaction key to add (emoji, shortcode, or custom emoji key)
-	ReactionKey string `json:"reactionKey,required"`
+	ReactionKey string `json:"reactionKey" api:"required"`
 	// Optional transaction ID for deduplication and local echo tracking
 	TransactionID param.Opt[string] `json:"transactionID,omitzero"`
 	paramObj

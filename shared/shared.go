@@ -20,7 +20,7 @@ type Attachment struct {
 	// Attachment type.
 	//
 	// Any of "unknown", "img", "video", "audio".
-	Type AttachmentType `json:"type,required"`
+	Type AttachmentType `json:"type" api:"required"`
 	// Attachment identifier (typically an mxc:// URL). Use with /v1/assets/download to
 	// get a local file path.
 	ID string `json:"id"`
@@ -102,17 +102,17 @@ func (r *AttachmentSize) UnmarshalJSON(data []byte) error {
 
 type Message struct {
 	// Message ID.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// Beeper account ID the message belongs to.
-	AccountID string `json:"accountID,required"`
+	AccountID string `json:"accountID" api:"required"`
 	// Unique identifier of the chat.
-	ChatID string `json:"chatID,required"`
+	ChatID string `json:"chatID" api:"required"`
 	// Sender user ID.
-	SenderID string `json:"senderID,required"`
+	SenderID string `json:"senderID" api:"required"`
 	// A unique, sortable key used to sort messages.
-	SortKey string `json:"sortKey,required"`
+	SortKey string `json:"sortKey" api:"required"`
 	// Message timestamp.
-	Timestamp time.Time `json:"timestamp,required" format:"date-time"`
+	Timestamp time.Time `json:"timestamp" api:"required" format:"date-time"`
 	// Attachments included with this message, if any.
 	Attachments []Attachment `json:"attachments"`
 	// True if the authenticated user sent the message.
@@ -181,12 +181,12 @@ const (
 type Reaction struct {
 	// Reaction ID, typically ${participantID}${reactionKey} if multiple reactions
 	// allowed, or just participantID otherwise.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// User ID of the participant who reacted.
-	ParticipantID string `json:"participantID,required"`
+	ParticipantID string `json:"participantID" api:"required"`
 	// The reaction key: an emoji (😄), a network-specific key, or a shortcode like
 	// "smiling-face".
-	ReactionKey string `json:"reactionKey,required"`
+	ReactionKey string `json:"reactionKey" api:"required"`
 	// True if the reactionKey is an emoji.
 	Emoji bool `json:"emoji"`
 	// URL to the reaction's image. May be temporary or local-only to this device;
@@ -213,7 +213,7 @@ func (r *Reaction) UnmarshalJSON(data []byte) error {
 // User the account belongs to.
 type User struct {
 	// Stable Beeper user ID. Use as the primary key when referencing a person.
-	ID string `json:"id,required"`
+	ID string `json:"id" api:"required"`
 	// True if Beeper cannot initiate messages to this user (e.g., blocked, network
 	// restriction, or no DM path). The user may still message you.
 	CannotMessage bool `json:"cannotMessage"`

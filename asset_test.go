@@ -76,7 +76,7 @@ func TestAssetUploadWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Assets.Upload(context.TODO(), beeperdesktopapi.AssetUploadParams{
-		File:     io.Reader(bytes.NewBuffer([]byte("some file contents"))),
+		File:     io.Reader(bytes.NewBuffer([]byte("Example data"))),
 		FileName: beeperdesktopapi.String("fileName"),
 		MimeType: beeperdesktopapi.String("mimeType"),
 	})

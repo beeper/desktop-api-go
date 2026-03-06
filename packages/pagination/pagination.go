@@ -22,8 +22,8 @@ type paramObj = param.APIObject
 type CursorSearch[T any] struct {
 	Items        []T    `json:"items"`
 	HasMore      bool   `json:"hasMore"`
-	OldestCursor string `json:"oldestCursor,nullable"`
-	NewestCursor string `json:"newestCursor,nullable"`
+	OldestCursor string `json:"oldestCursor" api:"nullable"`
+	NewestCursor string `json:"newestCursor" api:"nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Items        respjson.Field
@@ -130,8 +130,8 @@ func (r *CursorSearchAutoPager[T]) Index() int {
 type CursorNoLimit[T any] struct {
 	Items        []T    `json:"items"`
 	HasMore      bool   `json:"hasMore"`
-	OldestCursor string `json:"oldestCursor,nullable"`
-	NewestCursor string `json:"newestCursor,nullable"`
+	OldestCursor string `json:"oldestCursor" api:"nullable"`
+	NewestCursor string `json:"newestCursor" api:"nullable"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Items        respjson.Field
