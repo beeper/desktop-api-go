@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.5.0 (2026-03-06)
+
+Full Changelog: [v0.4.0...v0.5.0](https://github.com/beeper/desktop-api-go/compare/v0.4.0...v0.5.0)
+
+### Features
+
+* **api:** api update ([9678ceb](https://github.com/beeper/desktop-api-go/commit/9678cebd29ba5294be61472577aaea69402d31c2))
+
+
+### Bug Fixes
+
+* fix request delays for retrying to be more respectful of high requested delays ([8646fff](https://github.com/beeper/desktop-api-go/commit/8646fff5adc33b7224cccff6d4b3b2e3bba17ca2))
+
+
+### Chores
+
+* **ci:** skip uploading artifacts on stainless-internal branches ([459bffc](https://github.com/beeper/desktop-api-go/commit/459bffc9fa5aaa46f0eed05fe69acfd07032c849))
+* configure new SDK language ([789fdd6](https://github.com/beeper/desktop-api-go/commit/789fdd6dfc76338aaa39ca8af09192d7786c84c4))
+* configure new SDK language ([84875fd](https://github.com/beeper/desktop-api-go/commit/84875fdabd3b02099067f198c7329df61da103ce))
+* **internal:** codegen related update ([e089eec](https://github.com/beeper/desktop-api-go/commit/e089eece82226d34b322019650aef96e64545cc3))
+* **internal:** move custom custom `json` tags to `api` ([579ab9f](https://github.com/beeper/desktop-api-go/commit/579ab9fa08dd35b5a9f4efbe243a06d967494c51))
+* **test:** do not count install time for mock server timeout ([48d983d](https://github.com/beeper/desktop-api-go/commit/48d983d97e6656e55e7eef6accb360339c4c9057))
+* update placeholder string ([5907665](https://github.com/beeper/desktop-api-go/commit/5907665e897b67267e8e51d8ab35aef2306ddc24))
+
 ## 0.4.0 (2026-02-20)
 
 Full Changelog: [v0.3.0...v0.4.0](https://github.com/beeper/desktop-api-go/compare/v0.3.0...v0.4.0)
