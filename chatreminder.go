@@ -42,11 +42,11 @@ func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatR
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Clear an existing reminder from a chat
@@ -55,11 +55,11 @@ func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ..
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/chats/%s/reminders", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, nil, opts...)
-	return
+	return err
 }
 
 type ChatReminderNewParams struct {

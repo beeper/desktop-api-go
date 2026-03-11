@@ -135,7 +135,7 @@ func (r *Client) Focus(ctx context.Context, body FocusParams, opts ...option.Req
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/focus"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Returns matching chats, participant name matches in groups, and the first page
@@ -145,5 +145,5 @@ func (r *Client) Search(ctx context.Context, query SearchParams, opts ...option.
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/search"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }

@@ -54,7 +54,7 @@ func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...optio
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/chats"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Retrieve chat details including metadata, participants, and latest message
@@ -62,11 +62,11 @@ func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParam
 	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/chats/%s", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 // List all chats sorted by last activity (most recent first). Combines all
@@ -101,11 +101,11 @@ func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchi
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return err
 	}
 	path := fmt.Sprintf("v1/chats/%s/archive", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, nil, opts...)
-	return
+	return err
 }
 
 // Search chats by title/network or participants using Beeper Desktop's renderer

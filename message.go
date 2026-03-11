@@ -48,15 +48,15 @@ func (r *MessageService) Update(ctx context.Context, messageID string, params Me
 	opts = slices.Concat(r.Options, opts)
 	if params.ChatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return nil, err
 	}
 	if messageID == "" {
 		err = errors.New("missing required messageID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/chats/%s/messages/%s", params.ChatID, messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPut, path, params, &res, opts...)
-	return
+	return res, err
 }
 
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
@@ -66,7 +66,7 @@ func (r *MessageService) List(ctx context.Context, chatID string, query MessageL
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/chats/%s/messages", chatID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -115,11 +115,11 @@ func (r *MessageService) Send(ctx context.Context, chatID string, body MessageSe
 	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/chats/%s/messages", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type MessageUpdateResponse struct {

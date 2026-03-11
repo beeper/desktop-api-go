@@ -44,15 +44,15 @@ func (r *ChatMessageReactionService) Delete(ctx context.Context, messageID strin
 	opts = slices.Concat(r.Options, opts)
 	if params.ChatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return nil, err
 	}
 	if messageID == "" {
 		err = errors.New("missing required messageID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/chats/%s/messages/%s/reactions", params.ChatID, messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, params, &res, opts...)
-	return
+	return res, err
 }
 
 // Add a reaction to an existing message.
@@ -60,15 +60,15 @@ func (r *ChatMessageReactionService) Add(ctx context.Context, messageID string, 
 	opts = slices.Concat(r.Options, opts)
 	if params.ChatID == "" {
 		err = errors.New("missing required chatID parameter")
-		return
+		return nil, err
 	}
 	if messageID == "" {
 		err = errors.New("missing required messageID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/chats/%s/messages/%s/reactions", params.ChatID, messageID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, params, &res, opts...)
-	return
+	return res, err
 }
 
 type ChatMessageReactionDeleteResponse struct {

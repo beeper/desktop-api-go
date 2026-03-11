@@ -48,7 +48,7 @@ func (r *AccountContactService) List(ctx context.Context, accountID string, quer
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
 	if accountID == "" {
 		err = errors.New("missing required accountID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/accounts/%s/contacts/list", accountID)
 	cfg, err := requestconfig.NewRequestConfig(ctx, http.MethodGet, path, query, &res, opts...)
@@ -74,11 +74,11 @@ func (r *AccountContactService) Search(ctx context.Context, accountID string, qu
 	opts = slices.Concat(r.Options, opts)
 	if accountID == "" {
 		err = errors.New("missing required accountID parameter")
-		return
+		return nil, err
 	}
 	path := fmt.Sprintf("v1/accounts/%s/contacts", accountID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
-	return
+	return res, err
 }
 
 type AccountContactSearchResponse struct {
