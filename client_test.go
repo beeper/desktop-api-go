@@ -38,7 +38,7 @@ func TestUserAgentHeader(t *testing.T) {
 			},
 		}),
 	)
-	client.Accounts.List(context.Background())
+	_, _ = client.Accounts.List(context.Background())
 	if userAgent != fmt.Sprintf("BeeperDesktop/Go %s", internal.PackageVersion) {
 		t.Errorf("Expected User-Agent to be correct, but got: %#v", userAgent)
 	}
