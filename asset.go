@@ -47,7 +47,7 @@ func (r *AssetService) Download(ctx context.Context, body AssetDownloadParams, o
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/assets/download"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Stream a file given an mxc://, localmxc://, or file:// URL. Downloads first if
@@ -57,7 +57,7 @@ func (r *AssetService) Serve(ctx context.Context, query AssetServeParams, opts .
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
 	path := "v1/assets/serve"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return
+	return err
 }
 
 // Upload a file to a temporary location using multipart/form-data. Returns an
@@ -66,7 +66,7 @@ func (r *AssetService) Upload(ctx context.Context, body AssetUploadParams, opts 
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/assets/upload"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 // Upload a file using a JSON body with base64-encoded content. Returns an uploadID
@@ -76,7 +76,7 @@ func (r *AssetService) UploadBase64(ctx context.Context, body AssetUploadBase64P
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/assets/upload/base64"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
-	return
+	return res, err
 }
 
 type AssetDownloadResponse struct {
