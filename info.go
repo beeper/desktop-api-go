@@ -40,7 +40,7 @@ func (r *InfoService) Get(ctx context.Context, opts ...option.RequestOption) (re
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/info"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
-	return
+	return res, err
 }
 
 type InfoGetResponse struct {
