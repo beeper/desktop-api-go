@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.6.0 (2026-04-01)
+
+Full Changelog: [v0.5.0...v0.6.0](https://github.com/beeper/desktop-api-go/compare/v0.5.0...v0.6.0)
+
+### Features
+
+* **api:** manual updates ([9fd07e4](https://github.com/beeper/desktop-api-go/commit/9fd07e44e68014b1ba88891a8e89d2994540df19))
+* **internal:** support comma format in multipart form encoding ([d4f7e8e](https://github.com/beeper/desktop-api-go/commit/d4f7e8ef134cb9a535fa05458ee7af93532c8c2b))
+
+
+### Bug Fixes
+
+* prevent duplicate ? in query params ([8293eb7](https://github.com/beeper/desktop-api-go/commit/8293eb76584617003ec104770810028b3e4076b0))
+
+
+### Chores
+
+* **ci:** skip lint on metadata-only changes ([2a83146](https://github.com/beeper/desktop-api-go/commit/2a83146c4d9b2f29ddce45b6f8484f7533f98c58))
+* **ci:** support opting out of skipping builds on metadata-only commits ([b4dec8f](https://github.com/beeper/desktop-api-go/commit/b4dec8f324d1c18699f81d6a060b33c1b0d4772a))
+* **client:** fix multipart serialisation of Default() fields ([029f5d6](https://github.com/beeper/desktop-api-go/commit/029f5d67da0158cf1ed913fc3f6dfd213681d363))
+* **internal:** minor cleanup ([9504a61](https://github.com/beeper/desktop-api-go/commit/9504a6100b1c23909976ac1473285cab5397aece))
+* **internal:** support default value struct tag ([3e39971](https://github.com/beeper/desktop-api-go/commit/3e39971ec0ee20accae2c2eae5e64004f6cfe810))
+* **internal:** tweak CI branches ([b7458ce](https://github.com/beeper/desktop-api-go/commit/b7458ceb902a6e768e54adc05d5532f63147e3db))
+* **internal:** update gitignore ([229284f](https://github.com/beeper/desktop-api-go/commit/229284fcf7e552241afaebbe24df184a5db693af))
+* **internal:** use explicit returns ([ce4f065](https://github.com/beeper/desktop-api-go/commit/ce4f065cc711a045df715b8c0a7c4338f7d114db))
+* **internal:** use explicit returns in more places ([f102b8e](https://github.com/beeper/desktop-api-go/commit/f102b8ecdfa469185a1ed3700f73952f7c3bfec5))
+* remove unnecessary error check for url parsing ([76dc981](https://github.com/beeper/desktop-api-go/commit/76dc981c3f95e4b7935aaefd95f1de5e119d9298))
+* **tests:** bump steady to v0.19.4 ([0260191](https://github.com/beeper/desktop-api-go/commit/026019176b91a6cc8a06f3e34cf6df2365f14e50))
+* **tests:** bump steady to v0.19.5 ([bb2044f](https://github.com/beeper/desktop-api-go/commit/bb2044f9230e575f610398a5f28a43bd7b7e8cf2))
+* **tests:** bump steady to v0.19.6 ([30b897c](https://github.com/beeper/desktop-api-go/commit/30b897ce73a2216204876ab5fb3132cf549228ee))
+* **tests:** bump steady to v0.19.7 ([b64d423](https://github.com/beeper/desktop-api-go/commit/b64d42348319e02f4cad0107d9848f57743d04c7))
+* **tests:** bump steady to v0.20.1 ([8e7e3a6](https://github.com/beeper/desktop-api-go/commit/8e7e3a6fcedaf7b4eaeb0f7e880e5347f5c2ac93))
+* **tests:** bump steady to v0.20.2 ([a5fbcc7](https://github.com/beeper/desktop-api-go/commit/a5fbcc7e74ba585849c839bffb71ee1b42f6af2d))
+* update docs for api:"required" ([350f111](https://github.com/beeper/desktop-api-go/commit/350f111de7c4045065804f2425729f72a65a1388))
+
+
+### Refactors
+
+* **tests:** switch from prism to steady ([bd09ac3](https://github.com/beeper/desktop-api-go/commit/bd09ac321d342e5f197f8ceac6abf4ee5e766822))
+
 ## 0.5.0 (2026-03-06)
 
 Full Changelog: [v0.4.0...v0.5.0](https://github.com/beeper/desktop-api-go/compare/v0.4.0...v0.5.0)
