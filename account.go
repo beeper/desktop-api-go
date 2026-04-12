@@ -51,11 +51,17 @@ func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption)
 type Account struct {
 	// Chat account added to Beeper. Use this to route account-scoped actions.
 	AccountID string `json:"accountID" api:"required"`
+	// Bridge metadata for the account. Available from Beeper Desktop v.4.2.719+.
+	Bridge AccountBridge `json:"bridge" api:"required"`
+	// Human-friendly network name for the account.
+	Network string `json:"network" api:"required"`
 	// User the account belongs to.
 	User shared.User `json:"user" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		AccountID   respjson.Field
+		Bridge      respjson.Field
+		Network     respjson.Field
 		User        respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
@@ -65,5 +71,31 @@ type Account struct {
 // Returns the unmodified JSON received from the API
 func (r Account) RawJSON() string { return r.JSON.raw }
 func (r *Account) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Bridge metadata for the account. Available from Beeper Desktop v.4.2.719+.
+type AccountBridge struct {
+	// Bridge instance identifier.
+	ID string `json:"id" api:"required"`
+	// Bridge provider for the account.
+	//
+	// Any of "cloud", "self-hosted", "local", "platform-sdk".
+	Provider string `json:"provider" api:"required"`
+	// Bridge type.
+	Type string `json:"type" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ID          respjson.Field
+		Provider    respjson.Field
+		Type        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AccountBridge) RawJSON() string { return r.JSON.raw }
+func (r *AccountBridge) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
