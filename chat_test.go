@@ -27,19 +27,18 @@ func TestChatNewWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Chats.New(context.TODO(), beeperdesktopapi.ChatNewParams{
-		AccountID:      "accountID",
-		AllowInvite:    beeperdesktopapi.Bool(true),
-		MessageText:    beeperdesktopapi.String("messageText"),
-		Mode:           beeperdesktopapi.ChatNewParamsModeCreate,
-		ParticipantIDs: []string{"string"},
-		Title:          beeperdesktopapi.String("title"),
-		Type:           beeperdesktopapi.ChatNewParamsTypeSingle,
-		User: beeperdesktopapi.ChatNewParamsUser{
-			ID:          beeperdesktopapi.String("id"),
-			Email:       beeperdesktopapi.String("email"),
-			FullName:    beeperdesktopapi.String("fullName"),
-			PhoneNumber: beeperdesktopapi.String("phoneNumber"),
-			Username:    beeperdesktopapi.String("username"),
+		OfObject: &beeperdesktopapi.ChatNewParamsParamsObject{
+			AccountID: "accountID",
+			Mode:      "start",
+			User: beeperdesktopapi.ChatNewParamsParamsObjectUser{
+				ID:          beeperdesktopapi.String("id"),
+				Email:       beeperdesktopapi.String("email"),
+				FullName:    beeperdesktopapi.String("fullName"),
+				PhoneNumber: beeperdesktopapi.String("phoneNumber"),
+				Username:    beeperdesktopapi.String("username"),
+			},
+			AllowInvite: beeperdesktopapi.Bool(true),
+			MessageText: beeperdesktopapi.String("messageText"),
 		},
 	})
 	if err != nil {

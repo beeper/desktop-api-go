@@ -9,8 +9,6 @@
 The Beeper Desktop Go library provides convenient access to the [Beeper Desktop REST API](https://developers.beeper.com/desktop-api/)
 from applications written in Go.
 
-It is generated with [Stainless](https://www.stainless.com/).
-
 ## MCP Server
 
 Use the Beeper Desktop MCP Server to enable AI assistants to interact with this API, allowing them to explore endpoints, make test requests, and use documentation to help integrate this SDK into your application.
@@ -58,10 +56,13 @@ import (
 	"fmt"
 
 	"github.com/beeper/desktop-api-go"
+	"github.com/beeper/desktop-api-go/option"
 )
 
 func main() {
-	client := beeperdesktopapi.NewClient()
+	client := beeperdesktopapi.NewClient(
+		option.WithAccessToken("My Access Token"), // defaults to os.LookupEnv("BEEPER_ACCESS_TOKEN")
+	)
 	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
 		IncludeMuted: beeperdesktopapi.Bool(true),
 		Limit:        beeperdesktopapi.Int(3),
