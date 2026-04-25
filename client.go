@@ -32,7 +32,7 @@ type Client struct {
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
 // BEEPER_DESKTOP_BASE_URL). This should be used to initialize new clients.
 func DefaultClientOptions() []option.RequestOption {
-	defaults := []option.RequestOption{option.WithEnvironmentLocal()}
+	defaults := []option.RequestOption{option.WithHTTPClient(defaultHTTPClient()), option.WithEnvironmentLocal()}
 	if o, ok := os.LookupEnv("BEEPER_DESKTOP_BASE_URL"); ok {
 		defaults = append(defaults, option.WithBaseURL(o))
 	}
