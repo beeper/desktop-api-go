@@ -39,7 +39,7 @@ func NewChatMessageReactionService(opts ...option.RequestOption) (r ChatMessageR
 	return
 }
 
-// Remove the authenticated user's reaction from an existing message.
+// Remove the reaction added by the authenticated user from an existing message.
 func (r *ChatMessageReactionService) Delete(ctx context.Context, messageID string, params ChatMessageReactionDeleteParams, opts ...option.RequestOption) (res *ChatMessageReactionDeleteResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if params.ChatID == "" {

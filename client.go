@@ -31,16 +31,16 @@ type Client struct {
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
-// BEEPER_DESKTOP_BASE_URL). This should be used to initialize new clients.
+// BEEPER_BASE_URL). This should be used to initialize new clients.
 func DefaultClientOptions() []option.RequestOption {
 	defaults := []option.RequestOption{option.WithHTTPClient(defaultHTTPClient()), option.WithEnvironmentLocal()}
-	if o, ok := os.LookupEnv("BEEPER_DESKTOP_BASE_URL"); ok {
+	if o, ok := os.LookupEnv("BEEPER_BASE_URL"); ok {
 		defaults = append(defaults, option.WithBaseURL(o))
 	}
 	if o, ok := os.LookupEnv("BEEPER_ACCESS_TOKEN"); ok {
 		defaults = append(defaults, option.WithAccessToken(o))
 	}
-	if o, ok := os.LookupEnv("BEEPER_DESKTOP_CUSTOM_HEADERS"); ok {
+	if o, ok := os.LookupEnv("BEEPER_CUSTOM_HEADERS"); ok {
 		for _, line := range strings.Split(o, "\n") {
 			colon := strings.Index(line, ":")
 			if colon >= 0 {
@@ -52,8 +52,8 @@ func DefaultClientOptions() []option.RequestOption {
 }
 
 // NewClient generates a new client with the default option read from the
-// environment (BEEPER_ACCESS_TOKEN, BEEPER_DESKTOP_BASE_URL). The option passed in
-// as arguments are applied after these default arguments, and all option will be
+// environment (BEEPER_ACCESS_TOKEN, BEEPER_BASE_URL). The option passed in as
+// arguments are applied after these default arguments, and all option will be
 // passed down to the services and requests that this client makes.
 func NewClient(opts ...option.RequestOption) (r Client) {
 	opts = append(DefaultClientOptions(), opts...)

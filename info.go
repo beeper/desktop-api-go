@@ -37,7 +37,8 @@ func NewInfoService(opts ...option.RequestOption) (r InfoService) {
 // Returns app, platform, server, and endpoint discovery metadata for this Beeper
 // Desktop instance.
 func (r *InfoService) Get(ctx context.Context, opts ...option.RequestOption) (res *InfoGetResponse, err error) {
-	opts = slices.Concat(r.Options, opts)
+	var preClientOpts = []option.RequestOption{requestconfig.WithSecurity(requestconfig.Security{})}
+	opts = slices.Concat(preClientOpts, r.Options, opts)
 	path := "v1/info"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
 	return res, err
