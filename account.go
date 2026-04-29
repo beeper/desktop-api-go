@@ -47,22 +47,23 @@ func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption)
 	return res, err
 }
 
-// A chat account added to Beeper
+// A chat account added to Beeper.
 type Account struct {
 	// Chat account added to Beeper. Use this to route account-scoped actions.
 	AccountID string `json:"accountID" api:"required"`
-	// Bridge metadata for the account. Available from Beeper Desktop v.4.2.719+.
+	// Bridge metadata for the account. Available in Beeper Desktop v4.2.789+.
 	Bridge AccountBridge `json:"bridge" api:"required"`
-	// Human-friendly network name for the account.
-	Network string `json:"network" api:"required"`
 	// User the account belongs to.
 	User shared.User `json:"user" api:"required"`
+	// Human-friendly network name for the account. Omitted when the network is
+	// unknown.
+	Network string `json:"network"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		AccountID   respjson.Field
 		Bridge      respjson.Field
-		Network     respjson.Field
 		User        respjson.Field
+		Network     respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
@@ -74,15 +75,15 @@ func (r *Account) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Bridge metadata for the account. Available from Beeper Desktop v.4.2.719+.
+// Bridge metadata for the account. Available in Beeper Desktop v4.2.789+.
 type AccountBridge struct {
-	// Bridge instance identifier.
+	// Bridge instance identifier. Available in Beeper Desktop v4.2.789+.
 	ID string `json:"id" api:"required"`
-	// Bridge provider for the account.
+	// Bridge provider for the account. Available in Beeper Desktop v4.2.789+.
 	//
 	// Any of "cloud", "self-hosted", "local", "platform-sdk".
 	Provider string `json:"provider" api:"required"`
-	// Bridge type.
+	// Bridge type. Available in Beeper Desktop v4.2.789+.
 	Type string `json:"type" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
