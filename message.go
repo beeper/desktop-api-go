@@ -60,7 +60,7 @@ func (r *MessageService) Update(ctx context.Context, messageID string, params Me
 }
 
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
-func (r *MessageService) List(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) (res *pagination.CursorSortKey[shared.Message], err error) {
+func (r *MessageService) List(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) (res *pagination.CursorNoLimit[shared.Message], err error) {
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithResponseInto(&raw)}, opts...)
@@ -82,11 +82,11 @@ func (r *MessageService) List(ctx context.Context, chatID string, query MessageL
 }
 
 // List all messages in a chat with cursor-based pagination. Sorted by timestamp.
-func (r *MessageService) ListAutoPaging(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) *pagination.CursorSortKeyAutoPager[shared.Message] {
-	return pagination.NewCursorSortKeyAutoPager(r.List(ctx, chatID, query, opts...))
+func (r *MessageService) ListAutoPaging(ctx context.Context, chatID string, query MessageListParams, opts ...option.RequestOption) *pagination.CursorNoLimitAutoPager[shared.Message] {
+	return pagination.NewCursorNoLimitAutoPager(r.List(ctx, chatID, query, opts...))
 }
 
-// Search messages across chats using Beeper's message index
+// Search messages across chats.
 func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) (res *pagination.CursorSearch[shared.Message], err error) {
 	var raw *http.Response
 	opts = slices.Concat(r.Options, opts)
@@ -104,7 +104,7 @@ func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, 
 	return res, nil
 }
 
-// Search messages across chats using Beeper's message index
+// Search messages across chats.
 func (r *MessageService) SearchAutoPaging(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) *pagination.CursorSearchAutoPager[shared.Message] {
 	return pagination.NewCursorSearchAutoPager(r.Search(ctx, query, opts...))
 }

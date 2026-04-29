@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd "$(dirname "$0")/.."
+
+echo "==> Detecting breaking changes"
+
+TEST_PATHS=(
+	client_test.go
+	beeperdesktopapi_test.go
+	account_test.go
+	accountcontact_test.go
+	chat_test.go
+	chatreminder_test.go
+	chatmessagereaction_test.go
+	message_test.go
+	asset_test.go
+	info_test.go
+	usage_test.go
+	paginationauto_test.go
+	paginationmanual_test.go
+)
+
+for PATHSPEC in "${TEST_PATHS[@]}"; do
+    # Try to check out previous versions of the test files
+    # with the current SDK.
+    git checkout "$1" -- "${PATHSPEC}" 2>/dev/null || true
+done
+
+# Instead of running the tests, use the linter to check if an
+# older test is no longer compatible with the latest SDK.
+./scripts/lint
