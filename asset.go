@@ -52,12 +52,12 @@ func (r *AssetService) Download(ctx context.Context, body AssetDownloadParams, o
 
 // Stream a file given an mxc://, localmxc://, or file:// URL. Downloads first if
 // not cached. Supports Range requests for seeking in large files.
-func (r *AssetService) Serve(ctx context.Context, query AssetServeParams, opts ...option.RequestOption) (err error) {
+func (r *AssetService) Serve(ctx context.Context, query AssetServeParams, opts ...option.RequestOption) (res *http.Response, err error) {
 	opts = slices.Concat(r.Options, opts)
-	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "application/octet-stream")}, opts...)
 	path := "v1/assets/serve"
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, nil, opts...)
-	return err
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
 }
 
 // Upload a file to a temporary location using multipart/form-data. Returns an
