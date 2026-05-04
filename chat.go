@@ -48,8 +48,7 @@ func NewChatService(opts ...option.RequestOption) (r ChatService) {
 	return
 }
 
-// Create a direct or group chat with mode="create", or use mode="start" to resolve
-// a contact and open a direct chat.
+// Create a direct or group chat from participant IDs.
 func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...option.RequestOption) (res *ChatNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/chats"
@@ -129,6 +128,15 @@ func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts .
 // Search chats by title, network, or participant names.
 func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) *pagination.CursorSearchAutoPager[Chat] {
 	return pagination.NewCursorSearchAutoPager(r.Search(ctx, query, opts...))
+}
+
+// Resolve a user/contact and open a direct chat. Reuses an existing direct chat
+// when one is found. Available in Beeper Desktop v4.2.799+.
+func (r *ChatService) Start(ctx context.Context, body ChatStartParams, opts ...option.RequestOption) (res *ChatStartResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/chats.start"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
 }
 
 type Chat struct {
@@ -265,32 +273,52 @@ func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
+type ChatStartResponse struct {
+	// Newly created chat ID.
+	ChatID string `json:"chatID" api:"required"`
+	// Only returned in start mode. 'existing' means an existing chat was reused;
+	// 'created' means a new chat was created.
+	//
+	// Any of "existing", "created".
+	Status ChatStartResponseStatus `json:"status"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ChatID      respjson.Field
+		Status      respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatStartResponse) RawJSON() string { return r.JSON.raw }
+func (r *ChatStartResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Only returned in start mode. 'existing' means an existing chat was reused;
+// 'created' means a new chat was created.
+type ChatStartResponseStatus string
+
+const (
+	ChatStartResponseStatusExisting ChatStartResponseStatus = "existing"
+	ChatStartResponseStatusCreated  ChatStartResponseStatus = "created"
+)
+
 type ChatNewParams struct {
 	// Account to create or start the chat on.
 	AccountID string `json:"accountID" api:"required"`
-	// Only used for mode='start'. Whether invite-based DM creation is allowed when
-	// required by the platform.
-	AllowInvite param.Opt[bool] `json:"allowInvite,omitzero"`
+	// User IDs to include in the new chat.
+	ParticipantIDs []string `json:"participantIDs,omitzero" api:"required"`
+	// 'single' requires exactly one participantID; 'group' supports multiple
+	// participants and optional title.
+	//
+	// Any of "single", "group".
+	Type ChatNewParamsType `json:"type,omitzero" api:"required"`
 	// Optional first message content if the platform requires it to create the chat.
 	MessageText param.Opt[string] `json:"messageText,omitzero"`
 	// Optional title for group chats; ignored for single chats on most networks.
 	Title param.Opt[string] `json:"title,omitzero"`
-	// Operation mode. Use 'start' to resolve a user/contact and start a direct chat.
-	// Omit or set 'create' to create a chat directly.
-	//
-	// Any of "start", "create".
-	Mode ChatNewParamsMode `json:"mode,omitzero"`
-	// Required for create mode. Provide exactly one user ID for 'single' chats and one
-	// or more for 'group' chats.
-	ParticipantIDs []string `json:"participantIDs,omitzero"`
-	// Required for create mode. 'single' creates a direct message chat; 'group'
-	// creates a group chat.
-	//
-	// Any of "single", "group".
-	Type ChatNewParamsType `json:"type,omitzero"`
-	// Required for mode='start'. Merged user-like contact payload used to resolve the
-	// best identifier.
-	User ChatNewParamsUser `json:"user,omitzero"`
 	paramObj
 }
 
@@ -302,47 +330,14 @@ func (r *ChatNewParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Operation mode. Use 'start' to resolve a user/contact and start a direct chat.
-// Omit or set 'create' to create a chat directly.
-type ChatNewParamsMode string
-
-const (
-	ChatNewParamsModeStart  ChatNewParamsMode = "start"
-	ChatNewParamsModeCreate ChatNewParamsMode = "create"
-)
-
-// Required for create mode. 'single' creates a direct message chat; 'group'
-// creates a group chat.
+// 'single' requires exactly one participantID; 'group' supports multiple
+// participants and optional title.
 type ChatNewParamsType string
 
 const (
 	ChatNewParamsTypeSingle ChatNewParamsType = "single"
 	ChatNewParamsTypeGroup  ChatNewParamsType = "group"
 )
-
-// Required for mode='start'. Merged user-like contact payload used to resolve the
-// best identifier.
-type ChatNewParamsUser struct {
-	// Known user ID when available.
-	ID param.Opt[string] `json:"id,omitzero"`
-	// Email candidate.
-	Email param.Opt[string] `json:"email,omitzero"`
-	// Display name hint used for ranking only.
-	FullName param.Opt[string] `json:"fullName,omitzero"`
-	// Phone number candidate (E.164 preferred).
-	PhoneNumber param.Opt[string] `json:"phoneNumber,omitzero"`
-	// Username/handle candidate.
-	Username param.Opt[string] `json:"username,omitzero"`
-	paramObj
-}
-
-func (r ChatNewParamsUser) MarshalJSON() (data []byte, err error) {
-	type shadow ChatNewParamsUser
-	return param.MarshalObject(r, (*shadow)(&r))
-}
-func (r *ChatNewParamsUser) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
 
 type ChatGetParams struct {
 	// Maximum number of participants to return. Use -1 for all; otherwise 0–500.
@@ -493,3 +488,46 @@ const (
 	ChatSearchParamsTypeGroup  ChatSearchParamsType = "group"
 	ChatSearchParamsTypeAny    ChatSearchParamsType = "any"
 )
+
+type ChatStartParams struct {
+	// Account to create or start the chat on.
+	AccountID string `json:"accountID" api:"required"`
+	// Merged user-like contact payload used to resolve the best identifier.
+	User ChatStartParamsUser `json:"user,omitzero" api:"required"`
+	// Whether invite-based DM creation is allowed when required by the platform.
+	AllowInvite param.Opt[bool] `json:"allowInvite,omitzero"`
+	// Optional first message content if the platform requires it to create the chat.
+	MessageText param.Opt[string] `json:"messageText,omitzero"`
+	paramObj
+}
+
+func (r ChatStartParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatStartParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatStartParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Merged user-like contact payload used to resolve the best identifier.
+type ChatStartParamsUser struct {
+	// Known user ID when available.
+	ID param.Opt[string] `json:"id,omitzero"`
+	// Email candidate.
+	Email param.Opt[string] `json:"email,omitzero"`
+	// Display name hint used for ranking only.
+	FullName param.Opt[string] `json:"fullName,omitzero"`
+	// Phone number candidate (E.164 preferred).
+	PhoneNumber param.Opt[string] `json:"phoneNumber,omitzero"`
+	// Username/handle candidate.
+	Username param.Opt[string] `json:"username,omitzero"`
+	paramObj
+}
+
+func (r ChatStartParamsUser) MarshalJSON() (data []byte, err error) {
+	type shadow ChatStartParamsUser
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatStartParamsUser) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
