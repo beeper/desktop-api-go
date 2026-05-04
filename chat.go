@@ -4,6 +4,7 @@ package beeperdesktopapi
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -144,6 +145,8 @@ type Chat struct {
 	ID string `json:"id" api:"required"`
 	// Account ID this chat belongs to.
 	AccountID string `json:"accountID" api:"required"`
+	// Display-only human-readable account/network name.
+	Network string `json:"network" api:"required"`
 	// Chat participants information.
 	Participants ChatParticipants `json:"participants" api:"required"`
 	// Display title of the chat as computed by the client/server.
@@ -154,8 +157,16 @@ type Chat struct {
 	Type ChatType `json:"type" api:"required"`
 	// Number of unread messages.
 	UnreadCount int64 `json:"unreadCount" api:"required"`
+	// Group chat description/topic when available.
+	Description string `json:"description" api:"nullable"`
+	// Current draft object for this chat, or null when no draft is set.
+	Draft ChatDraft `json:"draft" api:"nullable"`
+	// Local filesystem path to the chat avatar image when available.
+	ImgURL string `json:"imgURL" api:"nullable"`
 	// True if chat is archived.
 	IsArchived bool `json:"isArchived"`
+	// True if chat is marked low priority.
+	IsLowPriority bool `json:"isLowPriority"`
 	// True if chat notifications are muted.
 	IsMuted bool `json:"isMuted"`
 	// True if chat is pinned.
@@ -166,20 +177,31 @@ type Chat struct {
 	LastReadMessageSortKey string `json:"lastReadMessageSortKey"`
 	// Local chat ID specific to this Beeper Desktop installation.
 	LocalChatID string `json:"localChatID" api:"nullable"`
+	// Disappearing-message timer in seconds when available.
+	MessageExpirySeconds int64 `json:"messageExpirySeconds" api:"nullable"`
+	// Mute expiration timestamp, forever, or null when not muted.
+	MutedUntil ChatMutedUntilUnion `json:"mutedUntil" api:"nullable" format:"date-time"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                     respjson.Field
 		AccountID              respjson.Field
+		Network                respjson.Field
 		Participants           respjson.Field
 		Title                  respjson.Field
 		Type                   respjson.Field
 		UnreadCount            respjson.Field
+		Description            respjson.Field
+		Draft                  respjson.Field
+		ImgURL                 respjson.Field
 		IsArchived             respjson.Field
+		IsLowPriority          respjson.Field
 		IsMuted                respjson.Field
 		IsPinned               respjson.Field
 		LastActivity           respjson.Field
 		LastReadMessageSortKey respjson.Field
 		LocalChatID            respjson.Field
+		MessageExpirySeconds   respjson.Field
+		MutedUntil             respjson.Field
 		ExtraFields            map[string]respjson.Field
 		raw                    string
 	} `json:"-"`
@@ -221,6 +243,175 @@ type ChatType string
 const (
 	ChatTypeSingle ChatType = "single"
 	ChatTypeGroup  ChatType = "group"
+)
+
+// Current draft object for this chat, or null when no draft is set.
+type ChatDraft struct {
+	// Draft attachments keyed by attachment ID.
+	Attachments map[string]ChatDraftAttachment `json:"attachments"`
+	// Rich-text draft content as Tiptap JSON.
+	Json ChatDraftJson `json:"json" api:"nullable"`
+	// Plain-text draft projection.
+	Text string `json:"text" api:"nullable"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Attachments respjson.Field
+		Json        respjson.Field
+		Text        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatDraft) RawJSON() string { return r.JSON.raw }
+func (r *ChatDraft) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatDraftAttachment struct {
+	// Draft attachment identifier.
+	ID string `json:"id" api:"required"`
+	// Audio duration in seconds if known.
+	AudioDurationSeconds float64 `json:"audioDurationSeconds"`
+	// Original filename if available.
+	FileName string `json:"fileName"`
+	// Local filesystem path for the draft attachment.
+	FilePath string `json:"filePath"`
+	// File size in bytes if known.
+	FileSize float64 `json:"fileSize"`
+	// True if the attachment is a GIF.
+	IsGif bool `json:"isGif"`
+	// True if the attachment is recorded audio.
+	IsRecordedAudio bool `json:"isRecordedAudio"`
+	// MIME type if known.
+	MimeType string `json:"mimeType"`
+	// Pixel dimensions of the attachment.
+	Size ChatDraftAttachmentSize `json:"size"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ID                   respjson.Field
+		AudioDurationSeconds respjson.Field
+		FileName             respjson.Field
+		FilePath             respjson.Field
+		FileSize             respjson.Field
+		IsGif                respjson.Field
+		IsRecordedAudio      respjson.Field
+		MimeType             respjson.Field
+		Size                 respjson.Field
+		ExtraFields          map[string]respjson.Field
+		raw                  string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatDraftAttachment) RawJSON() string { return r.JSON.raw }
+func (r *ChatDraftAttachment) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Pixel dimensions of the attachment.
+type ChatDraftAttachmentSize struct {
+	Height float64 `json:"height"`
+	Width  float64 `json:"width"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Height      respjson.Field
+		Width       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatDraftAttachmentSize) RawJSON() string { return r.JSON.raw }
+func (r *ChatDraftAttachmentSize) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Rich-text draft content as Tiptap JSON.
+type ChatDraftJson struct {
+	Attrs   map[string]any      `json:"attrs"`
+	Content []map[string]any    `json:"content"`
+	Marks   []ChatDraftJsonMark `json:"marks"`
+	Text    string              `json:"text"`
+	Type    string              `json:"type"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Attrs       respjson.Field
+		Content     respjson.Field
+		Marks       respjson.Field
+		Text        respjson.Field
+		Type        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatDraftJson) RawJSON() string { return r.JSON.raw }
+func (r *ChatDraftJson) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatDraftJsonMark struct {
+	Type  string         `json:"type" api:"required"`
+	Attrs map[string]any `json:"attrs"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Type        respjson.Field
+		Attrs       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatDraftJsonMark) RawJSON() string { return r.JSON.raw }
+func (r *ChatDraftJsonMark) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// ChatMutedUntilUnion contains all possible properties and values from
+// [time.Time], [string].
+//
+// Use the methods beginning with 'As' to cast the union to one of its variants.
+//
+// If the underlying value is not a json object, one of the following properties
+// will be valid: OfTime OfChatMutedUntilString]
+type ChatMutedUntilUnion struct {
+	// This field will be present if the value is a [time.Time] instead of an object.
+	OfTime time.Time `json:",inline"`
+	// This field will be present if the value is a [string] instead of an object.
+	OfChatMutedUntilString string `json:",inline"`
+	JSON                   struct {
+		OfTime                 respjson.Field
+		OfChatMutedUntilString respjson.Field
+		raw                    string
+	} `json:"-"`
+}
+
+func (u ChatMutedUntilUnion) AsTime() (v time.Time) {
+	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
+	return
+}
+
+func (u ChatMutedUntilUnion) AsChatMutedUntilString() (v string) {
+	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
+	return
+}
+
+// Returns the unmodified JSON received from the API
+func (u ChatMutedUntilUnion) RawJSON() string { return u.JSON.raw }
+
+func (r *ChatMutedUntilUnion) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatMutedUntilString string
+
+const (
+	ChatMutedUntilStringForever ChatMutedUntilString = "forever"
 )
 
 type ChatNewResponse struct {
