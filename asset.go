@@ -3,15 +3,11 @@
 package beeperdesktopapi
 
 import (
-	"bytes"
 	"context"
-	"io"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"slices"
 
-	"github.com/beeper/desktop-api-go/internal/apiform"
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/apiquery"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
@@ -210,31 +206,21 @@ func (r AssetServeParams) URLQuery() (v url.Values, err error) {
 }
 
 type AssetUploadParams struct {
-	// The file to upload (max 500 MB).
-	File io.Reader `json:"file,omitzero" api:"required" format:"binary"`
-	// Original filename. Defaults to the uploaded file name if omitted
-	FileName param.Opt[string] `json:"fileName,omitzero"`
-	// MIME type. Auto-detected from magic bytes if omitted
-	MimeType param.Opt[string] `json:"mimeType,omitzero"`
+	// Base64-encoded file content (max ~500MB decoded)
+	Content string `json:"content" api:"required"`
+	// Original filename. Required for the JSON form of /v1/assets/upload.
+	FileName string `json:"fileName" api:"required"`
+	// MIME type. Required for the JSON form of /v1/assets/upload.
+	MimeType string `json:"mimeType" api:"required"`
 	paramObj
 }
 
-func (r AssetUploadParams) MarshalMultipart() (data []byte, contentType string, err error) {
-	buf := bytes.NewBuffer(nil)
-	writer := multipart.NewWriter(buf)
-	err = apiform.MarshalRoot(r, writer)
-	if err == nil {
-		err = apiform.WriteExtras(writer, r.ExtraFields())
-	}
-	if err != nil {
-		writer.Close()
-		return nil, "", err
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil, "", err
-	}
-	return buf.Bytes(), writer.FormDataContentType(), nil
+func (r AssetUploadParams) MarshalJSON() (data []byte, err error) {
+	type shadow AssetUploadParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *AssetUploadParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 type AssetUploadBase64Params struct {
