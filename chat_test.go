@@ -28,19 +28,10 @@ func TestChatNewWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Chats.New(context.TODO(), beeperdesktopapi.ChatNewParams{
 		AccountID:      "accountID",
-		AllowInvite:    beeperdesktopapi.Bool(true),
-		MessageText:    beeperdesktopapi.String("messageText"),
-		Mode:           beeperdesktopapi.ChatNewParamsModeStart,
 		ParticipantIDs: []string{"string"},
-		Title:          beeperdesktopapi.String("title"),
 		Type:           beeperdesktopapi.ChatNewParamsTypeSingle,
-		User: beeperdesktopapi.ChatNewParamsUser{
-			ID:          beeperdesktopapi.String("id"),
-			Email:       beeperdesktopapi.String("email"),
-			FullName:    beeperdesktopapi.String("fullName"),
-			PhoneNumber: beeperdesktopapi.String("phoneNumber"),
-			Username:    beeperdesktopapi.String("username"),
-		},
+		MessageText:    beeperdesktopapi.String("messageText"),
+		Title:          beeperdesktopapi.String("title"),
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
@@ -158,6 +149,40 @@ func TestChatSearchWithOptionalParams(t *testing.T) {
 		Scope:              beeperdesktopapi.ChatSearchParamsScopeTitles,
 		Type:               beeperdesktopapi.ChatSearchParamsTypeSingle,
 		UnreadOnly:         beeperdesktopapi.Bool(true),
+	})
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestChatStartWithOptionalParams(t *testing.T) {
+	t.Skip("Stainless mock tests currently load the project-published OpenAPI spec URL, which may not include newly-added local-only endpoints during build checks.")
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Chats.Start(context.TODO(), beeperdesktopapi.ChatStartParams{
+		AccountID: "accountID",
+		User: beeperdesktopapi.ChatStartParamsUser{
+			ID:          beeperdesktopapi.String("id"),
+			Email:       beeperdesktopapi.String("email"),
+			FullName:    beeperdesktopapi.String("fullName"),
+			PhoneNumber: beeperdesktopapi.String("phoneNumber"),
+			Username:    beeperdesktopapi.String("username"),
+		},
+		AllowInvite: beeperdesktopapi.Bool(true),
+		MessageText: beeperdesktopapi.String("messageText"),
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
