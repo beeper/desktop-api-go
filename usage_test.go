@@ -25,6 +25,7 @@ func TestUsage(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
+		AccountIDs:   []string{"matrix", "discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		IncludeMuted: beeperdesktopapi.Bool(true),
 		Limit:        beeperdesktopapi.Int(3),
 		Type:         beeperdesktopapi.ChatSearchParamsTypeSingle,

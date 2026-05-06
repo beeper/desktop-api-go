@@ -26,7 +26,8 @@ type Client struct {
 	Messages MessageService
 	// Manage assets in Beeper Desktop, like message attachments
 	Assets AssetService
-	// Control the Beeper Desktop application
+	// Server discovery and capability metadata. Use /v1/info before authentication
+	// setup.
 	Info InfoService
 }
 
@@ -139,7 +140,7 @@ func (r *Client) Delete(ctx context.Context, path string, params any, res any, o
 }
 
 // Focus Beeper Desktop and optionally navigate to a specific chat, message, or
-// pre-fill draft text and attachment.
+// pre-fill plain text and an image path.
 func (r *Client) Focus(ctx context.Context, body FocusParams, opts ...option.RequestOption) (res *FocusResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/focus"

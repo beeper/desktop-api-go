@@ -25,9 +25,9 @@ func TestManualPagination(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	page, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
-		AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+		AccountIDs: []string{"discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		Limit:      beeperdesktopapi.Int(10),
-		Query:      beeperdesktopapi.String("deployment"),
+		Query:      beeperdesktopapi.String("oauth"),
 	})
 	if err != nil {
 		t.Fatalf("err should be nil: %s", err.Error())
