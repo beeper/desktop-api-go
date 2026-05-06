@@ -42,6 +42,23 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 	return
 }
 
+// Retrieve a message by final message ID, pendingMessageID, or Matrix event ID.
+// Chat ID may be a Beeper chat ID or local chat ID.
+func (r *MessageService) Get(ctx context.Context, messageID string, query MessageGetParams, opts ...option.RequestOption) (res *shared.Message, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if query.ChatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return nil, err
+	}
+	if messageID == "" {
+		err = errors.New("missing required messageID parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/chats/%s/messages/%s", query.ChatID, messageID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return res, err
+}
+
 // Edit the text content of an existing message. Messages with attachments cannot
 // be edited.
 func (r *MessageService) Update(ctx context.Context, messageID string, params MessageUpdateParams, opts ...option.RequestOption) (res *MessageUpdateResponse, err error) {
@@ -86,6 +103,24 @@ func (r *MessageService) ListAutoPaging(ctx context.Context, chatID string, quer
 	return pagination.NewCursorNoLimitAutoPager(r.List(ctx, chatID, query, opts...))
 }
 
+// Delete a message by final message ID. Pending message IDs are not accepted
+// because messages cannot be deleted while sending.
+func (r *MessageService) Delete(ctx context.Context, messageID string, params MessageDeleteParams, opts ...option.RequestOption) (err error) {
+	opts = slices.Concat(r.Options, opts)
+	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
+	if params.ChatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return err
+	}
+	if messageID == "" {
+		err = errors.New("missing required messageID parameter")
+		return err
+	}
+	path := fmt.Sprintf("v1/chats/%s/messages/%s", params.ChatID, messageID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, params, nil, opts...)
+	return err
+}
+
 // Search messages across chats.
 func (r *MessageService) Search(ctx context.Context, query MessageSearchParams, opts ...option.RequestOption) (res *pagination.CursorSearch[shared.Message], err error) {
 	var raw *http.Response
@@ -123,20 +158,25 @@ func (r *MessageService) Send(ctx context.Context, chatID string, body MessageSe
 }
 
 type MessageUpdateResponse struct {
-	// Unique identifier of the chat.
-	ChatID string `json:"chatID" api:"required"`
-	// Message ID.
+	// DEPRECATED - use id instead. Compatibility alias for older clients.
+	//
+	// Deprecated: deprecated
 	MessageID string `json:"messageID" api:"required"`
-	// Whether the message was successfully edited
+	// DEPRECATED - compatibility field. Successful responses are already represented
+	// by the 200 status code.
+	//
+	// Any of true.
+	//
+	// Deprecated: deprecated
 	Success bool `json:"success" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		ChatID      respjson.Field
 		MessageID   respjson.Field
 		Success     respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
+	shared.Message
 }
 
 // Returns the unmodified JSON received from the API
@@ -146,9 +186,12 @@ func (r *MessageUpdateResponse) UnmarshalJSON(data []byte) error {
 }
 
 type MessageSendResponse struct {
-	// Unique identifier of the chat.
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
 	ChatID string `json:"chatID" api:"required"`
-	// Pending message ID
+	// Pending ID assigned to the message before the network confirms the send. Pass it
+	// to GET /v1/chats/{chatID}/messages/{messageID} to resolve, or wait for the
+	// matching message.upserted over the WebSocket.
 	PendingMessageID string `json:"pendingMessageID" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -165,8 +208,16 @@ func (r *MessageSendResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
+type MessageGetParams struct {
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
+	ChatID string `path:"chatID" api:"required" json:"-"`
+	paramObj
+}
+
 type MessageUpdateParams struct {
-	// Unique identifier of the chat.
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
 	// New text content for the message
 	Text string `json:"text" api:"required"`
@@ -208,6 +259,24 @@ const (
 	MessageListParamsDirectionAfter  MessageListParamsDirection = "after"
 	MessageListParamsDirectionBefore MessageListParamsDirection = "before"
 )
+
+type MessageDeleteParams struct {
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
+	ChatID string `path:"chatID" api:"required" json:"-"`
+	// True to request deletion for everyone when the network supports it; false to
+	// delete only for the authenticated user when supported.
+	ForEveryone param.Opt[bool] `query:"forEveryone,omitzero" json:"-"`
+	paramObj
+}
+
+// URLQuery serializes [MessageDeleteParams]'s query parameters as `url.Values`.
+func (r MessageDeleteParams) URLQuery() (v url.Values, err error) {
+	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
+		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
+		NestedFormat: apiquery.NestedQueryFormatBrackets,
+	})
+}
 
 type MessageSearchParams struct {
 	// Exclude messages marked Low Priority by the user. Default: true. Set to false to
@@ -283,7 +352,8 @@ const (
 type MessageSendParams struct {
 	// Provide a message ID to send this as a reply to an existing message
 	ReplyToMessageID param.Opt[string] `json:"replyToMessageID,omitzero"`
-	// Text content of the message you want to send. You may use markdown.
+	// Draft text. Plain text and Markdown are converted to Matrix HTML with the same
+	// rules used by send and edit.
 	Text param.Opt[string] `json:"text,omitzero"`
 	// Single attachment to send with the message
 	Attachment MessageSendParamsAttachment `json:"attachment,omitzero"`
@@ -312,10 +382,10 @@ type MessageSendParamsAttachment struct {
 	MimeType param.Opt[string] `json:"mimeType,omitzero"`
 	// Dimensions (optional override of cached value)
 	Size MessageSendParamsAttachmentSize `json:"size,omitzero"`
-	// Special attachment type (gif, voiceNote, sticker). If omitted, auto-detected
-	// from mimeType
+	// Attachment type hint (image, video, audio, file, gif, voice-note, sticker). If
+	// omitted, auto-detected from mimeType
 	//
-	// Any of "gif", "voiceNote", "sticker".
+	// Any of "image", "video", "audio", "file", "gif", "voice-note", "sticker".
 	Type string `json:"type,omitzero"`
 	paramObj
 }
@@ -330,7 +400,7 @@ func (r *MessageSendParamsAttachment) UnmarshalJSON(data []byte) error {
 
 func init() {
 	apijson.RegisterFieldValidator[MessageSendParamsAttachment](
-		"type", "gif", "voiceNote", "sticker",
+		"type", "image", "video", "audio", "file", "gif", "voice-note", "sticker",
 	)
 }
 

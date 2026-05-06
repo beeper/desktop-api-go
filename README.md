@@ -64,6 +64,7 @@ func main() {
 		option.WithAccessToken("My Access Token"), // defaults to os.LookupEnv("BEEPER_ACCESS_TOKEN")
 	)
 	page, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
+		AccountIDs:   []string{"matrix", "discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		IncludeMuted: beeperdesktopapi.Bool(true),
 		Limit:        beeperdesktopapi.Int(3),
 		Type:         beeperdesktopapi.ChatSearchParamsTypeSingle,
@@ -297,9 +298,9 @@ You can use `.ListAutoPaging()` methods to iterate through items across all page
 
 ```go
 iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
-	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+	AccountIDs: []string{"discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 	Limit:      beeperdesktopapi.Int(10),
-	Query:      beeperdesktopapi.String("deployment"),
+	Query:      beeperdesktopapi.String("oauth"),
 })
 // Automatically fetches more pages as needed.
 for iter.Next() {
@@ -316,9 +317,9 @@ with additional helper methods like `.GetNextPage()`, e.g.:
 
 ```go
 page, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
-	AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+	AccountIDs: []string{"discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 	Limit:      beeperdesktopapi.Int(10),
-	Query:      beeperdesktopapi.String("deployment"),
+	Query:      beeperdesktopapi.String("oauth"),
 })
 for page != nil {
 	for _, message := range page.Items {
@@ -385,6 +386,24 @@ file returned by `os.Open` will be sent with the file name on disk.
 
 We also provide a helper `beeperdesktopapi.File(reader io.Reader, filename string, contentType string)`
 which can be used to wrap any `io.Reader` with the appropriate file name and content type.
+
+```go
+// A file from the file system
+file, err := os.Open("/path/to/file")
+beeperdesktopapi.AssetUploadParams{
+	File: file,
+}
+
+// A file from a string
+beeperdesktopapi.AssetUploadParams{
+	File: strings.NewReader("my file contents"),
+}
+
+// With a custom filename and contentType
+beeperdesktopapi.AssetUploadParams{
+	File: beeperdesktopapi.File(strings.NewReader(`{"hello": "foo"}`), "file.go", "application/json"),
+}
+```
 
 ### Retries
 

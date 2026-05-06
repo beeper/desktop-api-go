@@ -3,11 +3,15 @@
 package beeperdesktopapi
 
 import (
+	"bytes"
 	"context"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/url"
 	"slices"
 
+	"github.com/beeper/desktop-api-go/internal/apiform"
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/apiquery"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
@@ -37,8 +41,8 @@ func NewAssetService(opts ...option.RequestOption) (r AssetService) {
 	return
 }
 
-// Download a Matrix asset using its mxc:// or localmxc:// URL to the device
-// running Beeper Desktop and return the local file URL.
+// Download a Matrix file using its mxc:// or localmxc:// URL to the device running
+// Beeper Desktop and return the local file URL.
 func (r *AssetService) Download(ctx context.Context, body AssetDownloadParams, opts ...option.RequestOption) (res *AssetDownloadResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/assets/download"
@@ -57,7 +61,8 @@ func (r *AssetService) Serve(ctx context.Context, query AssetServeParams, opts .
 }
 
 // Upload a file to a temporary location using multipart/form-data. Returns an
-// uploadID that can be referenced when sending messages with attachments.
+// uploadID that can be referenced when sending a message or materializing a draft
+// attachment.
 func (r *AssetService) Upload(ctx context.Context, body AssetUploadParams, opts ...option.RequestOption) (res *AssetUploadResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/assets/upload"
@@ -66,8 +71,8 @@ func (r *AssetService) Upload(ctx context.Context, body AssetUploadParams, opts 
 }
 
 // Upload a file using a JSON body with base64-encoded content. Returns an uploadID
-// that can be referenced when sending messages with attachments. Alternative to
-// the multipart upload endpoint.
+// that can be referenced when sending a message or materializing a draft
+// attachment. Alternative to the multipart upload endpoint.
 func (r *AssetService) UploadBase64(ctx context.Context, body AssetUploadBase64Params, opts ...option.RequestOption) (res *AssetUploadBase64Response, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/assets/upload/base64"
@@ -78,7 +83,7 @@ func (r *AssetService) UploadBase64(ctx context.Context, body AssetUploadBase64P
 type AssetDownloadResponse struct {
 	// Error message if the download failed.
 	Error string `json:"error"`
-	// Local file URL to the downloaded asset.
+	// Local file URL to the downloaded file.
 	SrcURL string `json:"srcURL"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -108,9 +113,9 @@ type AssetUploadResponse struct {
 	Height float64 `json:"height"`
 	// Detected or provided MIME type
 	MimeType string `json:"mimeType"`
-	// Local file URL (file://) for the uploaded asset
+	// Local file URL (file://) for the uploaded file
 	SrcURL string `json:"srcURL"`
-	// Unique upload ID for this asset
+	// Unique upload ID for this temporary file
 	UploadID string `json:"uploadID"`
 	// Width in pixels (images/videos)
 	Width float64 `json:"width"`
@@ -149,9 +154,9 @@ type AssetUploadBase64Response struct {
 	Height float64 `json:"height"`
 	// Detected or provided MIME type
 	MimeType string `json:"mimeType"`
-	// Local file URL (file://) for the uploaded asset
+	// Local file URL (file://) for the uploaded file
 	SrcURL string `json:"srcURL"`
-	// Unique upload ID for this asset
+	// Unique upload ID for this temporary file
 	UploadID string `json:"uploadID"`
 	// Width in pixels (images/videos)
 	Width float64 `json:"width"`
@@ -178,7 +183,7 @@ func (r *AssetUploadBase64Response) UnmarshalJSON(data []byte) error {
 }
 
 type AssetDownloadParams struct {
-	// Matrix content URL (mxc:// or localmxc://) for the asset to download.
+	// Matrix content URL (mxc:// or localmxc://) for the file to download.
 	URL string `json:"url" api:"required"`
 	paramObj
 }
@@ -192,7 +197,7 @@ func (r *AssetDownloadParams) UnmarshalJSON(data []byte) error {
 }
 
 type AssetServeParams struct {
-	// Asset URL to serve. Accepts mxc://, localmxc://, or file:// URLs.
+	// File URL to serve. Accepts mxc://, localmxc://, or file:// URLs.
 	URL string `query:"url" api:"required" json:"-"`
 	paramObj
 }
@@ -206,21 +211,31 @@ func (r AssetServeParams) URLQuery() (v url.Values, err error) {
 }
 
 type AssetUploadParams struct {
-	// Base64-encoded file content (max ~500MB decoded)
-	Content string `json:"content" api:"required"`
-	// Original filename. Required for the JSON form of /v1/assets/upload.
-	FileName string `json:"fileName" api:"required"`
-	// MIME type. Required for the JSON form of /v1/assets/upload.
-	MimeType string `json:"mimeType" api:"required"`
+	// The file to upload (max 500 MB).
+	File io.Reader `json:"file,omitzero" api:"required" format:"binary"`
+	// Original filename. Defaults to the uploaded file name if omitted
+	FileName param.Opt[string] `json:"fileName,omitzero"`
+	// MIME type. Auto-detected from magic bytes if omitted
+	MimeType param.Opt[string] `json:"mimeType,omitzero"`
 	paramObj
 }
 
-func (r AssetUploadParams) MarshalJSON() (data []byte, err error) {
-	type shadow AssetUploadParams
-	return param.MarshalObject(r, (*shadow)(&r))
-}
-func (r *AssetUploadParams) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
+func (r AssetUploadParams) MarshalMultipart() (data []byte, contentType string, err error) {
+	buf := bytes.NewBuffer(nil)
+	writer := multipart.NewWriter(buf)
+	err = apiform.MarshalRoot(r, writer)
+	if err == nil {
+		err = apiform.WriteExtras(writer, r.ExtraFields())
+	}
+	if err != nil {
+		writer.Close()
+		return nil, "", err
+	}
+	err = writer.Close()
+	if err != nil {
+		return nil, "", err
+	}
+	return buf.Bytes(), writer.FormDataContentType(), nil
 }
 
 type AssetUploadBase64Params struct {

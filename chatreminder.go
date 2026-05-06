@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"time"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
@@ -78,10 +79,10 @@ func (r *ChatReminderNewParams) UnmarshalJSON(data []byte) error {
 
 // Reminder configuration
 //
-// The property RemindAtMs is required.
+// The property RemindAt is required.
 type ChatReminderNewParamsReminder struct {
-	// Unix timestamp in milliseconds when reminder should trigger
-	RemindAtMs float64 `json:"remindAtMs" api:"required"`
+	// Timestamp when the reminder should trigger.
+	RemindAt time.Time `json:"remindAt" api:"required" format:"date-time"`
 	// Cancel reminder if someone messages in the chat
 	DismissOnIncomingMessage param.Opt[bool] `json:"dismissOnIncomingMessage,omitzero"`
 	paramObj

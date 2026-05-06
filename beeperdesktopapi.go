@@ -103,9 +103,9 @@ type FocusParams struct {
 	// Optional Beeper chat ID (or local chat ID) to focus after opening the app. If
 	// omitted, only opens/focuses the app.
 	ChatID param.Opt[string] `json:"chatID,omitzero"`
-	// Optional draft attachment path to populate in the message input field.
+	// Optional image path to populate in the message input field.
 	DraftAttachmentPath param.Opt[string] `json:"draftAttachmentPath,omitzero"`
-	// Optional draft text to populate in the message input field.
+	// Optional plain text to populate in the message input field.
 	DraftText param.Opt[string] `json:"draftText,omitzero"`
 	// Optional message ID. Jumps to that message in the chat when opening.
 	MessageID param.Opt[string] `json:"messageID,omitzero"`

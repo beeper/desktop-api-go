@@ -58,7 +58,59 @@ func TestChatGetWithOptionalParams(t *testing.T) {
 		context.TODO(),
 		"!NCdzlIaMjZUmvmvyHU:beeper.com",
 		beeperdesktopapi.ChatGetParams{
-			MaxParticipantCount: beeperdesktopapi.Int(50),
+			MaxParticipantCount: beeperdesktopapi.Int(100),
+		},
+	)
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestChatUpdateWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Chats.Update(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.ChatUpdateParams{
+			Description: beeperdesktopapi.String("description"),
+			Draft: beeperdesktopapi.ChatUpdateParamsDraft{
+				Text: "text",
+				Attachments: map[string]beeperdesktopapi.ChatUpdateParamsDraftAttachment{
+					"foo": {
+						UploadID: "uploadID",
+						ID:       beeperdesktopapi.String("id"),
+						Duration: beeperdesktopapi.Float(0),
+						FileName: beeperdesktopapi.String("fileName"),
+						MimeType: beeperdesktopapi.String("mimeType"),
+						Size: beeperdesktopapi.ChatUpdateParamsDraftAttachmentSize{
+							Height: 0,
+							Width:  0,
+						},
+						Type: "image",
+					},
+				},
+			},
+			ImgURL:               beeperdesktopapi.String("imgURL"),
+			IsArchived:           beeperdesktopapi.Bool(true),
+			IsLowPriority:        beeperdesktopapi.Bool(true),
+			IsMuted:              beeperdesktopapi.Bool(true),
+			IsPinned:             beeperdesktopapi.Bool(true),
+			MessageExpirySeconds: beeperdesktopapi.Int(0),
+			Title:                beeperdesktopapi.String("title"),
 		},
 	)
 	if err != nil {
@@ -83,7 +135,7 @@ func TestChatListWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Chats.List(context.TODO(), beeperdesktopapi.ChatListParams{
-		AccountIDs: []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
+		AccountIDs: []string{"matrix", "discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		Cursor:     beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
 		Direction:  beeperdesktopapi.ChatListParamsDirectionBefore,
 	})
@@ -124,6 +176,88 @@ func TestChatArchiveWithOptionalParams(t *testing.T) {
 	}
 }
 
+func TestChatMarkReadWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Chats.MarkRead(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.ChatMarkReadParams{
+			MessageID: beeperdesktopapi.String("1343993"),
+		},
+	)
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestChatMarkUnreadWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Chats.MarkUnread(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.ChatMarkUnreadParams{
+			MessageID: beeperdesktopapi.String("1343993"),
+		},
+	)
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestChatNotifyAnyway(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Chats.NotifyAnyway(
+		context.TODO(),
+		"!NCdzlIaMjZUmvmvyHU:beeper.com",
+		beeperdesktopapi.ChatNotifyAnywayParams{},
+	)
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestChatSearchWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -137,7 +271,7 @@ func TestChatSearchWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Chats.Search(context.TODO(), beeperdesktopapi.ChatSearchParams{
-		AccountIDs:         []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+		AccountIDs:         []string{"matrix", "discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		Cursor:             beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
 		Direction:          beeperdesktopapi.ChatSearchParamsDirectionBefore,
 		Inbox:              beeperdesktopapi.ChatSearchParamsInboxPrimary,
@@ -160,7 +294,6 @@ func TestChatSearchWithOptionalParams(t *testing.T) {
 }
 
 func TestChatStartWithOptionalParams(t *testing.T) {
-	t.Skip("Stainless mock tests currently load the project-published OpenAPI spec URL, which may not include newly-added local-only endpoints during build checks.")
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
