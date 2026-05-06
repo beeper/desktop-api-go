@@ -27,10 +27,10 @@ func TestChatMessageReactionDelete(t *testing.T) {
 	)
 	_, err := client.Chats.Messages.Reactions.Delete(
 		context.TODO(),
-		"messageID",
+		"x",
 		beeperdesktopapi.ChatMessageReactionDeleteParams{
-			ChatID:      "!NCdzlIaMjZUmvmvyHU:beeper.com",
-			ReactionKey: "x",
+			ChatID:    "!NCdzlIaMjZUmvmvyHU:beeper.com",
+			MessageID: "1343993",
 		},
 	)
 	if err != nil {
@@ -56,7 +56,7 @@ func TestChatMessageReactionAddWithOptionalParams(t *testing.T) {
 	)
 	_, err := client.Chats.Messages.Reactions.Add(
 		context.TODO(),
-		"messageID",
+		"1343993",
 		beeperdesktopapi.ChatMessageReactionAddParams{
 			ChatID:        "!NCdzlIaMjZUmvmvyHU:beeper.com",
 			ReactionKey:   "x",

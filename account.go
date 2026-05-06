@@ -38,8 +38,8 @@ func NewAccountService(opts ...option.RequestOption) (r AccountService) {
 	return
 }
 
-// Lists chat accounts across networks (WhatsApp, Telegram, Twitter/X, etc.)
-// actively connected to this Beeper Desktop instance
+// List Chat Accounts connected to this Beeper Desktop instance, including bridge
+// metadata and network identity.
 func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption) (res *[]Account, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/accounts"
@@ -49,9 +49,12 @@ func (r *AccountService) List(ctx context.Context, opts ...option.RequestOption)
 
 // A chat account added to Beeper.
 type Account struct {
-	// Chat account added to Beeper. Use this to route account-scoped actions.
+	// Chat account added to Beeper. Use this to route account-scoped actions. Examples
+	// include matrix for Beeper/Matrix, discordgo for a cloud bridge,
+	// slackgo.TEAM-USER for workspace-scoped cloud bridges, and local-whatsapp*ba*...
+	// for local bridges.
 	AccountID string `json:"accountID" api:"required"`
-	// Bridge metadata for the account. Available in Beeper Desktop v4.2.799+.
+	// Bridge metadata for the account. Available in Beeper Desktop v4.2.785+.
 	Bridge AccountBridge `json:"bridge" api:"required"`
 	// User the account belongs to.
 	User shared.User `json:"user" api:"required"`
@@ -75,15 +78,18 @@ func (r *Account) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Bridge metadata for the account. Available in Beeper Desktop v4.2.799+.
+// Bridge metadata for the account. Available in Beeper Desktop v4.2.785+.
 type AccountBridge struct {
-	// Bridge instance identifier. Available in Beeper Desktop v4.2.799+.
+	// Bridge instance identifier. Matrix and cloud bridges often use the bridge type
+	// (for example matrix or discordgo); local bridges use a local bridge ID (for
+	// example local-whatsapp). Available in Beeper Desktop v4.2.785+.
 	ID string `json:"id" api:"required"`
-	// Bridge provider for the account. Available in Beeper Desktop v4.2.799+.
+	// Bridge provider for the account. Available in Beeper Desktop v4.2.785+.
 	//
 	// Any of "cloud", "self-hosted", "local", "platform-sdk".
 	Provider string `json:"provider" api:"required"`
-	// Bridge type. Available in Beeper Desktop v4.2.799+.
+	// Bridge type, such as matrix, discordgo, slackgo, whatsapp, telegram, or twitter.
+	// Available in Beeper Desktop v4.2.785+.
 	Type string `json:"type" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {

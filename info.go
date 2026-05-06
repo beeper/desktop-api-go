@@ -13,7 +13,8 @@ import (
 	"github.com/beeper/desktop-api-go/packages/respjson"
 )
 
-// Control the Beeper Desktop application
+// Server discovery and capability metadata. Use /v1/info before authentication
+// setup.
 //
 // InfoService contains methods and other services that help with interacting with
 // the beeperdesktop API.
@@ -34,8 +35,8 @@ func NewInfoService(opts ...option.RequestOption) (r InfoService) {
 	return
 }
 
-// Returns app, platform, server, and endpoint discovery metadata for this Beeper
-// Desktop instance.
+// Returns app, platform, server, endpoint discovery, OAuth, and WebSocket metadata
+// for this Beeper Desktop instance.
 func (r *InfoService) Get(ctx context.Context, opts ...option.RequestOption) (res *InfoGetResponse, err error) {
 	var preClientOpts = []option.RequestOption{requestconfig.WithSecurity(requestconfig.Security{})}
 	opts = slices.Concat(preClientOpts, r.Options, opts)
@@ -170,7 +171,7 @@ func (r *InfoGetResponsePlatform) UnmarshalJSON(data []byte) error {
 }
 
 type InfoGetResponseServer struct {
-	// Base URL of the Connect server
+	// Base URL of the Beeper Desktop API server
 	BaseURL string `json:"base_url" api:"required"`
 	// Listening host
 	Hostname string `json:"hostname" api:"required"`

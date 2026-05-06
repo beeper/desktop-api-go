@@ -14,6 +14,34 @@ import (
 	"github.com/beeper/desktop-api-go/option"
 )
 
+func TestMessageGet(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Messages.Get(
+		context.TODO(),
+		"1343993",
+		beeperdesktopapi.MessageGetParams{
+			ChatID: "!NCdzlIaMjZUmvmvyHU:beeper.com",
+		},
+	)
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestMessageUpdate(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -28,7 +56,7 @@ func TestMessageUpdate(t *testing.T) {
 	)
 	_, err := client.Messages.Update(
 		context.TODO(),
-		"messageID",
+		"1343993",
 		beeperdesktopapi.MessageUpdateParams{
 			ChatID: "!NCdzlIaMjZUmvmvyHU:beeper.com",
 			Text:   "x",
@@ -72,6 +100,35 @@ func TestMessageListWithOptionalParams(t *testing.T) {
 	}
 }
 
+func TestMessageDeleteWithOptionalParams(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	err := client.Messages.Delete(
+		context.TODO(),
+		"1343993",
+		beeperdesktopapi.MessageDeleteParams{
+			ChatID:      "!NCdzlIaMjZUmvmvyHU:beeper.com",
+			ForEveryone: beeperdesktopapi.Bool(true),
+		},
+	)
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
 func TestMessageSearchWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
@@ -85,7 +142,7 @@ func TestMessageSearchWithOptionalParams(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Messages.Search(context.TODO(), beeperdesktopapi.MessageSearchParams{
-		AccountIDs:         []string{"local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc", "local-instagram_ba_eRfQMmnSNy_p7Ih7HL7RduRpKFU"},
+		AccountIDs:         []string{"matrix", "discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		ChatIDs:            []string{"!NCdzlIaMjZUmvmvyHU:beeper.com", "1231073"},
 		ChatType:           beeperdesktopapi.MessageSearchParamsChatTypeGroup,
 		Cursor:             beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
@@ -133,7 +190,7 @@ func TestMessageSendWithOptionalParams(t *testing.T) {
 					Height: 0,
 					Width:  0,
 				},
-				Type: "gif",
+				Type: "image",
 			},
 			ReplyToMessageID: beeperdesktopapi.String("replyToMessageID"),
 			Text:             beeperdesktopapi.String("text"),

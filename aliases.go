@@ -41,8 +41,38 @@ const AttachmentTypeAudio = shared.AttachmentTypeAudio
 // This is an alias to an internal type.
 type AttachmentSize = shared.AttachmentSize
 
+// Attachment transcription if available.
+//
+// This is an alias to an internal type.
+type AttachmentTranscription = shared.AttachmentTranscription
+
 // This is an alias to an internal type.
 type Message = shared.Message
+
+// Link preview included with a message.
+//
+// This is an alias to an internal type.
+type MessageLink = shared.MessageLink
+
+// Preview image dimensions.
+//
+// This is an alias to an internal type.
+type MessageLinkImgSize = shared.MessageLinkImgSize
+
+// Read receipt state for this message, when available.
+//
+// This is an alias to an internal type.
+type MessageSeenUnion = shared.MessageSeenUnion
+
+// ISO 8601 timestamp.
+//
+// This is an alias to an internal type.
+type MessageSeenByParticipantItemUnion = shared.MessageSeenByParticipantItemUnion
+
+// Message send status for this message, when reported by the bridge.
+//
+// This is an alias to an internal type.
+type MessageSendStatus = shared.MessageSendStatus
 
 // Message content type. Useful for distinguishing reactions, media messages, and
 // state events from regular text messages.

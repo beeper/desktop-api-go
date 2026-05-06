@@ -7,6 +7,7 @@ import (
 	"errors"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/beeper/desktop-api-go"
 	"github.com/beeper/desktop-api-go/internal/testutil"
@@ -30,7 +31,7 @@ func TestChatReminderNewWithOptionalParams(t *testing.T) {
 		"!NCdzlIaMjZUmvmvyHU:beeper.com",
 		beeperdesktopapi.ChatReminderNewParams{
 			Reminder: beeperdesktopapi.ChatReminderNewParamsReminder{
-				RemindAtMs:               0,
+				RemindAt:                 time.Now(),
 				DismissOnIncomingMessage: beeperdesktopapi.Bool(true),
 			},
 		},

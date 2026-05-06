@@ -4,7 +4,6 @@ package beeperdesktopapi
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -49,7 +48,7 @@ func NewChatService(opts ...option.RequestOption) (r ChatService) {
 	return
 }
 
-// Create a direct or group chat from participant IDs.
+// Create a direct or group chat from participant IDs. Returns the created chat.
 func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...option.RequestOption) (res *ChatNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/chats"
@@ -66,6 +65,20 @@ func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParam
 	}
 	path := fmt.Sprintf("v1/chats/%s", chatID)
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, query, &res, opts...)
+	return res, err
+}
+
+// Update supported chat fields. Non-empty draft objects are accepted only when the
+// current draft is empty. Send draft=null to clear the draft before setting new
+// draft text or attachments.
+func (r *ChatService) Update(ctx context.Context, chatID string, body ChatUpdateParams, opts ...option.RequestOption) (res *Chat, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/chats/%s", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPatch, path, body, &res, opts...)
 	return res, err
 }
 
@@ -108,6 +121,43 @@ func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchi
 	return err
 }
 
+// Mark a chat as read, optionally through a specific message ID.
+func (r *ChatService) MarkRead(ctx context.Context, chatID string, body ChatMarkReadParams, opts ...option.RequestOption) (res *Chat, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/chats/%s/read", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
+// Mark a chat as unread, optionally from a specific message ID.
+func (r *ChatService) MarkUnread(ctx context.Context, chatID string, body ChatMarkUnreadParams, opts ...option.RequestOption) (res *Chat, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/chats/%s/unread", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
+// Force a delivery notification when supported by the underlying network.
+// Currently intended for iMessage on macOS; unsupported networks return an error.
+func (r *ChatService) NotifyAnyway(ctx context.Context, chatID string, body ChatNotifyAnywayParams, opts ...option.RequestOption) (res *Chat, err error) {
+	opts = slices.Concat(r.Options, opts)
+	if chatID == "" {
+		err = errors.New("missing required chatID parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/chats/%s/notify-anyway", chatID)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
+	return res, err
+}
+
 // Search chats by title, network, or participant names.
 func (r *ChatService) Search(ctx context.Context, query ChatSearchParams, opts ...option.RequestOption) (res *pagination.CursorSearch[Chat], err error) {
 	var raw *http.Response
@@ -131,11 +181,11 @@ func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchPara
 	return pagination.NewCursorSearchAutoPager(r.Search(ctx, query, opts...))
 }
 
-// Resolve a user/contact and open a direct chat. Reuses an existing direct chat
-// when one is found. Available in Beeper Desktop v4.2.799+.
+// Resolve a user/contact and open a direct chat. Reuses and returns an existing
+// direct chat when one is found. Available in Beeper Desktop v4.2.808+.
 func (r *ChatService) Start(ctx context.Context, body ChatStartParams, opts ...option.RequestOption) (res *ChatStartResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	path := "v1/chats.start"
+	path := "v1/chats/start"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return res, err
 }
@@ -157,6 +207,8 @@ type Chat struct {
 	Type ChatType `json:"type" api:"required"`
 	// Number of unread messages.
 	UnreadCount int64 `json:"unreadCount" api:"required"`
+	// Chat capabilities reported by the platform.
+	Capabilities ChatCapabilities `json:"capabilities"`
 	// Group chat description/topic when available.
 	Description string `json:"description" api:"nullable"`
 	// Current draft object for this chat, or null when no draft is set.
@@ -167,10 +219,14 @@ type Chat struct {
 	IsArchived bool `json:"isArchived"`
 	// True if chat is marked low priority.
 	IsLowPriority bool `json:"isLowPriority"`
+	// True if the chat was explicitly marked unread by the authenticated user.
+	IsMarkedUnread bool `json:"isMarkedUnread"`
 	// True if chat notifications are muted.
 	IsMuted bool `json:"isMuted"`
 	// True if chat is pinned.
 	IsPinned bool `json:"isPinned"`
+	// True if messages cannot be sent in this chat.
+	IsReadOnly bool `json:"isReadOnly"`
 	// Timestamp of last activity.
 	LastActivity time.Time `json:"lastActivity" format:"date-time"`
 	// Last read message sortKey.
@@ -179,8 +235,12 @@ type Chat struct {
 	LocalChatID string `json:"localChatID" api:"nullable"`
 	// Disappearing-message timer in seconds when available.
 	MessageExpirySeconds int64 `json:"messageExpirySeconds" api:"nullable"`
-	// Mute expiration timestamp, forever, or null when not muted.
-	MutedUntil ChatMutedUntilUnion `json:"mutedUntil" api:"nullable" format:"date-time"`
+	// Current reminder for this chat, or null when no reminder is set.
+	Reminder ChatReminder `json:"reminder" api:"nullable"`
+	// Current snooze state for this chat, or null when no snooze is set.
+	Snooze ChatSnooze `json:"snooze" api:"nullable"`
+	// Number of unread messages that mention the authenticated user or @room.
+	UnreadMentionsCount int64 `json:"unreadMentionsCount"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                     respjson.Field
@@ -190,18 +250,23 @@ type Chat struct {
 		Title                  respjson.Field
 		Type                   respjson.Field
 		UnreadCount            respjson.Field
+		Capabilities           respjson.Field
 		Description            respjson.Field
 		Draft                  respjson.Field
 		ImgURL                 respjson.Field
 		IsArchived             respjson.Field
 		IsLowPriority          respjson.Field
+		IsMarkedUnread         respjson.Field
 		IsMuted                respjson.Field
 		IsPinned               respjson.Field
+		IsReadOnly             respjson.Field
 		LastActivity           respjson.Field
 		LastReadMessageSortKey respjson.Field
 		LocalChatID            respjson.Field
 		MessageExpirySeconds   respjson.Field
-		MutedUntil             respjson.Field
+		Reminder               respjson.Field
+		Snooze                 respjson.Field
+		UnreadMentionsCount    respjson.Field
 		ExtraFields            map[string]respjson.Field
 		raw                    string
 	} `json:"-"`
@@ -218,7 +283,7 @@ type ChatParticipants struct {
 	// True if there are more participants than included in items.
 	HasMore bool `json:"hasMore" api:"required"`
 	// Participants returned for this chat (limited by the request; may be a subset).
-	Items []shared.User `json:"items" api:"required"`
+	Items []ChatParticipantsItem `json:"items" api:"required"`
 	// Total number of participants in the chat.
 	Total int64 `json:"total" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -237,6 +302,31 @@ func (r *ChatParticipants) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
+// A chat participant. Extends User with chat membership metadata.
+type ChatParticipantsItem struct {
+	// True if this participant has admin privileges in the chat.
+	IsAdmin bool `json:"isAdmin"`
+	// True if this participant represents a network or bridge bot.
+	IsNetworkBot bool `json:"isNetworkBot"`
+	// True if this participant has been invited but has not joined yet.
+	IsPending bool `json:"isPending"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		IsAdmin      respjson.Field
+		IsNetworkBot respjson.Field
+		IsPending    respjson.Field
+		ExtraFields  map[string]respjson.Field
+		raw          string
+	} `json:"-"`
+	shared.User
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatParticipantsItem) RawJSON() string { return r.JSON.raw }
+func (r *ChatParticipantsItem) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
 // Chat type: 'single' for direct messages, 'group' for group chats.
 type ChatType string
 
@@ -245,19 +335,394 @@ const (
 	ChatTypeGroup  ChatType = "group"
 )
 
-// Current draft object for this chat, or null when no draft is set.
-type ChatDraft struct {
-	// Draft attachments keyed by attachment ID.
-	Attachments map[string]ChatDraftAttachment `json:"attachments"`
-	// Rich-text draft content as Tiptap JSON.
-	Json ChatDraftJson `json:"json" api:"nullable"`
-	// Plain-text draft projection.
-	Text string `json:"text" api:"nullable"`
+// Chat capabilities reported by the platform.
+type ChatCapabilities struct {
+	// Allowed Unicode reactions. Omitted means all emoji reactions are allowed.
+	AllowedReactions []string `json:"allowedReactions"`
+	// True if archive/unarchive is supported.
+	Archive bool `json:"archive"`
+	// Supported attachment message types and their per-type constraints, keyed by
+	// Matrix msgtype or pseudo-msgtype (for example m.image, m.video,
+	// org.matrix.msc3245.voice). Missing message types should be treated as rejected.
+	Attachments map[string]ChatCapabilitiesAttachment `json:"attachments"`
+	// True if custom emoji reactions are supported.
+	CustomEmojiReactions bool `json:"customEmojiReactions"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Delete int64 `json:"delete"`
+	// True if deleting chats for the authenticated user is supported.
+	DeleteChat bool `json:"deleteChat"`
+	// True if deleting chats for everyone is supported.
+	DeleteChatForEveryone bool `json:"deleteChatForEveryone"`
+	// True if deleting messages only for the authenticated user is supported.
+	DeleteForMe bool `json:"deleteForMe"`
+	// Maximum message age for delete-for-everyone, in seconds.
+	DeleteMaxAge int64 `json:"deleteMaxAge"`
+	// Disappearing-message timer capabilities.
+	DisappearingTimer ChatCapabilitiesDisappearingTimer `json:"disappearingTimer"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Edit int64 `json:"edit"`
+	// Maximum message age for edits, in seconds.
+	EditMaxAge int64 `json:"editMaxAge"`
+	// Maximum number of edits allowed for one message.
+	EditMaxCount int64 `json:"editMaxCount"`
+	// Supported rich-text formatting features keyed by feature name (for example bold,
+	// inline_code, code_block.syntax_highlighting). Omitted means no formatting
+	// support is advertised.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Formatting map[string]int64 `json:"formatting"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	LocationMessage int64 `json:"locationMessage"`
+	// True if marking chats unread is supported.
+	MarkAsUnread bool `json:"markAsUnread"`
+	// Maximum length of normal text messages.
+	MaxTextLength int64 `json:"maxTextLength"`
+	// Message request capabilities.
+	MessageRequest ChatCapabilitiesMessageRequest `json:"messageRequest"`
+	// Participant management capabilities.
+	ParticipantActions ChatCapabilitiesParticipantActions `json:"participantActions"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Poll int64 `json:"poll"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Reaction int64 `json:"reaction"`
+	// Maximum number of reactions allowed on a single message.
+	ReactionCount int64 `json:"reactionCount"`
+	// True if read receipts are supported.
+	ReadReceipts bool `json:"readReceipts"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Reply int64 `json:"reply"`
+	// Chat state update capabilities.
+	State ChatCapabilitiesState `json:"state"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Thread int64 `json:"thread"`
+	// True if typing notifications are supported.
+	TypingNotifications bool `json:"typingNotifications"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		Attachments respjson.Field
-		Json        respjson.Field
+		AllowedReactions      respjson.Field
+		Archive               respjson.Field
+		Attachments           respjson.Field
+		CustomEmojiReactions  respjson.Field
+		Delete                respjson.Field
+		DeleteChat            respjson.Field
+		DeleteChatForEveryone respjson.Field
+		DeleteForMe           respjson.Field
+		DeleteMaxAge          respjson.Field
+		DisappearingTimer     respjson.Field
+		Edit                  respjson.Field
+		EditMaxAge            respjson.Field
+		EditMaxCount          respjson.Field
+		Formatting            respjson.Field
+		LocationMessage       respjson.Field
+		MarkAsUnread          respjson.Field
+		MaxTextLength         respjson.Field
+		MessageRequest        respjson.Field
+		ParticipantActions    respjson.Field
+		Poll                  respjson.Field
+		Reaction              respjson.Field
+		ReactionCount         respjson.Field
+		ReadReceipts          respjson.Field
+		Reply                 respjson.Field
+		State                 respjson.Field
+		Thread                respjson.Field
+		TypingNotifications   respjson.Field
+		ExtraFields           map[string]respjson.Field
+		raw                   string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilities) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilities) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Capabilities for one attachment message type.
+type ChatCapabilitiesAttachment struct {
+	// Supported MIME types or MIME patterns for this file message type. Missing MIME
+	// types should be treated as rejected.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	MimeTypes map[string]int64 `json:"mimeTypes" api:"required"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Caption int64 `json:"caption"`
+	// Maximum caption length when captions are supported.
+	MaxCaptionLength int64 `json:"maxCaptionLength"`
+	// Maximum audio or video duration in seconds.
+	MaxDuration int64 `json:"maxDuration"`
+	// Maximum image or video height in pixels.
+	MaxHeight int64 `json:"maxHeight"`
+	// Maximum file size in bytes.
+	MaxSize int64 `json:"maxSize"`
+	// Maximum image or video width in pixels.
+	MaxWidth int64 `json:"maxWidth"`
+	// True if this file type can be sent as view-once media.
+	ViewOnce bool `json:"viewOnce"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		MimeTypes        respjson.Field
+		Caption          respjson.Field
+		MaxCaptionLength respjson.Field
+		MaxDuration      respjson.Field
+		MaxHeight        respjson.Field
+		MaxSize          respjson.Field
+		MaxWidth         respjson.Field
+		ViewOnce         respjson.Field
+		ExtraFields      map[string]respjson.Field
+		raw              string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesAttachment) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesAttachment) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Disappearing-message timer capabilities.
+type ChatCapabilitiesDisappearingTimer struct {
+	// True if empty timer objects should be omitted from message content.
+	OmitEmptyTimer bool `json:"omitEmptyTimer"`
+	// Allowed disappearing timer values in milliseconds. Omitted means any timer is
+	// allowed.
+	Timers []int64 `json:"timers"`
+	// Supported disappearing timer types.
+	//
+	// Any of "afterRead", "afterSend".
+	Types []string `json:"types"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		OmitEmptyTimer respjson.Field
+		Timers         respjson.Field
+		Types          respjson.Field
+		ExtraFields    map[string]respjson.Field
+		raw            string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesDisappearingTimer) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesDisappearingTimer) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Message request capabilities.
+type ChatCapabilitiesMessageRequest struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	AcceptWithButton int64 `json:"acceptWithButton"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	AcceptWithMessage int64 `json:"acceptWithMessage"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		AcceptWithButton  respjson.Field
+		AcceptWithMessage respjson.Field
+		ExtraFields       map[string]respjson.Field
+		raw               string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesMessageRequest) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesMessageRequest) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Participant management capabilities.
+type ChatCapabilitiesParticipantActions struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Ban int64 `json:"ban"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Invite int64 `json:"invite"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Kick int64 `json:"kick"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Leave int64 `json:"leave"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	RevokeInvite int64 `json:"revokeInvite"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Ban          respjson.Field
+		Invite       respjson.Field
+		Kick         respjson.Field
+		Leave        respjson.Field
+		RevokeInvite respjson.Field
+		ExtraFields  map[string]respjson.Field
+		raw          string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesParticipantActions) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesParticipantActions) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat state update capabilities.
+type ChatCapabilitiesState struct {
+	// Chat avatar state capability.
+	Avatar ChatCapabilitiesStateAvatar `json:"avatar"`
+	// Chat description/topic state capability.
+	Description ChatCapabilitiesStateDescription `json:"description"`
+	// Disappearing-message timer state capability.
+	DisappearingTimer ChatCapabilitiesStateDisappearingTimer `json:"disappearingTimer"`
+	// Chat title state capability.
+	Title ChatCapabilitiesStateTitle `json:"title"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Avatar            respjson.Field
+		Description       respjson.Field
+		DisappearingTimer respjson.Field
+		Title             respjson.Field
+		ExtraFields       map[string]respjson.Field
+		raw               string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesState) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesState) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat avatar state capability.
+type ChatCapabilitiesStateAvatar struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesStateAvatar) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesStateAvatar) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat description/topic state capability.
+type ChatCapabilitiesStateDescription struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesStateDescription) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesStateDescription) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Disappearing-message timer state capability.
+type ChatCapabilitiesStateDisappearingTimer struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesStateDisappearingTimer) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesStateDisappearingTimer) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat title state capability.
+type ChatCapabilitiesStateTitle struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesStateTitle) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesStateTitle) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Current draft object for this chat, or null when no draft is set.
+type ChatDraft struct {
+	// Matrix HTML draft body.
+	Text string `json:"text" api:"required"`
+	// Draft attachments keyed by attachment ID.
+	Attachments map[string]ChatDraftAttachment `json:"attachments"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
 		Text        respjson.Field
+		Attachments respjson.Field
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
@@ -272,6 +737,10 @@ func (r *ChatDraft) UnmarshalJSON(data []byte) error {
 type ChatDraftAttachment struct {
 	// Draft attachment identifier.
 	ID string `json:"id" api:"required"`
+	// Draft attachment type. GIF and recorded audio are mutually exclusive types.
+	//
+	// Any of "file", "gif", "recorded_audio".
+	Type string `json:"type" api:"required"`
 	// Audio duration in seconds if known.
 	AudioDurationSeconds float64 `json:"audioDurationSeconds"`
 	// Original filename if available.
@@ -280,25 +749,23 @@ type ChatDraftAttachment struct {
 	FilePath string `json:"filePath"`
 	// File size in bytes if known.
 	FileSize float64 `json:"fileSize"`
-	// True if the attachment is a GIF.
-	IsGif bool `json:"isGif"`
-	// True if the attachment is recorded audio.
-	IsRecordedAudio bool `json:"isRecordedAudio"`
 	// MIME type if known.
 	MimeType string `json:"mimeType"`
 	// Pixel dimensions of the attachment.
 	Size ChatDraftAttachmentSize `json:"size"`
+	// Sticker identifier if the draft attachment is a sticker.
+	StickerID string `json:"stickerID"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID                   respjson.Field
+		Type                 respjson.Field
 		AudioDurationSeconds respjson.Field
 		FileName             respjson.Field
 		FilePath             respjson.Field
 		FileSize             respjson.Field
-		IsGif                respjson.Field
-		IsRecordedAudio      respjson.Field
 		MimeType             respjson.Field
 		Size                 respjson.Field
+		StickerID            respjson.Field
 		ExtraFields          map[string]respjson.Field
 		raw                  string
 	} `json:"-"`
@@ -329,99 +796,60 @@ func (r *ChatDraftAttachmentSize) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Rich-text draft content as Tiptap JSON.
-type ChatDraftJson struct {
-	Attrs   map[string]any      `json:"attrs"`
-	Content []map[string]any    `json:"content"`
-	Marks   []ChatDraftJsonMark `json:"marks"`
-	Text    string              `json:"text"`
-	Type    string              `json:"type"`
+// Current reminder for this chat, or null when no reminder is set.
+type ChatReminder struct {
+	// Cancel reminder if someone messages in the chat.
+	DismissOnIncomingMessage bool `json:"dismissOnIncomingMessage"`
+	// Timestamp when the reminder should trigger.
+	RemindAt time.Time `json:"remindAt" format:"date-time"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		Attrs       respjson.Field
-		Content     respjson.Field
-		Marks       respjson.Field
-		Text        respjson.Field
-		Type        respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
+		DismissOnIncomingMessage respjson.Field
+		RemindAt                 respjson.Field
+		ExtraFields              map[string]respjson.Field
+		raw                      string
 	} `json:"-"`
 }
 
 // Returns the unmodified JSON received from the API
-func (r ChatDraftJson) RawJSON() string { return r.JSON.raw }
-func (r *ChatDraftJson) UnmarshalJSON(data []byte) error {
+func (r ChatReminder) RawJSON() string { return r.JSON.raw }
+func (r *ChatReminder) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type ChatDraftJsonMark struct {
-	Type  string         `json:"type" api:"required"`
-	Attrs map[string]any `json:"attrs"`
+// Current snooze state for this chat, or null when no snooze is set.
+type ChatSnooze struct {
+	// Timestamp when the snooze expires.
+	SnoozeUntil time.Time `json:"snoozeUntil" format:"date-time"`
+	// Timestamp when the user set the snooze.
+	UserSnoozedAt time.Time `json:"userSnoozedAt" format:"date-time"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
-		Type        respjson.Field
-		Attrs       respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
+		SnoozeUntil   respjson.Field
+		UserSnoozedAt respjson.Field
+		ExtraFields   map[string]respjson.Field
+		raw           string
 	} `json:"-"`
 }
 
 // Returns the unmodified JSON received from the API
-func (r ChatDraftJsonMark) RawJSON() string { return r.JSON.raw }
-func (r *ChatDraftJsonMark) UnmarshalJSON(data []byte) error {
+func (r ChatSnooze) RawJSON() string { return r.JSON.raw }
+func (r *ChatSnooze) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
-
-// ChatMutedUntilUnion contains all possible properties and values from
-// [time.Time], [string].
-//
-// Use the methods beginning with 'As' to cast the union to one of its variants.
-//
-// If the underlying value is not a json object, one of the following properties
-// will be valid: OfTime OfChatMutedUntilString]
-type ChatMutedUntilUnion struct {
-	// This field will be present if the value is a [time.Time] instead of an object.
-	OfTime time.Time `json:",inline"`
-	// This field will be present if the value is a [string] instead of an object.
-	OfChatMutedUntilString string `json:",inline"`
-	JSON                   struct {
-		OfTime                 respjson.Field
-		OfChatMutedUntilString respjson.Field
-		raw                    string
-	} `json:"-"`
-}
-
-func (u ChatMutedUntilUnion) AsTime() (v time.Time) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-func (u ChatMutedUntilUnion) AsChatMutedUntilString() (v string) {
-	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
-	return
-}
-
-// Returns the unmodified JSON received from the API
-func (u ChatMutedUntilUnion) RawJSON() string { return u.JSON.raw }
-
-func (r *ChatMutedUntilUnion) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-type ChatMutedUntilString string
-
-const (
-	ChatMutedUntilStringForever ChatMutedUntilString = "forever"
-)
 
 type ChatNewResponse struct {
-	// Newly created chat ID.
+	// DEPRECATED - use id instead. Compatibility alias for older clients.
+	//
+	// Deprecated: deprecated
 	ChatID string `json:"chatID" api:"required"`
-	// Only returned in start mode. 'existing' means an existing chat was reused;
-	// 'created' means a new chat was created.
+	// DEPRECATED - legacy start-chat status for older clients. New clients should
+	// inspect the returned Chat instead.
 	//
 	// Any of "existing", "created".
-	Status ChatNewResponseStatus `json:"status"`
+	//
+	// Deprecated: deprecated
+	Status string `json:"status"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID      respjson.Field
@@ -429,6 +857,7 @@ type ChatNewResponse struct {
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
+	Chat
 }
 
 // Returns the unmodified JSON received from the API
@@ -437,15 +866,7 @@ func (r *ChatNewResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Only returned in start mode. 'existing' means an existing chat was reused;
-// 'created' means a new chat was created.
-type ChatNewResponseStatus string
-
-const (
-	ChatNewResponseStatusExisting ChatNewResponseStatus = "existing"
-	ChatNewResponseStatusCreated  ChatNewResponseStatus = "created"
-)
-
+// Chat with optional last message preview.
 type ChatListResponse struct {
 	// Last message preview for this chat, if available.
 	Preview shared.Message `json:"preview"`
@@ -465,13 +886,17 @@ func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
 }
 
 type ChatStartResponse struct {
-	// Newly created chat ID.
+	// DEPRECATED - use id instead. Compatibility alias for older clients.
+	//
+	// Deprecated: deprecated
 	ChatID string `json:"chatID" api:"required"`
-	// Only returned in start mode. 'existing' means an existing chat was reused;
-	// 'created' means a new chat was created.
+	// DEPRECATED - legacy start-chat status for older clients. New clients should
+	// inspect the returned Chat instead.
 	//
 	// Any of "existing", "created".
-	Status ChatStartResponseStatus `json:"status"`
+	//
+	// Deprecated: deprecated
+	Status string `json:"status"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ChatID      respjson.Field
@@ -479,6 +904,7 @@ type ChatStartResponse struct {
 		ExtraFields map[string]respjson.Field
 		raw         string
 	} `json:"-"`
+	Chat
 }
 
 // Returns the unmodified JSON received from the API
@@ -486,15 +912,6 @@ func (r ChatStartResponse) RawJSON() string { return r.JSON.raw }
 func (r *ChatStartResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
-
-// Only returned in start mode. 'existing' means an existing chat was reused;
-// 'created' means a new chat was created.
-type ChatStartResponseStatus string
-
-const (
-	ChatStartResponseStatusExisting ChatStartResponseStatus = "existing"
-	ChatStartResponseStatusCreated  ChatStartResponseStatus = "created"
-)
 
 type ChatNewParams struct {
 	// Account to create or start the chat on.
@@ -531,8 +948,9 @@ const (
 )
 
 type ChatGetParams struct {
-	// Maximum number of participants to return. Use -1 for all; otherwise 0–500.
-	// Defaults to all (-1).
+	// Maximum number of participants to return. Use -1 for all; otherwise 0-500.
+	// Defaults to 100. List and search endpoints return up to 20 participants per
+	// chat.
 	MaxParticipantCount param.Opt[int64] `query:"maxParticipantCount,omitzero" json:"-"`
 	paramObj
 }
@@ -543,6 +961,116 @@ func (r ChatGetParams) URLQuery() (v url.Values, err error) {
 		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
 		NestedFormat: apiquery.NestedQueryFormatBrackets,
 	})
+}
+
+type ChatUpdateParams struct {
+	// Group chat description/topic. Support depends on the chat account and chat
+	// permissions.
+	Description param.Opt[string] `json:"description,omitzero"`
+	// Local filesystem path to a group chat avatar image. Support depends on the chat
+	// account and chat permissions.
+	ImgURL param.Opt[string] `json:"imgURL,omitzero"`
+	// Disappearing-message timer in seconds, or null to clear when supported.
+	MessageExpirySeconds param.Opt[int64] `json:"messageExpirySeconds,omitzero"`
+	// Custom chat title. Support depends on the chat account and chat permissions.
+	Title param.Opt[string] `json:"title,omitzero"`
+	// Archive or unarchive the chat.
+	IsArchived param.Opt[bool] `json:"isArchived,omitzero"`
+	// Mark or unmark the chat as low priority when supported by the account.
+	IsLowPriority param.Opt[bool] `json:"isLowPriority,omitzero"`
+	// Mute or unmute the chat.
+	IsMuted param.Opt[bool] `json:"isMuted,omitzero"`
+	// Pin or unpin the chat when supported by the account.
+	IsPinned param.Opt[bool] `json:"isPinned,omitzero"`
+	// Draft object to set or clear. Non-empty drafts are only accepted when the
+	// current draft is empty. Send draft=null to clear text and attachments together
+	// before setting a new draft.
+	Draft ChatUpdateParamsDraft `json:"draft,omitzero"`
+	paramObj
+}
+
+func (r ChatUpdateParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatUpdateParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatUpdateParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Draft object to set or clear. Non-empty drafts are only accepted when the
+// current draft is empty. Send draft=null to clear text and attachments together
+// before setting a new draft.
+//
+// The property Text is required.
+type ChatUpdateParamsDraft struct {
+	// Draft text. Plain text and Markdown are converted to Matrix HTML with the same
+	// rules used by send and edit.
+	Text string `json:"text" api:"required"`
+	// Draft attachments keyed by attachment ID. Each attachment must reference an
+	// uploadID returned by the upload file endpoint.
+	Attachments map[string]ChatUpdateParamsDraftAttachment `json:"attachments,omitzero"`
+	paramObj
+}
+
+func (r ChatUpdateParamsDraft) MarshalJSON() (data []byte, err error) {
+	type shadow ChatUpdateParamsDraft
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatUpdateParamsDraft) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// The property UploadID is required.
+type ChatUpdateParamsDraftAttachment struct {
+	// Upload ID from uploadAsset endpoint. Required to reference uploaded files.
+	UploadID string `json:"uploadID" api:"required"`
+	// Optional draft attachment identifier. If omitted, a new identifier is generated.
+	ID param.Opt[string] `json:"id,omitzero"`
+	// Duration in seconds (optional override of cached value)
+	Duration param.Opt[float64] `json:"duration,omitzero"`
+	// Filename (optional override of cached value)
+	FileName param.Opt[string] `json:"fileName,omitzero"`
+	// MIME type (optional override of cached value)
+	MimeType param.Opt[string] `json:"mimeType,omitzero"`
+	// Dimensions (optional override of cached value)
+	Size ChatUpdateParamsDraftAttachmentSize `json:"size,omitzero"`
+	// Attachment type hint (image, video, audio, file, gif, voice-note, sticker). If
+	// omitted, auto-detected from mimeType
+	//
+	// Any of "image", "video", "audio", "file", "gif", "voice-note", "sticker".
+	Type string `json:"type,omitzero"`
+	paramObj
+}
+
+func (r ChatUpdateParamsDraftAttachment) MarshalJSON() (data []byte, err error) {
+	type shadow ChatUpdateParamsDraftAttachment
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatUpdateParamsDraftAttachment) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+func init() {
+	apijson.RegisterFieldValidator[ChatUpdateParamsDraftAttachment](
+		"type", "image", "video", "audio", "file", "gif", "voice-note", "sticker",
+	)
+}
+
+// Dimensions (optional override of cached value)
+//
+// The properties Height, Width are required.
+type ChatUpdateParamsDraftAttachmentSize struct {
+	Height float64 `json:"height" api:"required"`
+	Width  float64 `json:"width" api:"required"`
+	paramObj
+}
+
+func (r ChatUpdateParamsDraftAttachmentSize) MarshalJSON() (data []byte, err error) {
+	type shadow ChatUpdateParamsDraftAttachmentSize
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatUpdateParamsDraftAttachmentSize) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
 }
 
 type ChatListParams struct {
@@ -586,6 +1114,46 @@ func (r ChatArchiveParams) MarshalJSON() (data []byte, err error) {
 	return param.MarshalObject(r, (*shadow)(&r))
 }
 func (r *ChatArchiveParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatMarkReadParams struct {
+	// Optional message ID to mark read through.
+	MessageID param.Opt[string] `json:"messageID,omitzero"`
+	paramObj
+}
+
+func (r ChatMarkReadParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatMarkReadParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatMarkReadParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatMarkUnreadParams struct {
+	// Optional message ID to mark unread from.
+	MessageID param.Opt[string] `json:"messageID,omitzero"`
+	paramObj
+}
+
+func (r ChatMarkUnreadParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatMarkUnreadParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatMarkUnreadParams) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type ChatNotifyAnywayParams struct {
+	paramObj
+}
+
+func (r ChatNotifyAnywayParams) MarshalJSON() (data []byte, err error) {
+	type shadow ChatNotifyAnywayParams
+	return param.MarshalObject(r, (*shadow)(&r))
+}
+func (r *ChatNotifyAnywayParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 

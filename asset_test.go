@@ -77,7 +77,7 @@ func TestAssetServe(t *testing.T) {
 	}
 }
 
-func TestAssetUpload(t *testing.T) {
+func TestAssetUploadWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -90,9 +90,9 @@ func TestAssetUpload(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	_, err := client.Assets.Upload(context.TODO(), beeperdesktopapi.AssetUploadParams{
-		Content:  "x",
-		FileName: "x",
-		MimeType: "x",
+		File:     io.Reader(bytes.NewBuffer([]byte("Example data"))),
+		FileName: beeperdesktopapi.String("fileName"),
+		MimeType: beeperdesktopapi.String("mimeType"),
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error

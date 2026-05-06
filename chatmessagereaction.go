@@ -7,11 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"slices"
 
 	"github.com/beeper/desktop-api-go/internal/apijson"
-	"github.com/beeper/desktop-api-go/internal/apiquery"
 	"github.com/beeper/desktop-api-go/internal/requestconfig"
 	"github.com/beeper/desktop-api-go/option"
 	"github.com/beeper/desktop-api-go/packages/param"
@@ -40,18 +38,22 @@ func NewChatMessageReactionService(opts ...option.RequestOption) (r ChatMessageR
 }
 
 // Remove the reaction added by the authenticated user from an existing message.
-func (r *ChatMessageReactionService) Delete(ctx context.Context, messageID string, params ChatMessageReactionDeleteParams, opts ...option.RequestOption) (res *ChatMessageReactionDeleteResponse, err error) {
+func (r *ChatMessageReactionService) Delete(ctx context.Context, reactionKey string, body ChatMessageReactionDeleteParams, opts ...option.RequestOption) (res *ChatMessageReactionDeleteResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
-	if params.ChatID == "" {
+	if body.ChatID == "" {
 		err = errors.New("missing required chatID parameter")
 		return nil, err
 	}
-	if messageID == "" {
+	if body.MessageID == "" {
 		err = errors.New("missing required messageID parameter")
 		return nil, err
 	}
-	path := fmt.Sprintf("v1/chats/%s/messages/%s/reactions", params.ChatID, messageID)
-	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, params, &res, opts...)
+	if reactionKey == "" {
+		err = errors.New("missing required reactionKey parameter")
+		return nil, err
+	}
+	path := fmt.Sprintf("v1/chats/%s/messages/%s/reactions/%s", body.ChatID, body.MessageID, reactionKey)
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodDelete, path, nil, &res, opts...)
 	return res, err
 }
 
@@ -72,13 +74,15 @@ func (r *ChatMessageReactionService) Add(ctx context.Context, messageID string, 
 }
 
 type ChatMessageReactionDeleteResponse struct {
-	// Unique identifier of the chat.
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
 	ChatID string `json:"chatID" api:"required"`
 	// Message ID.
 	MessageID string `json:"messageID" api:"required"`
-	// Reaction key that was removed
+	// Reaction key that was removed.
 	ReactionKey string `json:"reactionKey" api:"required"`
-	// Whether the reaction was successfully removed
+	// Always true. Indicates the reaction removal was queued; failures return an error
+	// response.
 	Success bool `json:"success" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -98,15 +102,17 @@ func (r *ChatMessageReactionDeleteResponse) UnmarshalJSON(data []byte) error {
 }
 
 type ChatMessageReactionAddResponse struct {
-	// Unique identifier of the chat.
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
 	ChatID string `json:"chatID" api:"required"`
 	// Message ID.
 	MessageID string `json:"messageID" api:"required"`
-	// Reaction key that was added
+	// Reaction key that was added.
 	ReactionKey string `json:"reactionKey" api:"required"`
-	// Whether the reaction was successfully added
+	// Always true. Indicates the reaction was queued; failures return an error
+	// response.
 	Success bool `json:"success" api:"required"`
-	// Transaction ID used for the reaction event
+	// Transaction ID used for send tracking.
 	TransactionID string `json:"transactionID" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -127,28 +133,21 @@ func (r *ChatMessageReactionAddResponse) UnmarshalJSON(data []byte) error {
 }
 
 type ChatMessageReactionDeleteParams struct {
-	// Unique identifier of the chat.
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
-	// Reaction key to remove
-	ReactionKey string `query:"reactionKey" api:"required" json:"-"`
+	// Message ID.
+	MessageID string `path:"messageID" api:"required" json:"-"`
 	paramObj
 }
 
-// URLQuery serializes [ChatMessageReactionDeleteParams]'s query parameters as
-// `url.Values`.
-func (r ChatMessageReactionDeleteParams) URLQuery() (v url.Values, err error) {
-	return apiquery.MarshalWithSettings(r, apiquery.QuerySettings{
-		ArrayFormat:  apiquery.ArrayQueryFormatRepeat,
-		NestedFormat: apiquery.NestedQueryFormatBrackets,
-	})
-}
-
 type ChatMessageReactionAddParams struct {
-	// Unique identifier of the chat.
+	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
+	// installation when available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
 	// Reaction key to add (emoji, shortcode, or custom emoji key)
 	ReactionKey string `json:"reactionKey" api:"required"`
-	// Optional transaction ID for deduplication and local echo tracking
+	// Optional transaction ID for deduplication and send tracking
 	TransactionID param.Opt[string] `json:"transactionID,omitzero"`
 	paramObj
 }

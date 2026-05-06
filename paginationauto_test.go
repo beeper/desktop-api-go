@@ -25,9 +25,9 @@ func TestAutoPagination(t *testing.T) {
 		option.WithAccessToken("My Access Token"),
 	)
 	iter := client.Messages.SearchAutoPaging(context.TODO(), beeperdesktopapi.MessageSearchParams{
-		AccountIDs: []string{"local-telegram_ba_QFrb5lrLPhO3OT5MFBeTWv0x4BI"},
+		AccountIDs: []string{"discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		Limit:      beeperdesktopapi.Int(10),
-		Query:      beeperdesktopapi.String("deployment"),
+		Query:      beeperdesktopapi.String("oauth"),
 	})
 	// The mock server isn't going to give us real pagination
 	for i := 0; i < 3 && iter.Next(); i++ {
