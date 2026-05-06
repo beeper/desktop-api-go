@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beeper/desktop-api-go/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
 	"github.com/tidwall/sjson"
 )
 

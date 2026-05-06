@@ -1,7 +1,7 @@
 package apiform
 
 import (
-	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/v5/packages/param"
 	"mime/multipart"
 	"reflect"
 )

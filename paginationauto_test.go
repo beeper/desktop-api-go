@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go"
-	"github.com/beeper/desktop-api-go/internal/testutil"
-	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/v5"
+	"github.com/beeper/desktop-api-go/v5/internal/testutil"
+	"github.com/beeper/desktop-api-go/v5/option"
 )
 
 func TestAutoPagination(t *testing.T) {

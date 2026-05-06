@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/beeper/desktop-api-go/internal/apijson"
-	"github.com/beeper/desktop-api-go/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/option"
-	"github.com/beeper/desktop-api-go/packages/respjson"
-	"github.com/beeper/desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/v5/internal/apijson"
+	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v5/packages/respjson"
+	"github.com/beeper/desktop-api-go/v5/shared"
 )
 
 // Manage connected chat accounts

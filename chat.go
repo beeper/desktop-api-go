@@ -11,14 +11,14 @@ import (
 	"slices"
 	"time"
 
-	"github.com/beeper/desktop-api-go/internal/apijson"
-	"github.com/beeper/desktop-api-go/internal/apiquery"
-	"github.com/beeper/desktop-api-go/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/option"
-	"github.com/beeper/desktop-api-go/packages/pagination"
-	"github.com/beeper/desktop-api-go/packages/param"
-	"github.com/beeper/desktop-api-go/packages/respjson"
-	"github.com/beeper/desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/v5/internal/apijson"
+	"github.com/beeper/desktop-api-go/v5/internal/apiquery"
+	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v5/packages/pagination"
+	"github.com/beeper/desktop-api-go/v5/packages/param"
+	"github.com/beeper/desktop-api-go/v5/packages/respjson"
+	"github.com/beeper/desktop-api-go/v5/shared"
 )
 
 // Manage chats

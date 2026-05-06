@@ -1,4 +1,4 @@
-module github.com/beeper/desktop-api-go
+module github.com/beeper/desktop-api-go/v5
 
 go 1.22
 

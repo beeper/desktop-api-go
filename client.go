@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/beeper/desktop-api-go/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v5/option"
 )
 
 // Client creates a struct with services and top level methods that help with
