@@ -3,9 +3,9 @@
 package beeperdesktopapi
 
 import (
-	"github.com/beeper/desktop-api-go/internal/apierror"
-	"github.com/beeper/desktop-api-go/packages/param"
-	"github.com/beeper/desktop-api-go/shared"
+	"github.com/beeper/desktop-api-go/v5/internal/apierror"
+	"github.com/beeper/desktop-api-go/v5/packages/param"
+	"github.com/beeper/desktop-api-go/v5/shared"
 )
 
 // aliased to make [param.APIUnion] private when embedding

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	shimjson "github.com/beeper/desktop-api-go/internal/encoding/json"
+	shimjson "github.com/beeper/desktop-api-go/v5/internal/encoding/json"
 
 	"github.com/tidwall/sjson"
 )

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"github.com/beeper/desktop-api-go/internal/apijson"
-	"github.com/beeper/desktop-api-go/packages/respjson"
+	"github.com/beeper/desktop-api-go/v5/internal/apijson"
+	"github.com/beeper/desktop-api-go/v5/packages/respjson"
 )
 
 // Error represents an error that originates from the API, i.e. when a request is

@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/beeper/desktop-api-go/packages/param"
+	"github.com/beeper/desktop-api-go/v5/packages/param"
 )
 
 type Struct struct {

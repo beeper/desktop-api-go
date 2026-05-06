@@ -3,7 +3,7 @@
 package beeperdesktopapi
 
 import (
-	"github.com/beeper/desktop-api-go/option"
+	"github.com/beeper/desktop-api-go/v5/option"
 )
 
 // Manage chat messages
