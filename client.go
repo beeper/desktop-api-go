@@ -18,8 +18,14 @@ import (
 // directly, and instead use the [NewClient] method instead.
 type Client struct {
 	Options []option.RequestOption
+	// Manage Beeper app login and encrypted messaging setup
+	App AppService
 	// Manage connected chat accounts
 	Accounts AccountService
+	// Manage bridge-backed account types and account availability
+	Bridges BridgeService
+	// Matrix-compatible APIs for accounts, rooms, and connected network bridges.
+	Matrix MatrixService
 	// Manage chats
 	Chats ChatService
 	// Manage messages in chats
@@ -61,7 +67,10 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 
 	r = Client{Options: opts}
 
+	r.App = NewAppService(opts...)
 	r.Accounts = NewAccountService(opts...)
+	r.Bridges = NewBridgeService(opts...)
+	r.Matrix = NewMatrixService(opts...)
 	r.Chats = NewChatService(opts...)
 	r.Messages = NewMessageService(opts...)
 	r.Assets = NewAssetService(opts...)
