@@ -18,6 +18,21 @@ func ValueOf[T Constant[T]]() T {
 	return t.Default()
 }
 
+type Complete string       // Always "complete"
+type Cookies string        // Always "cookies"
+type DisplayAndWait string // Always "display_and_wait"
+type UserInput string      // Always "user_input"
+
+func (c Complete) Default() Complete             { return "complete" }
+func (c Cookies) Default() Cookies               { return "cookies" }
+func (c DisplayAndWait) Default() DisplayAndWait { return "display_and_wait" }
+func (c UserInput) Default() UserInput           { return "user_input" }
+
+func (c Complete) MarshalJSON() ([]byte, error)       { return marshalString(c) }
+func (c Cookies) MarshalJSON() ([]byte, error)        { return marshalString(c) }
+func (c DisplayAndWait) MarshalJSON() ([]byte, error) { return marshalString(c) }
+func (c UserInput) MarshalJSON() ([]byte, error)      { return marshalString(c) }
+
 type constant[T any] interface {
 	Constant[T]
 	*T
