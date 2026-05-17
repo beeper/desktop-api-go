@@ -181,16 +181,91 @@ Methods:
 
 # App
 
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppSessionResponse">AppSessionResponse</a>
+
+Methods:
+
+- <code title="get /v1/app/setup">client.App.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppService.Session">Session</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppSessionResponse">AppSessionResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 ## Login
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginRegisterResponse">AppLoginRegisterResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginResponseResponseUnion">AppLoginResponseResponseUnion</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginStartResponse">AppLoginStartResponse</a>
+
+Methods:
+
+- <code title="post /v1/app/setup/email">client.App.Login.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginService.Email">Email</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginEmailParams">AppLoginEmailParams</a>) <a href="https://pkg.go.dev/builtin#error">error</a></code>
+- <code title="post /v1/app/setup/register">client.App.Login.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginService.Register">Register</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginRegisterParams">AppLoginRegisterParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginRegisterResponse">AppLoginRegisterResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/app/setup/response">client.App.Login.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginService.Response">Response</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginResponseParams">AppLoginResponseParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginResponseResponseUnion">AppLoginResponseResponseUnion</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/app/setup/start">client.App.Login.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginService.Start">Start</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginStartResponse">AppLoginStartResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 ### Verification
 
 #### RecoveryKey
 
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyVerifyResponse">AppLoginVerificationRecoveryKeyVerifyResponse</a>
+
+Methods:
+
+- <code title="post /v1/app/setup/verification/recovery-key">client.App.Login.Verification.RecoveryKey.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyService.Verify">Verify</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyVerifyParams">AppLoginVerificationRecoveryKeyVerifyParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyVerifyResponse">AppLoginVerificationRecoveryKeyVerifyResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 ##### Reset
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetNewResponse">AppLoginVerificationRecoveryKeyResetNewResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetConfirmResponse">AppLoginVerificationRecoveryKeyResetConfirmResponse</a>
+
+Methods:
+
+- <code title="post /v1/app/setup/verification/recovery-key/reset">client.App.Login.Verification.RecoveryKey.Reset.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetNewParams">AppLoginVerificationRecoveryKeyResetNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetNewResponse">AppLoginVerificationRecoveryKeyResetNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/app/setup/verification/recovery-key/reset/confirm">client.App.Login.Verification.RecoveryKey.Reset.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetService.Confirm">Confirm</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetConfirmParams">AppLoginVerificationRecoveryKeyResetConfirmParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppLoginVerificationRecoveryKeyResetConfirmResponse">AppLoginVerificationRecoveryKeyResetConfirmResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
 
 ## Verifications
 
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationNewResponse">AppVerificationNewResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationGetResponse">AppVerificationGetResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationListResponse">AppVerificationListResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationAcceptResponse">AppVerificationAcceptResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationCancelResponse">AppVerificationCancelResponse</a>
+
+Methods:
+
+- <code title="post /v1/app/setup/verifications">client.App.Verifications.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationService.New">New</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationNewParams">AppVerificationNewParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationNewResponse">AppVerificationNewResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /v1/app/setup/verifications/{verificationID}">client.App.Verifications.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationService.Get">Get</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, verificationID <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationGetResponse">AppVerificationGetResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="get /v1/app/setup/verifications">client.App.Verifications.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationService.List">List</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationListResponse">AppVerificationListResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/app/setup/verifications/{verificationID}/accept">client.App.Verifications.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationService.Accept">Accept</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, verificationID <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationAcceptResponse">AppVerificationAcceptResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/app/setup/verifications/{verificationID}/cancel">client.App.Verifications.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationService.Cancel">Cancel</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, verificationID <a href="https://pkg.go.dev/builtin#string">string</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationCancelParams">AppVerificationCancelParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationCancelResponse">AppVerificationCancelResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 ### Qr
 
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationQrConfirmScannedResponse">AppVerificationQrConfirmScannedResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationQrScanResponse">AppVerificationQrScanResponse</a>
+
+Methods:
+
+- <code title="post /v1/app/setup/verifications/{verificationID}/qr/confirm-scanned">client.App.Verifications.Qr.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationQrService.ConfirmScanned">ConfirmScanned</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, verificationID <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationQrConfirmScannedResponse">AppVerificationQrConfirmScannedResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/app/setup/verifications/qr/scan">client.App.Verifications.Qr.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationQrService.Scan">Scan</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, body <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationQrScanParams">AppVerificationQrScanParams</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationQrScanResponse">AppVerificationQrScanResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+
 ### SAS
+
+Response Types:
+
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationSASConfirmResponse">AppVerificationSASConfirmResponse</a>
+- <a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationSASStartResponse">AppVerificationSASStartResponse</a>
+
+Methods:
+
+- <code title="post /v1/app/setup/verifications/{verificationID}/sas/confirm">client.App.Verifications.SAS.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationSASService.Confirm">Confirm</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, verificationID <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationSASConfirmResponse">AppVerificationSASConfirmResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>
+- <code title="post /v1/app/setup/verifications/{verificationID}/sas/start">client.App.Verifications.SAS.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationSASService.Start">Start</a>(ctx <a href="https://pkg.go.dev/context">context</a>.<a href="https://pkg.go.dev/context#Context">Context</a>, verificationID <a href="https://pkg.go.dev/builtin#string">string</a>) (\*<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5">beeperdesktopapi</a>.<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5#AppVerificationSASStartResponse">AppVerificationSASStartResponse</a>, <a href="https://pkg.go.dev/builtin#error">error</a>)</code>

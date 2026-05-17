@@ -13,7 +13,9 @@ import (
 // automatically. You should not instantiate this service directly, and instead use
 // the [NewAppLoginVerificationService] method instead.
 type AppLoginVerificationService struct {
-	Options     []option.RequestOption
+	Options []option.RequestOption
+	// First-party sign-in and encrypted messaging setup for Beeper Desktop and Beeper
+	// Server.
 	RecoveryKey AppLoginVerificationRecoveryKeyService
 }
 
