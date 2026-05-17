@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/v5/option"
 )
 
-func TestMatrixRoomAccountDataGet(t *testing.T) {
+func TestBridgeLoginSessionNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,12 +25,13 @@ func TestMatrixRoomAccountDataGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Matrix.Rooms.AccountData.Get(
+	_, err := client.Bridges.LoginSessions.New(
 		context.TODO(),
-		"org.example.custom.room.config",
-		beeperdesktopapi.MatrixRoomAccountDataGetParams{
-			UserID: "@alice:example.com",
-			RoomID: "!726s6s6q:example.com",
+		"local-whatsapp",
+		beeperdesktopapi.BridgeLoginSessionNewParams{
+			AccountID: beeperdesktopapi.String("x"),
+			FlowID:    beeperdesktopapi.String("x"),
+			LoginID:   beeperdesktopapi.String("x"),
 		},
 	)
 	if err != nil {
@@ -42,7 +43,7 @@ func TestMatrixRoomAccountDataGet(t *testing.T) {
 	}
 }
 
-func TestMatrixRoomAccountDataUpdate(t *testing.T) {
+func TestBridgeLoginSessionGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -54,15 +55,39 @@ func TestMatrixRoomAccountDataUpdate(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Matrix.Rooms.AccountData.Update(
+	_, err := client.Bridges.LoginSessions.Get(
 		context.TODO(),
-		"org.example.custom.room.config",
-		beeperdesktopapi.MatrixRoomAccountDataUpdateParams{
-			UserID: "@alice:example.com",
-			RoomID: "!726s6s6q:example.com",
-			Body: map[string]any{
-				"custom_account_data_key": "custom_account_data_value",
-			},
+		"123",
+		beeperdesktopapi.BridgeLoginSessionGetParams{
+			BridgeID: "local-whatsapp",
+		},
+	)
+	if err != nil {
+		var apierr *beeperdesktopapi.Error
+		if errors.As(err, &apierr) {
+			t.Log(string(apierr.DumpRequest(true)))
+		}
+		t.Fatalf("err should be nil: %s", err.Error())
+	}
+}
+
+func TestBridgeLoginSessionCancel(t *testing.T) {
+	baseURL := "http://localhost:4010"
+	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
+		baseURL = envURL
+	}
+	if !testutil.CheckTestServer(t, baseURL) {
+		return
+	}
+	client := beeperdesktopapi.NewClient(
+		option.WithBaseURL(baseURL),
+		option.WithAccessToken("My Access Token"),
+	)
+	_, err := client.Bridges.LoginSessions.Cancel(
+		context.TODO(),
+		"123",
+		beeperdesktopapi.BridgeLoginSessionCancelParams{
+			BridgeID: "local-whatsapp",
 		},
 	)
 	if err != nil {

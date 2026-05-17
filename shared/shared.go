@@ -17,12 +17,32 @@ type paramUnion = param.APIUnion
 // aliased to make [param.APIObject] private when embedding
 type paramObj = param.APIObject
 
+type APIError struct {
+	Code    string         `json:"code" api:"required"`
+	Message string         `json:"message" api:"required"`
+	Details map[string]any `json:"details"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Code        respjson.Field
+		Message     respjson.Field
+		Details     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r APIError) RawJSON() string { return r.JSON.raw }
+func (r *APIError) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
 type Attachment struct {
 	// Attachment type.
 	//
 	// Any of "unknown", "img", "video", "audio".
 	Type AttachmentType `json:"type" api:"required"`
-	// Attachment identifier (typically an mxc:// URL). Use the download file endpoint
+	// Attachment identifier, typically an mxc:// URL. Use the download file endpoint
 	// to get a local file path.
 	ID string `json:"id"`
 	// Duration in seconds (audio/video).
@@ -40,12 +60,12 @@ type Attachment struct {
 	// MIME type if known (e.g., 'image/png').
 	MimeType string `json:"mimeType"`
 	// Preview image URL for video attachments (poster frame). May be temporary or
-	// local-only to this device; download promptly if durable access is needed.
+	// available only on this device; download promptly if durable access is needed.
 	PosterImg string `json:"posterImg"`
 	// Pixel dimensions of the attachment: width/height in px.
 	Size AttachmentSize `json:"size"`
-	// Public URL or local file path to fetch the file. May be temporary or local-only
-	// to this device; download promptly if durable access is needed.
+	// Public URL or local file path to fetch the file. May be temporary or available
+	// only on this device; download promptly if durable access is needed.
 	SrcURL string `json:"srcURL"`
 	// Attachment transcription if available.
 	Transcription AttachmentTranscription `json:"transcription"`
@@ -133,11 +153,11 @@ type Message struct {
 	ID string `json:"id" api:"required"`
 	// Beeper account ID the message belongs to.
 	AccountID string `json:"accountID" api:"required"`
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `json:"chatID" api:"required"`
-	// Matrix-style fully-qualified sender user ID, usually including a bridge prefix
-	// and homeserver.
+	// Fully qualified sender user ID. Network-backed IDs usually include the network
+	// prefix and homeserver.
 	SenderID string `json:"senderID" api:"required"`
 	// A unique, sortable key used to sort messages.
 	SortKey string `json:"sortKey" api:"required"`
@@ -166,11 +186,11 @@ type Message struct {
 	Reactions []Reaction `json:"reactions"`
 	// Read receipt state for this message, when available.
 	Seen MessageSeenUnion `json:"seen" format:"date-time"`
-	// Resolved sender display name (impersonator/full name/username/participant name).
+	// Resolved sender display name.
 	SenderName string `json:"senderName"`
 	// Message send status for this message, when reported by the bridge.
 	SendStatus MessageSendStatus `json:"sendStatus"`
-	// Matrix HTML body if present.
+	// Rich-text message body if present.
 	Text string `json:"text"`
 	// Message content type. Useful for distinguishing reactions, media messages, and
 	// state events from regular text messages.
@@ -218,11 +238,11 @@ type MessageLink struct {
 	Title string `json:"title" api:"required"`
 	// Resolved link URL.
 	URL string `json:"url" api:"required"`
-	// Favicon URL if available. May be temporary or local-only to this device;
+	// Favicon URL if available. May be temporary or available only on this device;
 	// download promptly if durable access is needed.
 	Favicon string `json:"favicon"`
-	// Preview image URL if available. May be temporary or local-only to this device;
-	// download promptly if durable access is needed.
+	// Preview image URL if available. May be temporary or available only on this
+	// device; download promptly if durable access is needed.
 	Img string `json:"img"`
 	// Preview image dimensions.
 	ImgSize MessageLinkImgSize `json:"imgSize"`
@@ -356,7 +376,8 @@ type MessageSendStatus struct {
 	Timestamp time.Time `json:"timestamp" api:"required" format:"date-time"`
 	// User IDs the message was delivered to, when reported by the network.
 	DeliveredToUsers []string `json:"deliveredToUsers"`
-	// Internal bridge error detail. Intended for diagnostics, not end-user display.
+	// Diagnostic error detail from the messaging network adapter. Do not show directly
+	// to users.
 	InternalError string `json:"internalError"`
 	// Human-readable send status or failure message.
 	Message string `json:"message"`
@@ -410,7 +431,7 @@ type Reaction struct {
 	ReactionKey string `json:"reactionKey" api:"required"`
 	// True if the reactionKey is an emoji.
 	Emoji bool `json:"emoji"`
-	// URL to the reaction's image. May be temporary or local-only to this device;
+	// URL to the reaction's image. May be temporary or available only on this device;
 	// download promptly if durable access is needed.
 	ImgURL string `json:"imgURL"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -442,9 +463,9 @@ type User struct {
 	Email string `json:"email"`
 	// Display name as shown in clients (e.g., 'Alice Example'). May include emojis.
 	FullName string `json:"fullName"`
-	// Avatar image URL if available. This may be a remote URL, Matrix media URL, data
-	// URL, or local filesystem URL depending on source and endpoint. May be temporary
-	// or local-only to this device; download promptly if durable access is needed.
+	// Avatar image URL if available. This may be a remote URL, media URL, data URL, or
+	// local file URL depending on the source. May be temporary or available only on
+	// this device; download promptly if durable access is needed.
 	ImgURL string `json:"imgURL"`
 	// True if this user represents the authenticated account's own identity.
 	IsSelf bool `json:"isSelf"`

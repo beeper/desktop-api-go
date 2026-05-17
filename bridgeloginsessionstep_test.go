@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/v5/option"
 )
 
-func TestMatrixRoomEventGet(t *testing.T) {
+func TestBridgeLoginSessionStepSubmitWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,11 +25,18 @@ func TestMatrixRoomEventGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Matrix.Rooms.Events.Get(
+	_, err := client.Bridges.LoginSessions.Steps.Submit(
 		context.TODO(),
-		"$asfDuShaf7Gafaw:matrix.org",
-		beeperdesktopapi.MatrixRoomEventGetParams{
-			RoomID: "!636q39766251:matrix.org",
+		"x",
+		beeperdesktopapi.BridgeLoginSessionStepSubmitParams{
+			BridgeID:       "local-whatsapp",
+			LoginSessionID: "123",
+			Type:           beeperdesktopapi.BridgeLoginSessionStepSubmitParamsTypeUserInput,
+			Fields: map[string]string{
+				"foo": "string",
+			},
+			LastURL: beeperdesktopapi.String("lastURL"),
+			Source:  beeperdesktopapi.BridgeLoginSessionStepSubmitParamsSourceAPI,
 		},
 	)
 	if err != nil {

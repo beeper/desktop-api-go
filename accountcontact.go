@@ -102,7 +102,7 @@ type AccountContactListParams struct {
 	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
 	// Maximum contacts to return per page.
 	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
-	// Optional search query for blended contact lookup.
+	// Optional search query for contact lookup.
 	Query param.Opt[string] `query:"query,omitzero" json:"-"`
 	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
 	// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
@@ -131,7 +131,7 @@ const (
 )
 
 type AccountContactSearchParams struct {
-	// Text to search users by. Network-specific behavior.
+	// Text to search contacts by. Matching behavior depends on the network.
 	Query string `query:"query" api:"required" json:"-"`
 	paramObj
 }
