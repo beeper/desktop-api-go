@@ -37,7 +37,7 @@ func NewChatReminderService(opts ...option.RequestOption) (r ChatReminderService
 	return
 }
 
-// Set a reminder for a chat at a specific time
+// Set a reminder for a chat at a specific time.
 func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatReminderNewParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -50,7 +50,7 @@ func (r *ChatReminderService) New(ctx context.Context, chatID string, body ChatR
 	return err
 }
 
-// Clear an existing reminder from a chat
+// Clear an existing reminder from a chat.
 func (r *ChatReminderService) Delete(ctx context.Context, chatID string, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)

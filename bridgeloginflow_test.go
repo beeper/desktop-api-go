@@ -13,7 +13,7 @@ import (
 	"github.com/beeper/desktop-api-go/v5/option"
 )
 
-func TestMatrixUserGetProfile(t *testing.T) {
+func TestBridgeLoginFlowList(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,7 @@ func TestMatrixUserGetProfile(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.Matrix.Users.GetProfile(context.TODO(), "@alice:example.com")
+	_, err := client.Bridges.LoginFlows.List(context.TODO(), "local-whatsapp")
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {

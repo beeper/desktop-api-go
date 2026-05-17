@@ -43,7 +43,7 @@ func NewMessageService(opts ...option.RequestOption) (r MessageService) {
 }
 
 // Retrieve a message by final message ID, pendingMessageID, or Matrix event ID.
-// Chat ID may be a Beeper chat ID or local chat ID.
+// chatID may be a Beeper chat ID or a local chat ID.
 func (r *MessageService) Get(ctx context.Context, messageID string, query MessageGetParams, opts ...option.RequestOption) (res *shared.Message, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if query.ChatID == "" {
@@ -160,14 +160,12 @@ func (r *MessageService) Send(ctx context.Context, chatID string, body MessageSe
 type MessageUpdateResponse struct {
 	// DEPRECATED - use id instead. Compatibility alias for older clients.
 	//
-	// Deprecated: deprecated
+	// Deprecated: Use id instead.
 	MessageID string `json:"messageID" api:"required"`
 	// DEPRECATED - compatibility field. Successful responses are already represented
 	// by the 200 status code.
 	//
-	// Any of true.
-	//
-	// Deprecated: deprecated
+	// Deprecated: Use the HTTP 200 response status instead.
 	Success bool `json:"success" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -186,8 +184,8 @@ func (r *MessageUpdateResponse) UnmarshalJSON(data []byte) error {
 }
 
 type MessageSendResponse struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `json:"chatID" api:"required"`
 	// Pending ID assigned to the message before the network confirms the send. Pass it
 	// to GET /v1/chats/{chatID}/messages/{messageID} to resolve, or wait for the
@@ -209,15 +207,15 @@ func (r *MessageSendResponse) UnmarshalJSON(data []byte) error {
 }
 
 type MessageGetParams struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
 	paramObj
 }
 
 type MessageUpdateParams struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
 	// New text content for the message
 	Text string `json:"text" api:"required"`
@@ -261,8 +259,8 @@ const (
 )
 
 type MessageDeleteParams struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
 	// True to request deletion for everyone when the network supports it; false to
 	// delete only for the authenticated user when supported.
@@ -295,10 +293,10 @@ type MessageSearchParams struct {
 	DateBefore param.Opt[time.Time] `query:"dateBefore,omitzero" format:"date-time" json:"-"`
 	// Maximum number of messages to return.
 	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
-	// Literal word search (non-semantic). Finds messages containing these EXACT words
-	// in any order. Use single words users actually type, not concepts or phrases.
-	// Example: use "dinner" not "dinner plans", use "sick" not "health issues". If
-	// omitted, returns results filtered only by other parameters.
+	// Literal word search. Finds messages containing these words in any order. Use
+	// words the user actually typed, not inferred concepts. Example: use "dinner"
+	// rather than "dinner plans". If omitted, returns results filtered only by the
+	// other parameters.
 	Query param.Opt[string] `query:"query,omitzero" json:"-"`
 	// Filter by sender: 'me' (messages sent by the authenticated user), 'others'
 	// (messages sent by others), or a specific user ID string (user.id).
@@ -352,8 +350,8 @@ const (
 type MessageSendParams struct {
 	// Provide a message ID to send this as a reply to an existing message
 	ReplyToMessageID param.Opt[string] `json:"replyToMessageID,omitzero"`
-	// Draft text. Plain text and Markdown are converted to Matrix HTML with the same
-	// rules used by send and edit.
+	// Draft text. Plain text and Markdown are converted to Beeper rich text with the
+	// same rules used by send and edit.
 	Text param.Opt[string] `json:"text,omitzero"`
 	// Single attachment to send with the message
 	Attachment MessageSendParamsAttachment `json:"attachment,omitzero"`

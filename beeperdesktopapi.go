@@ -103,7 +103,7 @@ type FocusParams struct {
 	// Optional Beeper chat ID (or local chat ID) to focus after opening the app. If
 	// omitted, only opens/focuses the app.
 	ChatID param.Opt[string] `json:"chatID,omitzero"`
-	// Optional image path to populate in the message input field.
+	// Optional local image path to populate in the message input field.
 	DraftAttachmentPath param.Opt[string] `json:"draftAttachmentPath,omitzero"`
 	// Optional plain text to populate in the message input field.
 	DraftText param.Opt[string] `json:"draftText,omitzero"`
@@ -121,7 +121,7 @@ func (r *FocusParams) UnmarshalJSON(data []byte) error {
 }
 
 type SearchParams struct {
-	// User-typed search text. Literal word matching (non-semantic).
+	// User-typed search text. Uses literal word matching.
 	Query string `query:"query" api:"required" json:"-"`
 	paramObj
 }

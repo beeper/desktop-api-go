@@ -56,7 +56,7 @@ func (r *ChatService) New(ctx context.Context, body ChatNewParams, opts ...optio
 	return res, err
 }
 
-// Retrieve chat details including metadata, participants, and latest message
+// Retrieve chat details, including metadata, participants, and the latest message.
 func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParams, opts ...option.RequestOption) (res *Chat, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
@@ -68,7 +68,7 @@ func (r *ChatService) Get(ctx context.Context, chatID string, query ChatGetParam
 	return res, err
 }
 
-// Update supported chat fields. Non-empty draft objects are accepted only when the
+// Update supported chat fields. Non-empty drafts are accepted only when the
 // current draft is empty. Send draft=null to clear the draft before setting new
 // draft text or attachments.
 func (r *ChatService) Update(ctx context.Context, chatID string, body ChatUpdateParams, opts ...option.RequestOption) (res *Chat, err error) {
@@ -107,8 +107,8 @@ func (r *ChatService) ListAutoPaging(ctx context.Context, query ChatListParams, 
 	return pagination.NewCursorNoLimitAutoPager(r.List(ctx, query, opts...))
 }
 
-// Archive or unarchive a chat. Set archived=true to move to archive,
-// archived=false to move back to inbox
+// Archive or unarchive a chat. Set archived=true to move it to Archive, or
+// archived=false to move it back to the inbox.
 func (r *ChatService) Archive(ctx context.Context, chatID string, body ChatArchiveParams, opts ...option.RequestOption) (err error) {
 	opts = slices.Concat(r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -145,8 +145,9 @@ func (r *ChatService) MarkUnread(ctx context.Context, chatID string, body ChatMa
 	return res, err
 }
 
-// Force a delivery notification when supported by the underlying network.
-// Currently intended for iMessage on macOS; unsupported networks return an error.
+// Send a notification despite the recipient focus state when the network supports
+// it. Currently intended for iMessage on macOS; unsupported networks return an
+// error.
 func (r *ChatService) NotifyAnyway(ctx context.Context, chatID string, body ChatNotifyAnywayParams, opts ...option.RequestOption) (res *Chat, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if chatID == "" {
@@ -182,7 +183,7 @@ func (r *ChatService) SearchAutoPaging(ctx context.Context, query ChatSearchPara
 }
 
 // Resolve a user/contact and open a direct chat. Reuses and returns an existing
-// direct chat when one is found. Available in Beeper Desktop v4.2.808+.
+// direct chat when one is found. Available in Beeper v4.2.808+.
 func (r *ChatService) Start(ctx context.Context, body ChatStartParams, opts ...option.RequestOption) (res *ChatStartResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/chats/start"
@@ -231,7 +232,7 @@ type Chat struct {
 	LastActivity time.Time `json:"lastActivity" format:"date-time"`
 	// Last read message sortKey.
 	LastReadMessageSortKey string `json:"lastReadMessageSortKey"`
-	// Local chat ID specific to this Beeper Desktop installation.
+	// Local chat ID specific to this installation.
 	LocalChatID string `json:"localChatID" api:"nullable"`
 	// Disappearing-message timer in seconds when available.
 	MessageExpirySeconds int64 `json:"messageExpirySeconds" api:"nullable"`
@@ -306,7 +307,7 @@ func (r *ChatParticipants) UnmarshalJSON(data []byte) error {
 type ChatParticipantsItem struct {
 	// True if this participant has admin privileges in the chat.
 	IsAdmin bool `json:"isAdmin"`
-	// True if this participant represents a network or bridge bot.
+	// True if this participant represents an automated network account.
 	IsNetworkBot bool `json:"isNetworkBot"`
 	// True if this participant has been invited but has not joined yet.
 	IsPending bool `json:"isPending"`
@@ -715,7 +716,7 @@ func (r *ChatCapabilitiesStateTitle) UnmarshalJSON(data []byte) error {
 
 // Current draft object for this chat, or null when no draft is set.
 type ChatDraft struct {
-	// Matrix HTML draft body.
+	// Rich-text draft body as returned by Beeper.
 	Text string `json:"text" api:"required"`
 	// Draft attachments keyed by attachment ID.
 	Attachments map[string]ChatDraftAttachment `json:"attachments"`
@@ -841,14 +842,14 @@ func (r *ChatSnooze) UnmarshalJSON(data []byte) error {
 type ChatNewResponse struct {
 	// DEPRECATED - use id instead. Compatibility alias for older clients.
 	//
-	// Deprecated: deprecated
+	// Deprecated: Use id instead.
 	ChatID string `json:"chatID" api:"required"`
 	// DEPRECATED - legacy start-chat status for older clients. New clients should
 	// inspect the returned Chat instead.
 	//
 	// Any of "existing", "created".
 	//
-	// Deprecated: deprecated
+	// Deprecated: Inspect the returned Chat instead.
 	Status string `json:"status"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -888,14 +889,14 @@ func (r *ChatListResponse) UnmarshalJSON(data []byte) error {
 type ChatStartResponse struct {
 	// DEPRECATED - use id instead. Compatibility alias for older clients.
 	//
-	// Deprecated: deprecated
+	// Deprecated: Use id instead.
 	ChatID string `json:"chatID" api:"required"`
 	// DEPRECATED - legacy start-chat status for older clients. New clients should
 	// inspect the returned Chat instead.
 	//
 	// Any of "existing", "created".
 	//
-	// Deprecated: deprecated
+	// Deprecated: Inspect the returned Chat instead.
 	Status string `json:"status"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
@@ -1003,8 +1004,8 @@ func (r *ChatUpdateParams) UnmarshalJSON(data []byte) error {
 //
 // The property Text is required.
 type ChatUpdateParamsDraft struct {
-	// Draft text. Plain text and Markdown are converted to Matrix HTML with the same
-	// rules used by send and edit.
+	// Draft text. Plain text and Markdown are converted to Beeper rich text with the
+	// same rules used by send and edit.
 	Text string `json:"text" api:"required"`
 	// Draft attachments keyed by attachment ID. Each attachment must reference an
 	// uploadID returned by the upload file endpoint.
@@ -1165,19 +1166,16 @@ type ChatSearchParams struct {
 	UnreadOnly param.Opt[bool] `query:"unreadOnly,omitzero" json:"-"`
 	// Opaque pagination cursor; do not inspect. Use together with 'direction'.
 	Cursor param.Opt[string] `query:"cursor,omitzero" json:"-"`
-	// Provide an ISO datetime string to only retrieve chats with last activity after
-	// this time
+	// Only include chats with last activity after this ISO 8601 datetime.
 	LastActivityAfter param.Opt[time.Time] `query:"lastActivityAfter,omitzero" format:"date-time" json:"-"`
-	// Provide an ISO datetime string to only retrieve chats with last activity before
-	// this time
+	// Only include chats with last activity before this ISO 8601 datetime.
 	LastActivityBefore param.Opt[time.Time] `query:"lastActivityBefore,omitzero" format:"date-time" json:"-"`
 	// Set the maximum number of chats to retrieve. Valid range: 1-200, default is 50
 	Limit param.Opt[int64] `query:"limit,omitzero" json:"-"`
-	// Literal token search (non-semantic). Use single words users type (e.g.,
-	// "dinner"). When multiple words provided, ALL must match. Case-insensitive.
+	// Literal chat search. Use words the user typed, such as "dinner". When multiple
+	// words are provided, all must match. Case-insensitive.
 	Query param.Opt[string] `query:"query,omitzero" json:"-"`
-	// Provide an array of account IDs to filter chats from specific messaging accounts
-	// only
+	// Limit results to specific chat accounts.
 	AccountIDs []string `query:"accountIDs,omitzero" json:"-"`
 	// Pagination direction used with 'cursor': 'before' fetches older results, 'after'
 	// fetches newer results. Defaults to 'before' when only 'cursor' is provided.
@@ -1251,7 +1249,7 @@ const (
 type ChatStartParams struct {
 	// Account to create or start the chat on.
 	AccountID string `json:"accountID" api:"required"`
-	// Merged user-like contact payload used to resolve the best identifier.
+	// Contact-like user payload used to resolve the best identifier.
 	User ChatStartParamsUser `json:"user,omitzero" api:"required"`
 	// Whether invite-based DM creation is allowed when required by the platform.
 	AllowInvite param.Opt[bool] `json:"allowInvite,omitzero"`
@@ -1268,7 +1266,7 @@ func (r *ChatStartParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Merged user-like contact payload used to resolve the best identifier.
+// Contact-like user payload used to resolve the best identifier.
 type ChatStartParamsUser struct {
 	// Known user ID when available.
 	ID param.Opt[string] `json:"id,omitzero"`
