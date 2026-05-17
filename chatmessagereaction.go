@@ -74,8 +74,8 @@ func (r *ChatMessageReactionService) Add(ctx context.Context, messageID string, 
 }
 
 type ChatMessageReactionDeleteResponse struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `json:"chatID" api:"required"`
 	// Message ID.
 	MessageID string `json:"messageID" api:"required"`
@@ -102,8 +102,8 @@ func (r *ChatMessageReactionDeleteResponse) UnmarshalJSON(data []byte) error {
 }
 
 type ChatMessageReactionAddResponse struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `json:"chatID" api:"required"`
 	// Message ID.
 	MessageID string `json:"messageID" api:"required"`
@@ -133,8 +133,8 @@ func (r *ChatMessageReactionAddResponse) UnmarshalJSON(data []byte) error {
 }
 
 type ChatMessageReactionDeleteParams struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
 	// Message ID.
 	MessageID string `path:"messageID" api:"required" json:"-"`
@@ -142,8 +142,8 @@ type ChatMessageReactionDeleteParams struct {
 }
 
 type ChatMessageReactionAddParams struct {
-	// Chat ID. Input routes also accept the local chat ID from this Beeper Desktop
-	// installation when available.
+	// Chat ID. Input routes also accept the local chat ID from this installation when
+	// available.
 	ChatID string `path:"chatID" api:"required" json:"-"`
 	// Reaction key to add (emoji, shortcode, or custom emoji key)
 	ReactionKey string `json:"reactionKey" api:"required"`

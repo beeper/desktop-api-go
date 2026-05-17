@@ -20,7 +20,7 @@ type Client struct {
 	Options []option.RequestOption
 	// Manage connected chat accounts
 	Accounts AccountService
-	// Manage bridge-backed account types and account availability
+	// Manage bridge-backed account types, connections, and login sessions
 	Bridges BridgeService
 	// Manage chats
 	Chats ChatService
@@ -33,8 +33,6 @@ type Client struct {
 	Info InfoService
 	// Manage Beeper app login and encrypted messaging setup
 	App AppService
-	// Matrix-compatible APIs for accounts, rooms, and connected network bridges.
-	Matrix MatrixService
 }
 
 // DefaultClientOptions read from the environment (BEEPER_ACCESS_TOKEN,
@@ -74,7 +72,6 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r.Assets = NewAssetService(opts...)
 	r.Info = NewInfoService(opts...)
 	r.App = NewAppService(opts...)
-	r.Matrix = NewMatrixService(opts...)
 
 	return
 }
@@ -148,8 +145,8 @@ func (r *Client) Delete(ctx context.Context, path string, params any, res any, o
 	return r.Execute(ctx, http.MethodDelete, path, params, res, opts...)
 }
 
-// Focus Beeper Desktop and optionally navigate to a specific chat, message, or
-// pre-fill plain text and an image path.
+// Focus Beeper Desktop and optionally open a specific chat, jump to a message, or
+// pre-fill text and an image.
 func (r *Client) Focus(ctx context.Context, body FocusParams, opts ...option.RequestOption) (res *FocusResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/focus"
@@ -157,9 +154,9 @@ func (r *Client) Focus(ctx context.Context, body FocusParams, opts ...option.Req
 	return res, err
 }
 
-// Returns matching chats, participant name matches in groups, and the first page
-// of messages in one call. Paginate messages via search-messages. Paginate chats
-// via search-chats.
+// Return matching chats, participant matches in group chats, and the first page of
+// message results in one call. Use the dedicated chat and message search endpoints
+// for pagination.
 func (r *Client) Search(ctx context.Context, query SearchParams, opts ...option.RequestOption) (res *SearchResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/search"

@@ -18,19 +18,31 @@ func ValueOf[T Constant[T]]() T {
 	return t.Default()
 }
 
+type Cancelled string      // Always "cancelled"
 type Complete string       // Always "complete"
 type Cookies string        // Always "cookies"
 type DisplayAndWait string // Always "display_and_wait"
+type Emoji string          // Always "emoji"
+type Nothing string        // Always "nothing"
+type Qr string             // Always "qr"
 type UserInput string      // Always "user_input"
 
+func (c Cancelled) Default() Cancelled           { return "cancelled" }
 func (c Complete) Default() Complete             { return "complete" }
 func (c Cookies) Default() Cookies               { return "cookies" }
 func (c DisplayAndWait) Default() DisplayAndWait { return "display_and_wait" }
+func (c Emoji) Default() Emoji                   { return "emoji" }
+func (c Nothing) Default() Nothing               { return "nothing" }
+func (c Qr) Default() Qr                         { return "qr" }
 func (c UserInput) Default() UserInput           { return "user_input" }
 
+func (c Cancelled) MarshalJSON() ([]byte, error)      { return marshalString(c) }
 func (c Complete) MarshalJSON() ([]byte, error)       { return marshalString(c) }
 func (c Cookies) MarshalJSON() ([]byte, error)        { return marshalString(c) }
 func (c DisplayAndWait) MarshalJSON() ([]byte, error) { return marshalString(c) }
+func (c Emoji) MarshalJSON() ([]byte, error)          { return marshalString(c) }
+func (c Nothing) MarshalJSON() ([]byte, error)        { return marshalString(c) }
+func (c Qr) MarshalJSON() ([]byte, error)             { return marshalString(c) }
 func (c UserInput) MarshalJSON() ([]byte, error)      { return marshalString(c) }
 
 type constant[T any] interface {

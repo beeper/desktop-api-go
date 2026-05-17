@@ -36,7 +36,7 @@ func NewInfoService(opts ...option.RequestOption) (r InfoService) {
 }
 
 // Returns app, platform, server, endpoint discovery, OAuth, and WebSocket metadata
-// for this Beeper Desktop instance.
+// for this Beeper Client API server.
 func (r *InfoService) Get(ctx context.Context, opts ...option.RequestOption) (res *InfoGetResponse, err error) {
 	var preClientOpts = []option.RequestOption{requestconfig.WithSecurity(requestconfig.Security{})}
 	opts = slices.Concat(preClientOpts, r.Options, opts)
@@ -171,7 +171,7 @@ func (r *InfoGetResponsePlatform) UnmarshalJSON(data []byte) error {
 }
 
 type InfoGetResponseServer struct {
-	// Base URL of the Beeper Desktop API server
+	// Base URL of the Beeper Client API server
 	BaseURL string `json:"base_url" api:"required"`
 	// Listening host
 	Hostname string `json:"hostname" api:"required"`
