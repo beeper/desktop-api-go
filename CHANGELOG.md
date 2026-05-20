@@ -1,5 +1,25 @@
 # Changelog
 
+## 5.0.1 (2026-05-20)
+
+Full Changelog: [v5.0.0...v5.0.1](https://github.com/beeper/desktop-api-go/compare/v5.0.0...v5.0.1)
+
+### Features
+
+* **api:** add account/bridge endpoints, remove matrix/app.login APIs, update types ([3e969d9](https://github.com/beeper/desktop-api-go/commit/3e969d90a0d4b649b207d70170f4a14f62c6d4f5))
+* **api:** add app login/session, verification, recovery key endpoints ([6f25557](https://github.com/beeper/desktop-api-go/commit/6f25557647937bb0dd45a71b7bb03ef13e4d1651))
+* **client:** optimize json encoder for internal types ([dcc797f](https://github.com/beeper/desktop-api-go/commit/dcc797ff224ede9ee34604dbce9f0a0bfd98a979))
+
+
+### Bug Fixes
+
+* **go:** avoid panic when http.DefaultTransport is wrapped ([f96d2e8](https://github.com/beeper/desktop-api-go/commit/f96d2e8c266c49dd57d26112fbb67239f5241a9f))
+
+
+### Chores
+
+* redact api-key headers in debug logs ([7672988](https://github.com/beeper/desktop-api-go/commit/767298873b546ae8b23e381707023548cebda355))
+
 ## 5.0.0 (2026-05-06)
 
 Full Changelog: [v0.5.0...v5.0.0](https://github.com/beeper/desktop-api-go/compare/v0.5.0...v5.0.0)
