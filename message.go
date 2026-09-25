@@ -11,14 +11,14 @@ import (
 	"slices"
 	"time"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/internal/apiquery"
-	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/v5/option"
-	"github.com/beeper/desktop-api-go/v5/packages/pagination"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
-	"github.com/beeper/desktop-api-go/v5/shared"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/internal/apiquery"
+	"github.com/beeper/desktop-api-go/v6/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v6/option"
+	"github.com/beeper/desktop-api-go/v6/packages/pagination"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/shared"
 )
 
 // Manage messages in chats
@@ -184,8 +184,8 @@ func (r *MessageUpdateResponse) UnmarshalJSON(data []byte) error {
 }
 
 type MessageSendResponse struct {
-	// Chat ID. Input routes also accept the local chat ID from this installation when
-	// available.
+	// Chat the message was actually sent to. When sending to a merged chat, this is
+	// the member chat the send was routed to.
 	ChatID string `json:"chatID" api:"required"`
 	// Pending ID assigned to the message before the network confirms the send. Pass it
 	// to GET /v1/chats/{chatID}/messages/{messageID} to resolve, or wait for the

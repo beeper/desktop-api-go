@@ -18,10 +18,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/beeper/desktop-api-go/v5/internal"
-	"github.com/beeper/desktop-api-go/v5/internal/apierror"
-	"github.com/beeper/desktop-api-go/v5/internal/apiform"
-	"github.com/beeper/desktop-api-go/v5/internal/apiquery"
+	"github.com/beeper/desktop-api-go/v6/internal"
+	"github.com/beeper/desktop-api-go/v6/internal/apierror"
+	"github.com/beeper/desktop-api-go/v6/internal/apiform"
+	"github.com/beeper/desktop-api-go/v6/internal/apiquery"
 )
 
 func getDefaultHeaders() map[string]string {

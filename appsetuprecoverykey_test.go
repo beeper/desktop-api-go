@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/internal/testutil"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/internal/testutil"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
-func TestAppLoginVerificationRecoveryKeyVerify(t *testing.T) {
+func TestAppSetupRecoveryKeyVerify(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,7 @@ func TestAppLoginVerificationRecoveryKeyVerify(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Login.Verification.RecoveryKey.Verify(context.TODO(), beeperdesktopapi.AppLoginVerificationRecoveryKeyVerifyParams{
+	_, err := client.App.Setup.RecoveryKey.Verify(context.TODO(), beeperdesktopapi.AppSetupRecoveryKeyVerifyParams{
 		RecoveryKey: "x",
 	})
 	if err != nil {

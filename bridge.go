@@ -10,15 +10,15 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/v5/option"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
-	"github.com/beeper/desktop-api-go/v5/shared"
-	"github.com/beeper/desktop-api-go/v5/shared/constant"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v6/option"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/shared"
+	"github.com/beeper/desktop-api-go/v6/shared/constant"
 )
 
-// Manage bridge-backed account types, connections, and login sessions
+// Manage available bridges, connect or reconnect chat accounts
 //
 // BridgeService contains methods and other services that help with interacting
 // with the beeperdesktop API.
@@ -30,8 +30,10 @@ type BridgeService struct {
 	Options []option.RequestOption
 	// Available bridges, bridge logins, login sessions for connect and reconnect
 	// flows, and advanced network capabilities.
-	LoginFlows  BridgeLoginFlowService
-	Connections BridgeConnectionService
+	LoginFlows BridgeLoginFlowService
+	// Available bridges, bridge logins, login sessions for connect and reconnect
+	// flows, and advanced network capabilities.
+	Logins BridgeLoginService
 	// Available bridges, bridge logins, login sessions for connect and reconnect
 	// flows, and advanced network capabilities.
 	LoginSessions BridgeLoginSessionService
@@ -44,7 +46,7 @@ func NewBridgeService(opts ...option.RequestOption) (r BridgeService) {
 	r = BridgeService{}
 	r.Options = opts
 	r.LoginFlows = NewBridgeLoginFlowService(opts...)
-	r.Connections = NewBridgeConnectionService(opts...)
+	r.Logins = NewBridgeLoginService(opts...)
 	r.LoginSessions = NewBridgeLoginSessionService(opts...)
 	return
 }
@@ -157,6 +159,53 @@ const (
 	BridgeStatusDisabled               BridgeStatus = "disabled"
 )
 
+// Signed-in identity for a bridge. One bridge login can contain multiple chat
+// accounts.
+type BridgeLogin struct {
+	// Bridge ID.
+	BridgeID string `json:"bridgeID" api:"required"`
+	// Bridge login ID.
+	LoginID string `json:"loginID" api:"required"`
+	// Any of "current-device", "all-devices".
+	RemoveScopes []string `json:"removeScopes" api:"required"`
+	// Any of "connected", "connecting", "needs_login", "logged_out", "unknown".
+	Status BridgeLoginStatus `json:"status" api:"required"`
+	// Chat accounts that belong to this bridge login, when known.
+	AccountIDs []string `json:"accountIDs"`
+	// Human-friendly bridge login status text.
+	StatusText string `json:"statusText"`
+	// User the account belongs to.
+	User shared.User `json:"user"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		BridgeID     respjson.Field
+		LoginID      respjson.Field
+		RemoveScopes respjson.Field
+		Status       respjson.Field
+		AccountIDs   respjson.Field
+		StatusText   respjson.Field
+		User         respjson.Field
+		ExtraFields  map[string]respjson.Field
+		raw          string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r BridgeLogin) RawJSON() string { return r.JSON.raw }
+func (r *BridgeLogin) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type BridgeLoginStatus string
+
+const (
+	BridgeLoginStatusConnected  BridgeLoginStatus = "connected"
+	BridgeLoginStatusConnecting BridgeLoginStatus = "connecting"
+	BridgeLoginStatusNeedsLogin BridgeLoginStatus = "needs_login"
+	BridgeLoginStatusLoggedOut  BridgeLoginStatus = "logged_out"
+	BridgeLoginStatusUnknown    BridgeLoginStatus = "unknown"
+)
+
 type CookieField struct {
 	// Field ID to send back in the fields object.
 	ID string `json:"id" api:"required"`
@@ -193,7 +242,7 @@ const (
 
 // Disappearing-message timer capability.
 type DisappearingTimerCapability struct {
-	// Any of "", "after_read", "after_send".
+	// Any of "", "after_read", "after_read_by_recipient", "after_send".
 	Types []string `json:"types" api:"required"`
 	// Any of true.
 	OmitEmptyTimer bool    `json:"omit_empty_timer"`
@@ -352,7 +401,7 @@ type LoginSession struct {
 	Error       shared.APIError              `json:"error"`
 	// Signed-in identity for a bridge. One bridge login can contain multiple chat
 	// accounts.
-	Login LoginSessionLogin `json:"login"`
+	Login BridgeLogin `json:"login"`
 	// Bridge login ID for reconnect flows, when known.
 	LoginID string `json:"loginID"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -414,7 +463,7 @@ type LoginSessionCurrentStepUnion struct {
 	// This field is from variant [LoginSessionCurrentStepComplete].
 	Account Account `json:"account"`
 	// This field is from variant [LoginSessionCurrentStepComplete].
-	Login LoginSessionCurrentStepCompleteLogin `json:"login"`
+	Login BridgeLogin `json:"login"`
 	JSON  struct {
 		Fields                respjson.Field
 		StepID                respjson.Field
@@ -571,13 +620,13 @@ func (r *LoginSessionCurrentStepDisplayAndWait) UnmarshalJSON(data []byte) error
 }
 
 // LoginSessionCurrentStepDisplayAndWaitDisplayUnion contains all possible
-// properties and values from [LoginSessionCurrentStepDisplayAndWaitDisplayQrCode],
+// properties and values from [LoginSessionCurrentStepDisplayAndWaitDisplayQRCode],
 // [LoginSessionCurrentStepDisplayAndWaitDisplayEmoji],
+// [LoginSessionCurrentStepDisplayAndWaitDisplayCode],
 // [LoginSessionCurrentStepDisplayAndWaitDisplayEmpty].
 //
 // Use the methods beginning with 'As' to cast the union to one of its variants.
 type LoginSessionCurrentStepDisplayAndWaitDisplayUnion struct {
-	// This field is from variant [LoginSessionCurrentStepDisplayAndWaitDisplayQrCode].
 	Data string `json:"data"`
 	Type string `json:"type"`
 	// This field is from variant [LoginSessionCurrentStepDisplayAndWaitDisplayEmoji].
@@ -590,12 +639,17 @@ type LoginSessionCurrentStepDisplayAndWaitDisplayUnion struct {
 	} `json:"-"`
 }
 
-func (u LoginSessionCurrentStepDisplayAndWaitDisplayUnion) AsQrCode() (v LoginSessionCurrentStepDisplayAndWaitDisplayQrCode) {
+func (u LoginSessionCurrentStepDisplayAndWaitDisplayUnion) AsQRCode() (v LoginSessionCurrentStepDisplayAndWaitDisplayQRCode) {
 	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
 	return
 }
 
 func (u LoginSessionCurrentStepDisplayAndWaitDisplayUnion) AsEmoji() (v LoginSessionCurrentStepDisplayAndWaitDisplayEmoji) {
+	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
+	return
+}
+
+func (u LoginSessionCurrentStepDisplayAndWaitDisplayUnion) AsCode() (v LoginSessionCurrentStepDisplayAndWaitDisplayCode) {
 	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
 	return
 }
@@ -612,9 +666,9 @@ func (r *LoginSessionCurrentStepDisplayAndWaitDisplayUnion) UnmarshalJSON(data [
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type LoginSessionCurrentStepDisplayAndWaitDisplayQrCode struct {
+type LoginSessionCurrentStepDisplayAndWaitDisplayQRCode struct {
 	Data string      `json:"data" api:"required"`
-	Type constant.Qr `json:"type" default:"qr"`
+	Type constant.QR `json:"type" default:"qr"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Data        respjson.Field
@@ -625,8 +679,8 @@ type LoginSessionCurrentStepDisplayAndWaitDisplayQrCode struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r LoginSessionCurrentStepDisplayAndWaitDisplayQrCode) RawJSON() string { return r.JSON.raw }
-func (r *LoginSessionCurrentStepDisplayAndWaitDisplayQrCode) UnmarshalJSON(data []byte) error {
+func (r LoginSessionCurrentStepDisplayAndWaitDisplayQRCode) RawJSON() string { return r.JSON.raw }
+func (r *LoginSessionCurrentStepDisplayAndWaitDisplayQRCode) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
@@ -645,6 +699,24 @@ type LoginSessionCurrentStepDisplayAndWaitDisplayEmoji struct {
 // Returns the unmodified JSON received from the API
 func (r LoginSessionCurrentStepDisplayAndWaitDisplayEmoji) RawJSON() string { return r.JSON.raw }
 func (r *LoginSessionCurrentStepDisplayAndWaitDisplayEmoji) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type LoginSessionCurrentStepDisplayAndWaitDisplayCode struct {
+	Data string        `json:"data" api:"required"`
+	Type constant.Code `json:"type" default:"code"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Data        respjson.Field
+		Type        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r LoginSessionCurrentStepDisplayAndWaitDisplayCode) RawJSON() string { return r.JSON.raw }
+func (r *LoginSessionCurrentStepDisplayAndWaitDisplayCode) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
@@ -672,8 +744,8 @@ type LoginSessionCurrentStepComplete struct {
 	Instructions string `json:"instructions"`
 	// Signed-in identity for a bridge. One bridge login can contain multiple chat
 	// accounts.
-	Login  LoginSessionCurrentStepCompleteLogin `json:"login"`
-	StepID string                               `json:"stepID"`
+	Login  BridgeLogin `json:"login"`
+	StepID string      `json:"stepID"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Type         respjson.Field
@@ -689,80 +761,6 @@ type LoginSessionCurrentStepComplete struct {
 // Returns the unmodified JSON received from the API
 func (r LoginSessionCurrentStepComplete) RawJSON() string { return r.JSON.raw }
 func (r *LoginSessionCurrentStepComplete) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Signed-in identity for a bridge. One bridge login can contain multiple chat
-// accounts.
-type LoginSessionCurrentStepCompleteLogin struct {
-	// Bridge ID.
-	BridgeID string `json:"bridgeID" api:"required"`
-	// Bridge login ID.
-	LoginID string `json:"loginID" api:"required"`
-	// Any of "current-device", "all-devices".
-	RemoveScopes []string `json:"removeScopes" api:"required"`
-	// Any of "connected", "connecting", "needs_login", "logged_out", "unknown".
-	Status string `json:"status" api:"required"`
-	// Chat accounts that belong to this bridge login, when known.
-	AccountIDs []string `json:"accountIDs"`
-	// Human-friendly bridge login status text.
-	StatusText string `json:"statusText"`
-	// User the account belongs to.
-	User shared.User `json:"user"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		BridgeID     respjson.Field
-		LoginID      respjson.Field
-		RemoveScopes respjson.Field
-		Status       respjson.Field
-		AccountIDs   respjson.Field
-		StatusText   respjson.Field
-		User         respjson.Field
-		ExtraFields  map[string]respjson.Field
-		raw          string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r LoginSessionCurrentStepCompleteLogin) RawJSON() string { return r.JSON.raw }
-func (r *LoginSessionCurrentStepCompleteLogin) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Signed-in identity for a bridge. One bridge login can contain multiple chat
-// accounts.
-type LoginSessionLogin struct {
-	// Bridge ID.
-	BridgeID string `json:"bridgeID" api:"required"`
-	// Bridge login ID.
-	LoginID string `json:"loginID" api:"required"`
-	// Any of "current-device", "all-devices".
-	RemoveScopes []string `json:"removeScopes" api:"required"`
-	// Any of "connected", "connecting", "needs_login", "logged_out", "unknown".
-	Status string `json:"status" api:"required"`
-	// Chat accounts that belong to this bridge login, when known.
-	AccountIDs []string `json:"accountIDs"`
-	// Human-friendly bridge login status text.
-	StatusText string `json:"statusText"`
-	// User the account belongs to.
-	User shared.User `json:"user"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		BridgeID     respjson.Field
-		LoginID      respjson.Field
-		RemoveScopes respjson.Field
-		Status       respjson.Field
-		AccountIDs   respjson.Field
-		StatusText   respjson.Field
-		User         respjson.Field
-		ExtraFields  map[string]respjson.Field
-		raw          string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r LoginSessionLogin) RawJSON() string { return r.JSON.raw }
-func (r *LoginSessionLogin) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 

@@ -9,8 +9,8 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
 // Client creates a struct with services and top level methods that help with
@@ -20,18 +20,20 @@ type Client struct {
 	Options []option.RequestOption
 	// Manage connected chat accounts
 	Accounts AccountService
-	// Manage bridge-backed account types, connections, and login sessions
+	// Manage available bridges, connect or reconnect chat accounts
 	Bridges BridgeService
 	// Manage chats
 	Chats ChatService
+	// User-created labels that organize chats
+	Labels LabelService
 	// Manage messages in chats
 	Messages MessageService
-	// Manage assets in Beeper Desktop, like message attachments
+	// Manage files for message attachments
 	Assets AssetService
 	// Server discovery and capability metadata. Use /v1/info before authentication
 	// setup.
 	Info InfoService
-	// Manage Beeper app login and encrypted messaging setup
+	// Manage Beeper account setup and encrypted messaging setup
 	App AppService
 }
 
@@ -68,6 +70,7 @@ func NewClient(opts ...option.RequestOption) (r Client) {
 	r.Accounts = NewAccountService(opts...)
 	r.Bridges = NewBridgeService(opts...)
 	r.Chats = NewChatService(opts...)
+	r.Labels = NewLabelService(opts...)
 	r.Messages = NewMessageService(opts...)
 	r.Assets = NewAssetService(opts...)
 	r.Info = NewInfoService(opts...)

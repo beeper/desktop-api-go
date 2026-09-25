@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/internal"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/internal"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
 type closureTransport struct {

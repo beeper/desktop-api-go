@@ -3,8 +3,8 @@ package respjson_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	rj "github.com/beeper/desktop-api-go/v5/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	rj "github.com/beeper/desktop-api-go/v6/packages/respjson"
 	"reflect"
 	"testing"
 )

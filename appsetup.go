@@ -8,39 +8,53 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/v5/option"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
-	"github.com/beeper/desktop-api-go/v5/shared/constant"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v6/option"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/shared/constant"
 )
 
-// Complete first-party Beeper app login
+// Complete first-party Beeper app setup
 //
-// AppLoginService contains methods and other services that help with interacting
+// AppSetupService contains methods and other services that help with interacting
 // with the beeperdesktop API.
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
-// the [NewAppLoginService] method instead.
-type AppLoginService struct {
-	Options      []option.RequestOption
-	Verification AppLoginVerificationService
+// the [NewAppSetupService] method instead.
+type AppSetupService struct {
+	Options []option.RequestOption
+	// Manage recovery-key setup for encrypted messages
+	RecoveryKey AppSetupRecoveryKeyService
+	// Manage device verification transactions
+	Verifications AppSetupVerificationService
 }
 
-// NewAppLoginService generates a new service that applies the given options to
+// NewAppSetupService generates a new service that applies the given options to
 // each request. These options are applied after the parent client's options (if
 // there is one), and before any request-specific options.
-func NewAppLoginService(opts ...option.RequestOption) (r AppLoginService) {
-	r = AppLoginService{}
+func NewAppSetupService(opts ...option.RequestOption) (r AppSetupService) {
+	r = AppSetupService{}
 	r.Options = opts
-	r.Verification = NewAppLoginVerificationService(opts...)
+	r.RecoveryKey = NewAppSetupRecoveryKeyService(opts...)
+	r.Verifications = NewAppSetupVerificationService(opts...)
 	return
 }
 
+// Return the current Beeper Desktop or Beeper Server sign-in and encrypted
+// messaging setup state. This endpoint is public before sign-in so apps can
+// discover that sign-in is needed; after sign-in, pass a read token.
+func (r *AppSetupService) Get(ctx context.Context, opts ...option.RequestOption) (res *AppSetupGetResponse, err error) {
+	opts = slices.Concat(r.Options, opts)
+	path := "v1/app/setup"
+	err = requestconfig.ExecuteNewRequest(ctx, http.MethodGet, path, nil, &res, opts...)
+	return res, err
+}
+
 // Send a sign-in code to the user email address for app setup.
-func (r *AppLoginService) Email(ctx context.Context, body AppLoginEmailParams, opts ...option.RequestOption) (err error) {
+func (r *AppSetupService) Email(ctx context.Context, body AppSetupEmailParams, opts ...option.RequestOption) (err error) {
 	var preClientOpts = []option.RequestOption{requestconfig.WithSecurity(requestconfig.Security{})}
 	opts = slices.Concat(preClientOpts, r.Options, opts)
 	opts = append([]option.RequestOption{option.WithHeader("Accept", "*/*")}, opts...)
@@ -51,7 +65,7 @@ func (r *AppLoginService) Email(ctx context.Context, body AppLoginEmailParams, o
 
 // Create a Beeper account after the user chooses a username and accepts the Terms
 // of Use.
-func (r *AppLoginService) Register(ctx context.Context, body AppLoginRegisterParams, opts ...option.RequestOption) (res *AppLoginRegisterResponse, err error) {
+func (r *AppSetupService) Register(ctx context.Context, body AppSetupRegisterParams, opts ...option.RequestOption) (res *AppSetupRegisterResponse, err error) {
 	var preClientOpts = []option.RequestOption{requestconfig.WithSecurity(requestconfig.Security{})}
 	opts = slices.Concat(preClientOpts, r.Options, opts)
 	path := "v1/app/setup/register"
@@ -62,7 +76,7 @@ func (r *AppLoginService) Register(ctx context.Context, body AppLoginRegisterPar
 // Finish setup sign-in with the code sent to the user email address. If the user
 // needs a new account, the response includes account creation copy and username
 // suggestions.
-func (r *AppLoginService) Response(ctx context.Context, body AppLoginResponseParams, opts ...option.RequestOption) (res *AppLoginResponseResponseUnion, err error) {
+func (r *AppSetupService) Response(ctx context.Context, body AppSetupResponseParams, opts ...option.RequestOption) (res *AppSetupResponseResponseUnion, err error) {
 	var preClientOpts = []option.RequestOption{requestconfig.WithSecurity(requestconfig.Security{})}
 	opts = slices.Concat(preClientOpts, r.Options, opts)
 	path := "v1/app/setup/response"
@@ -72,7 +86,7 @@ func (r *AppLoginService) Response(ctx context.Context, body AppLoginResponsePar
 
 // Start setting up Beeper Desktop or Beeper Server. The flow supports existing
 // Beeper accounts and new account creation.
-func (r *AppLoginService) Start(ctx context.Context, opts ...option.RequestOption) (res *AppLoginStartResponse, err error) {
+func (r *AppSetupService) Start(ctx context.Context, opts ...option.RequestOption) (res *AppSetupStartResponse, err error) {
 	var preClientOpts = []option.RequestOption{requestconfig.WithSecurity(requestconfig.Security{})}
 	opts = slices.Concat(preClientOpts, r.Options, opts)
 	path := "v1/app/setup/start"
@@ -80,67 +94,19 @@ func (r *AppLoginService) Start(ctx context.Context, opts ...option.RequestOptio
 	return res, err
 }
 
-type AppLoginRegisterResponse struct {
-	// Account credentials for first-party app setup.
-	Matrix AppLoginRegisterResponseMatrix `json:"matrix" api:"required"`
-	// Current app sign-in and encrypted messaging setup state after sign-in.
-	Session AppLoginRegisterResponseSession `json:"session" api:"required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Matrix      respjson.Field
-		Session     respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponse) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponse) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Account credentials for first-party app setup.
-type AppLoginRegisterResponseMatrix struct {
-	// Beeper account access token. Returned once for first-party app setup.
-	AccessToken string `json:"accessToken" api:"required"`
-	// Current device ID.
-	DeviceID string `json:"deviceID" api:"required"`
-	// Beeper homeserver URL for this account.
-	Homeserver string `json:"homeserver" api:"required"`
-	// Signed-in Beeper user ID.
-	UserID string `json:"userID" api:"required"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		AccessToken respjson.Field
-		DeviceID    respjson.Field
-		Homeserver  respjson.Field
-		UserID      respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseMatrix) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseMatrix) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Current app sign-in and encrypted messaging setup state after sign-in.
-type AppLoginRegisterResponseSession struct {
+type AppSetupGetResponse struct {
 	// Encrypted messaging setup status.
-	E2EE AppLoginRegisterResponseSessionE2EE `json:"e2ee" api:"required"`
+	E2EE AppSetupGetResponseE2EE `json:"e2ee" api:"required"`
 	// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
 	// Server.
 	//
 	// Any of "needs-login", "initializing", "needs-cross-signing-setup",
 	// "needs-verification", "needs-secrets", "needs-first-sync", "ready".
-	State string `json:"state" api:"required"`
+	State AppSetupGetResponseState `json:"state" api:"required"`
 	// Signed-in account details. Omitted until sign-in is complete.
-	Matrix AppLoginRegisterResponseSessionMatrix `json:"matrix"`
+	Matrix AppSetupGetResponseMatrix `json:"matrix"`
 	// Trusted device verification progress.
-	Verification AppLoginRegisterResponseSessionVerification `json:"verification"`
+	Verification AppSetupGetResponseVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		E2EE         respjson.Field
@@ -153,13 +119,13 @@ type AppLoginRegisterResponseSession struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSession) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSession) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponse) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging setup status.
-type AppLoginRegisterResponseSessionE2EE struct {
+type AppSetupGetResponseE2EE struct {
 	// Whether this account can verify trusted devices.
 	CrossSigning bool `json:"crossSigning" api:"required"`
 	// Whether the first encrypted message sync is complete.
@@ -171,7 +137,7 @@ type AppLoginRegisterResponseSessionE2EE struct {
 	// Whether encrypted message backup is available.
 	KeyBackup bool `json:"keyBackup" api:"required"`
 	// Encrypted messaging keys available on this device.
-	Secrets AppLoginRegisterResponseSessionE2EESecrets `json:"secrets" api:"required"`
+	Secrets AppSetupGetResponseE2EESecrets `json:"secrets" api:"required"`
 	// Whether secure key storage is available.
 	SecretStorage bool `json:"secretStorage" api:"required"`
 	// Whether this device is trusted for encrypted messages.
@@ -195,13 +161,13 @@ type AppLoginRegisterResponseSessionE2EE struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionE2EE) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseE2EE) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseE2EE) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging keys available on this device.
-type AppLoginRegisterResponseSessionE2EESecrets struct {
+type AppSetupGetResponseE2EESecrets struct {
 	// Whether the account identity key is available.
 	MasterKey bool `json:"masterKey" api:"required"`
 	// Whether the encrypted message backup key is available.
@@ -225,13 +191,27 @@ type AppLoginRegisterResponseSessionE2EESecrets struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseE2EESecrets) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseE2EESecrets) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
+// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
+// Server.
+type AppSetupGetResponseState string
+
+const (
+	AppSetupGetResponseStateNeedsLogin             AppSetupGetResponseState = "needs-login"
+	AppSetupGetResponseStateInitializing           AppSetupGetResponseState = "initializing"
+	AppSetupGetResponseStateNeedsCrossSigningSetup AppSetupGetResponseState = "needs-cross-signing-setup"
+	AppSetupGetResponseStateNeedsVerification      AppSetupGetResponseState = "needs-verification"
+	AppSetupGetResponseStateNeedsSecrets           AppSetupGetResponseState = "needs-secrets"
+	AppSetupGetResponseStateNeedsFirstSync         AppSetupGetResponseState = "needs-first-sync"
+	AppSetupGetResponseStateReady                  AppSetupGetResponseState = "ready"
+)
+
 // Signed-in account details. Omitted until sign-in is complete.
-type AppLoginRegisterResponseSessionMatrix struct {
+type AppSetupGetResponseMatrix struct {
 	// Current device ID.
 	DeviceID string `json:"deviceID" api:"required"`
 	// Beeper homeserver URL for this account.
@@ -249,13 +229,13 @@ type AppLoginRegisterResponseSessionMatrix struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionMatrix) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseMatrix) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppLoginRegisterResponseSessionVerification struct {
+type AppSetupGetResponseVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -280,15 +260,15 @@ type AppLoginRegisterResponseSessionVerification struct {
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppLoginRegisterResponseSessionVerificationError `json:"error"`
+	Error AppSetupGetResponseVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppLoginRegisterResponseSessionVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupGetResponseVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppLoginRegisterResponseSessionVerificationQr `json:"qr"`
+	QR AppSetupGetResponseVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppLoginRegisterResponseSessionVerificationSAS `json:"sas"`
+	SAS AppSetupGetResponseVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -300,7 +280,7 @@ type AppLoginRegisterResponseSessionVerification struct {
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -308,13 +288,13 @@ type AppLoginRegisterResponseSessionVerification struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionVerification) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionVerification) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseVerification) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppLoginRegisterResponseSessionVerificationError struct {
+type AppSetupGetResponseVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -329,13 +309,13 @@ type AppLoginRegisterResponseSessionVerificationError struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionVerificationError) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseVerificationError) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseVerificationError) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Other device participating in verification.
-type AppLoginRegisterResponseSessionVerificationOtherDevice struct {
+type AppSetupGetResponseVerificationOtherDevice struct {
 	// Other device ID.
 	ID string `json:"id" api:"required"`
 	// Other device display name, if known.
@@ -350,13 +330,13 @@ type AppLoginRegisterResponseSessionVerificationOtherDevice struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionVerificationOtherDevice) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseVerificationOtherDevice) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppLoginRegisterResponseSessionVerificationQr struct {
+type AppSetupGetResponseVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -368,13 +348,13 @@ type AppLoginRegisterResponseSessionVerificationQr struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionVerificationQr) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionVerificationQr) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseVerificationQR) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppLoginRegisterResponseSessionVerificationSAS struct {
+type AppSetupGetResponseVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -389,30 +369,344 @@ type AppLoginRegisterResponseSessionVerificationSAS struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginRegisterResponseSessionVerificationSAS) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginRegisterResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r AppSetupGetResponseVerificationSAS) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupGetResponseVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// AppLoginResponseResponseUnion contains all possible properties and values from
-// [AppLoginResponseResponseSuccess],
-// [AppLoginResponseResponseRegistrationRequired].
+type AppSetupRegisterResponse struct {
+	// Account credentials for first-party app setup.
+	Matrix AppSetupRegisterResponseMatrix `json:"matrix" api:"required"`
+	// Current app sign-in and encrypted messaging setup state after sign-in.
+	Session AppSetupRegisterResponseSession `json:"session" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Matrix      respjson.Field
+		Session     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponse) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponse) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Account credentials for first-party app setup.
+type AppSetupRegisterResponseMatrix struct {
+	// Beeper account access token. Returned once for first-party app setup.
+	AccessToken string `json:"accessToken" api:"required"`
+	// Current device ID.
+	DeviceID string `json:"deviceID" api:"required"`
+	// Beeper homeserver URL for this account.
+	Homeserver string `json:"homeserver" api:"required"`
+	// Signed-in Beeper user ID.
+	UserID string `json:"userID" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		AccessToken respjson.Field
+		DeviceID    respjson.Field
+		Homeserver  respjson.Field
+		UserID      respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseMatrix) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Current app sign-in and encrypted messaging setup state after sign-in.
+type AppSetupRegisterResponseSession struct {
+	// Encrypted messaging setup status.
+	E2EE AppSetupRegisterResponseSessionE2EE `json:"e2ee" api:"required"`
+	// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
+	// Server.
+	//
+	// Any of "needs-login", "initializing", "needs-cross-signing-setup",
+	// "needs-verification", "needs-secrets", "needs-first-sync", "ready".
+	State string `json:"state" api:"required"`
+	// Signed-in account details. Omitted until sign-in is complete.
+	Matrix AppSetupRegisterResponseSessionMatrix `json:"matrix"`
+	// Trusted device verification progress.
+	Verification AppSetupRegisterResponseSessionVerification `json:"verification"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		E2EE         respjson.Field
+		State        respjson.Field
+		Matrix       respjson.Field
+		Verification respjson.Field
+		ExtraFields  map[string]respjson.Field
+		raw          string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSession) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSession) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Encrypted messaging setup status.
+type AppSetupRegisterResponseSessionE2EE struct {
+	// Whether this account can verify trusted devices.
+	CrossSigning bool `json:"crossSigning" api:"required"`
+	// Whether the first encrypted message sync is complete.
+	FirstSyncDone bool `json:"firstSyncDone" api:"required"`
+	// Whether the user confirmed that they saved their recovery key.
+	HasBackedUpRecoveryKey bool `json:"hasBackedUpRecoveryKey" api:"required"`
+	// Whether encrypted messaging setup has started.
+	Initialized bool `json:"initialized" api:"required"`
+	// Whether encrypted message backup is available.
+	KeyBackup bool `json:"keyBackup" api:"required"`
+	// Encrypted messaging keys available on this device.
+	Secrets AppSetupRegisterResponseSessionE2EESecrets `json:"secrets" api:"required"`
+	// Whether secure key storage is available.
+	SecretStorage bool `json:"secretStorage" api:"required"`
+	// Whether this device is trusted for encrypted messages.
+	Verified bool `json:"verified" api:"required"`
+	// Unix timestamp for when the recovery key was created.
+	RecoveryKeyGeneratedAt float64 `json:"recoveryKeyGeneratedAt"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		CrossSigning           respjson.Field
+		FirstSyncDone          respjson.Field
+		HasBackedUpRecoveryKey respjson.Field
+		Initialized            respjson.Field
+		KeyBackup              respjson.Field
+		Secrets                respjson.Field
+		SecretStorage          respjson.Field
+		Verified               respjson.Field
+		RecoveryKeyGeneratedAt respjson.Field
+		ExtraFields            map[string]respjson.Field
+		raw                    string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionE2EE) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Encrypted messaging keys available on this device.
+type AppSetupRegisterResponseSessionE2EESecrets struct {
+	// Whether the account identity key is available.
+	MasterKey bool `json:"masterKey" api:"required"`
+	// Whether the encrypted message backup key is available.
+	MegolmBackupKey bool `json:"megolmBackupKey" api:"required"`
+	// Whether a recovery key is available.
+	RecoveryKey bool `json:"recoveryKey" api:"required"`
+	// Whether the device trust key is available.
+	SelfSigningKey bool `json:"selfSigningKey" api:"required"`
+	// Whether the user trust key is available.
+	UserSigningKey bool `json:"userSigningKey" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		MasterKey       respjson.Field
+		MegolmBackupKey respjson.Field
+		RecoveryKey     respjson.Field
+		SelfSigningKey  respjson.Field
+		UserSigningKey  respjson.Field
+		ExtraFields     map[string]respjson.Field
+		raw             string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Signed-in account details. Omitted until sign-in is complete.
+type AppSetupRegisterResponseSessionMatrix struct {
+	// Current device ID.
+	DeviceID string `json:"deviceID" api:"required"`
+	// Beeper homeserver URL for this account.
+	Homeserver string `json:"homeserver" api:"required"`
+	// Signed-in Beeper user ID.
+	UserID string `json:"userID" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		DeviceID    respjson.Field
+		Homeserver  respjson.Field
+		UserID      respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionMatrix) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Trusted device verification progress.
+type AppSetupRegisterResponseSessionVerification struct {
+	// Verification ID to pass in verification action paths.
+	ID string `json:"id" api:"required"`
+	// Verification actions that are valid for the current state.
+	//
+	// Any of "accept", "cancel", "qr.confirmScanned", "sas.start", "sas.confirm".
+	AvailableActions []string `json:"availableActions" api:"required"`
+	// Whether this device started or received the verification.
+	//
+	// Any of "incoming", "outgoing".
+	Direction string `json:"direction" api:"required"`
+	// Verification methods supported for this transaction.
+	//
+	// Any of "qr", "sas".
+	Methods []string `json:"methods" api:"required"`
+	// Why this verification exists.
+	//
+	// Any of "login", "device".
+	Purpose string `json:"purpose" api:"required"`
+	// Current trusted-device verification state.
+	//
+	// Any of "requested", "ready", "sas_ready", "qr_scanned", "done", "cancelled",
+	// "error".
+	State string `json:"state" api:"required"`
+	// Verification error details, if verification stopped.
+	Error AppSetupRegisterResponseSessionVerificationError `json:"error"`
+	// Other device participating in verification.
+	OtherDevice AppSetupRegisterResponseSessionVerificationOtherDevice `json:"otherDevice"`
+	// Other Beeper user participating in verification.
+	OtherUserID string `json:"otherUserID"`
+	// QR verification data.
+	QR AppSetupRegisterResponseSessionVerificationQR `json:"qr"`
+	// Emoji or number comparison data for verification.
+	SAS AppSetupRegisterResponseSessionVerificationSAS `json:"sas"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ID               respjson.Field
+		AvailableActions respjson.Field
+		Direction        respjson.Field
+		Methods          respjson.Field
+		Purpose          respjson.Field
+		State            respjson.Field
+		Error            respjson.Field
+		OtherDevice      respjson.Field
+		OtherUserID      respjson.Field
+		QR               respjson.Field
+		SAS              respjson.Field
+		ExtraFields      map[string]respjson.Field
+		raw              string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionVerification) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionVerification) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Verification error details, if verification stopped.
+type AppSetupRegisterResponseSessionVerificationError struct {
+	// Verification error code.
+	Code string `json:"code" api:"required"`
+	// User-facing verification error message.
+	Reason string `json:"reason" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Code        respjson.Field
+		Reason      respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionVerificationError) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Other device participating in verification.
+type AppSetupRegisterResponseSessionVerificationOtherDevice struct {
+	// Other device ID.
+	ID string `json:"id" api:"required"`
+	// Other device display name, if known.
+	Name string `json:"name"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ID          respjson.Field
+		Name        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionVerificationOtherDevice) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// QR verification data.
+type AppSetupRegisterResponseSessionVerificationQR struct {
+	// QR code payload to display for verification.
+	Data string `json:"data" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Data        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionVerificationQR) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionVerificationQR) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Emoji or number comparison data for verification.
+type AppSetupRegisterResponseSessionVerificationSAS struct {
+	// Emoji sequence to compare on both devices.
+	Emojis string `json:"emojis" api:"required"`
+	// Number sequence to compare on both devices.
+	Decimals string `json:"decimals"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Emojis      respjson.Field
+		Decimals    respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupRegisterResponseSessionVerificationSAS) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRegisterResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// AppSetupResponseResponseUnion contains all possible properties and values from
+// [AppSetupResponseResponseSuccess],
+// [AppSetupResponseResponseRegistrationRequired].
 //
 // Use the methods beginning with 'As' to cast the union to one of its variants.
-type AppLoginResponseResponseUnion struct {
-	// This field is from variant [AppLoginResponseResponseSuccess].
-	Matrix AppLoginResponseResponseSuccessMatrix `json:"matrix"`
-	// This field is from variant [AppLoginResponseResponseSuccess].
-	Session AppLoginResponseResponseSuccessSession `json:"session"`
-	// This field is from variant [AppLoginResponseResponseRegistrationRequired].
-	Copy AppLoginResponseResponseRegistrationRequiredCopy `json:"copy"`
-	// This field is from variant [AppLoginResponseResponseRegistrationRequired].
+type AppSetupResponseResponseUnion struct {
+	// This field is from variant [AppSetupResponseResponseSuccess].
+	Matrix AppSetupResponseResponseSuccessMatrix `json:"matrix"`
+	// This field is from variant [AppSetupResponseResponseSuccess].
+	Session AppSetupResponseResponseSuccessSession `json:"session"`
+	// This field is from variant [AppSetupResponseResponseRegistrationRequired].
+	Copy AppSetupResponseResponseRegistrationRequiredCopy `json:"copy"`
+	// This field is from variant [AppSetupResponseResponseRegistrationRequired].
 	LeadToken string `json:"leadToken"`
-	// This field is from variant [AppLoginResponseResponseRegistrationRequired].
+	// This field is from variant [AppSetupResponseResponseRegistrationRequired].
 	RegistrationRequired bool `json:"registrationRequired"`
-	// This field is from variant [AppLoginResponseResponseRegistrationRequired].
+	// This field is from variant [AppSetupResponseResponseRegistrationRequired].
 	SetupRequestID string `json:"setupRequestID"`
-	// This field is from variant [AppLoginResponseResponseRegistrationRequired].
+	// This field is from variant [AppSetupResponseResponseRegistrationRequired].
 	UsernameSuggestions []string `json:"usernameSuggestions"`
 	JSON                struct {
 		Matrix               respjson.Field
@@ -426,28 +720,28 @@ type AppLoginResponseResponseUnion struct {
 	} `json:"-"`
 }
 
-func (u AppLoginResponseResponseUnion) AsSuccess() (v AppLoginResponseResponseSuccess) {
+func (u AppSetupResponseResponseUnion) AsSuccess() (v AppSetupResponseResponseSuccess) {
 	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
 	return
 }
 
-func (u AppLoginResponseResponseUnion) AsRegistrationRequired() (v AppLoginResponseResponseRegistrationRequired) {
+func (u AppSetupResponseResponseUnion) AsRegistrationRequired() (v AppSetupResponseResponseRegistrationRequired) {
 	apijson.UnmarshalRoot(json.RawMessage(u.JSON.raw), &v)
 	return
 }
 
 // Returns the unmodified JSON received from the API
-func (u AppLoginResponseResponseUnion) RawJSON() string { return u.JSON.raw }
+func (u AppSetupResponseResponseUnion) RawJSON() string { return u.JSON.raw }
 
-func (r *AppLoginResponseResponseUnion) UnmarshalJSON(data []byte) error {
+func (r *AppSetupResponseResponseUnion) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginResponseResponseSuccess struct {
+type AppSetupResponseResponseSuccess struct {
 	// Account credentials for first-party app setup.
-	Matrix AppLoginResponseResponseSuccessMatrix `json:"matrix" api:"required"`
+	Matrix AppSetupResponseResponseSuccessMatrix `json:"matrix" api:"required"`
 	// Current app sign-in and encrypted messaging setup state after sign-in.
-	Session AppLoginResponseResponseSuccessSession `json:"session" api:"required"`
+	Session AppSetupResponseResponseSuccessSession `json:"session" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Matrix      respjson.Field
@@ -458,13 +752,13 @@ type AppLoginResponseResponseSuccess struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccess) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccess) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccess) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccess) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Account credentials for first-party app setup.
-type AppLoginResponseResponseSuccessMatrix struct {
+type AppSetupResponseResponseSuccessMatrix struct {
 	// Beeper account access token. Returned once for first-party app setup.
 	AccessToken string `json:"accessToken" api:"required"`
 	// Current device ID.
@@ -485,15 +779,15 @@ type AppLoginResponseResponseSuccessMatrix struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessMatrix) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessMatrix) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessMatrix) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Current app sign-in and encrypted messaging setup state after sign-in.
-type AppLoginResponseResponseSuccessSession struct {
+type AppSetupResponseResponseSuccessSession struct {
 	// Encrypted messaging setup status.
-	E2EE AppLoginResponseResponseSuccessSessionE2EE `json:"e2ee" api:"required"`
+	E2EE AppSetupResponseResponseSuccessSessionE2EE `json:"e2ee" api:"required"`
 	// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
 	// Server.
 	//
@@ -501,9 +795,9 @@ type AppLoginResponseResponseSuccessSession struct {
 	// "needs-verification", "needs-secrets", "needs-first-sync", "ready".
 	State string `json:"state" api:"required"`
 	// Signed-in account details. Omitted until sign-in is complete.
-	Matrix AppLoginResponseResponseSuccessSessionMatrix `json:"matrix"`
+	Matrix AppSetupResponseResponseSuccessSessionMatrix `json:"matrix"`
 	// Trusted device verification progress.
-	Verification AppLoginResponseResponseSuccessSessionVerification `json:"verification"`
+	Verification AppSetupResponseResponseSuccessSessionVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		E2EE         respjson.Field
@@ -516,13 +810,13 @@ type AppLoginResponseResponseSuccessSession struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSession) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSession) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSession) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSession) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging setup status.
-type AppLoginResponseResponseSuccessSessionE2EE struct {
+type AppSetupResponseResponseSuccessSessionE2EE struct {
 	// Whether this account can verify trusted devices.
 	CrossSigning bool `json:"crossSigning" api:"required"`
 	// Whether the first encrypted message sync is complete.
@@ -534,7 +828,7 @@ type AppLoginResponseResponseSuccessSessionE2EE struct {
 	// Whether encrypted message backup is available.
 	KeyBackup bool `json:"keyBackup" api:"required"`
 	// Encrypted messaging keys available on this device.
-	Secrets AppLoginResponseResponseSuccessSessionE2EESecrets `json:"secrets" api:"required"`
+	Secrets AppSetupResponseResponseSuccessSessionE2EESecrets `json:"secrets" api:"required"`
 	// Whether secure key storage is available.
 	SecretStorage bool `json:"secretStorage" api:"required"`
 	// Whether this device is trusted for encrypted messages.
@@ -558,13 +852,13 @@ type AppLoginResponseResponseSuccessSessionE2EE struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionE2EE) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSessionE2EE) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSessionE2EE) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSessionE2EE) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging keys available on this device.
-type AppLoginResponseResponseSuccessSessionE2EESecrets struct {
+type AppSetupResponseResponseSuccessSessionE2EESecrets struct {
 	// Whether the account identity key is available.
 	MasterKey bool `json:"masterKey" api:"required"`
 	// Whether the encrypted message backup key is available.
@@ -588,13 +882,13 @@ type AppLoginResponseResponseSuccessSessionE2EESecrets struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSessionE2EESecrets) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSessionE2EESecrets) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Signed-in account details. Omitted until sign-in is complete.
-type AppLoginResponseResponseSuccessSessionMatrix struct {
+type AppSetupResponseResponseSuccessSessionMatrix struct {
 	// Current device ID.
 	DeviceID string `json:"deviceID" api:"required"`
 	// Beeper homeserver URL for this account.
@@ -612,13 +906,13 @@ type AppLoginResponseResponseSuccessSessionMatrix struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionMatrix) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSessionMatrix) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSessionMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSessionMatrix) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppLoginResponseResponseSuccessSessionVerification struct {
+type AppSetupResponseResponseSuccessSessionVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -643,15 +937,15 @@ type AppLoginResponseResponseSuccessSessionVerification struct {
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppLoginResponseResponseSuccessSessionVerificationError `json:"error"`
+	Error AppSetupResponseResponseSuccessSessionVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppLoginResponseResponseSuccessSessionVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupResponseResponseSuccessSessionVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppLoginResponseResponseSuccessSessionVerificationQr `json:"qr"`
+	QR AppSetupResponseResponseSuccessSessionVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppLoginResponseResponseSuccessSessionVerificationSAS `json:"sas"`
+	SAS AppSetupResponseResponseSuccessSessionVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -663,7 +957,7 @@ type AppLoginResponseResponseSuccessSessionVerification struct {
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -671,13 +965,13 @@ type AppLoginResponseResponseSuccessSessionVerification struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionVerification) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSessionVerification) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSessionVerification) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSessionVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppLoginResponseResponseSuccessSessionVerificationError struct {
+type AppSetupResponseResponseSuccessSessionVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -692,13 +986,13 @@ type AppLoginResponseResponseSuccessSessionVerificationError struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionVerificationError) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSessionVerificationError) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSessionVerificationError) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSessionVerificationError) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Other device participating in verification.
-type AppLoginResponseResponseSuccessSessionVerificationOtherDevice struct {
+type AppSetupResponseResponseSuccessSessionVerificationOtherDevice struct {
 	// Other device ID.
 	ID string `json:"id" api:"required"`
 	// Other device display name, if known.
@@ -713,15 +1007,15 @@ type AppLoginResponseResponseSuccessSessionVerificationOtherDevice struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionVerificationOtherDevice) RawJSON() string {
+func (r AppSetupResponseResponseSuccessSessionVerificationOtherDevice) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginResponseResponseSuccessSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r *AppSetupResponseResponseSuccessSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppLoginResponseResponseSuccessSessionVerificationQr struct {
+type AppSetupResponseResponseSuccessSessionVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -733,13 +1027,13 @@ type AppLoginResponseResponseSuccessSessionVerificationQr struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionVerificationQr) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSessionVerificationQr) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSessionVerificationQR) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSessionVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppLoginResponseResponseSuccessSessionVerificationSAS struct {
+type AppSetupResponseResponseSuccessSessionVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -754,14 +1048,14 @@ type AppLoginResponseResponseSuccessSessionVerificationSAS struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseSuccessSessionVerificationSAS) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseSuccessSessionVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseSuccessSessionVerificationSAS) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseSuccessSessionVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginResponseResponseRegistrationRequired struct {
+type AppSetupResponseResponseRegistrationRequired struct {
 	// Copy to display during account creation.
-	Copy AppLoginResponseResponseRegistrationRequiredCopy `json:"copy" api:"required"`
+	Copy AppSetupResponseResponseRegistrationRequiredCopy `json:"copy" api:"required"`
 	// Registration token returned by Beeper.
 	LeadToken string `json:"leadToken" api:"required"`
 	// Indicates that the user needs to create a Beeper account.
@@ -783,13 +1077,13 @@ type AppLoginResponseResponseRegistrationRequired struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseRegistrationRequired) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseRegistrationRequired) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseRegistrationRequired) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseRegistrationRequired) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Copy to display during account creation.
-type AppLoginResponseResponseRegistrationRequiredCopy struct {
+type AppSetupResponseResponseRegistrationRequiredCopy struct {
 	// Submit button label.
 	Submit constant.Continue `json:"submit" default:"Continue"`
 	// Terms and privacy notice to show before account creation.
@@ -810,12 +1104,12 @@ type AppLoginResponseResponseRegistrationRequiredCopy struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginResponseResponseRegistrationRequiredCopy) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginResponseResponseRegistrationRequiredCopy) UnmarshalJSON(data []byte) error {
+func (r AppSetupResponseResponseRegistrationRequiredCopy) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupResponseResponseRegistrationRequiredCopy) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginStartResponse struct {
+type AppSetupStartResponse struct {
 	// Setup request ID to use in the next sign-in step.
 	SetupRequestID string `json:"setupRequestID" api:"required"`
 	// Available sign-in methods for this setup request.
@@ -830,12 +1124,12 @@ type AppLoginStartResponse struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginStartResponse) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginStartResponse) UnmarshalJSON(data []byte) error {
+func (r AppSetupStartResponse) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupStartResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginEmailParams struct {
+type AppSetupEmailParams struct {
 	// Email address to send the sign-in code to.
 	Email string `json:"email" api:"required" format:"email"`
 	// Setup request ID returned by the start step.
@@ -843,15 +1137,15 @@ type AppLoginEmailParams struct {
 	paramObj
 }
 
-func (r AppLoginEmailParams) MarshalJSON() (data []byte, err error) {
-	type shadow AppLoginEmailParams
+func (r AppSetupEmailParams) MarshalJSON() (data []byte, err error) {
+	type shadow AppSetupEmailParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *AppLoginEmailParams) UnmarshalJSON(data []byte) error {
+func (r *AppSetupEmailParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginRegisterParams struct {
+type AppSetupRegisterParams struct {
 	// Registration token returned by Beeper.
 	LeadToken string `json:"leadToken" api:"required"`
 	// Setup request ID returned by the start step.
@@ -867,15 +1161,15 @@ type AppLoginRegisterParams struct {
 	paramObj
 }
 
-func (r AppLoginRegisterParams) MarshalJSON() (data []byte, err error) {
-	type shadow AppLoginRegisterParams
+func (r AppSetupRegisterParams) MarshalJSON() (data []byte, err error) {
+	type shadow AppSetupRegisterParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *AppLoginRegisterParams) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRegisterParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginResponseParams struct {
+type AppSetupResponseParams struct {
 	// Sign-in code from the user email.
 	Response string `json:"response" api:"required"`
 	// Setup request ID returned by the start step.
@@ -883,10 +1177,10 @@ type AppLoginResponseParams struct {
 	paramObj
 }
 
-func (r AppLoginResponseParams) MarshalJSON() (data []byte, err error) {
-	type shadow AppLoginResponseParams
+func (r AppSetupResponseParams) MarshalJSON() (data []byte, err error) {
+	type shadow AppSetupResponseParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *AppLoginResponseParams) UnmarshalJSON(data []byte) error {
+func (r *AppSetupResponseParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

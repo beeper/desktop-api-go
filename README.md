@@ -2,7 +2,7 @@
 
 <!-- x-release-please-start-version -->
 
-<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v5"><img src="https://pkg.go.dev/badge/github.com/beeper/desktop-api-go.svg" alt="Go Reference"></a>
+<a href="https://pkg.go.dev/github.com/beeper/desktop-api-go/v6"><img src="https://pkg.go.dev/badge/github.com/beeper/desktop-api-go/v6.svg" alt="Go Reference"></a>
 
 <!-- x-release-please-end -->
 
@@ -24,7 +24,7 @@ Use the Beeper Desktop MCP Server to enable AI assistants to interact with this 
 
 ```go
 import (
-	"github.com/beeper/desktop-api-go/v5" // imported as beeperdesktopapi
+	"github.com/beeper/desktop-api-go/v6" // imported as beeperdesktopapi
 )
 ```
 
@@ -35,7 +35,7 @@ Or to pin the version:
 <!-- x-release-please-start-version -->
 
 ```sh
-go get -u 'github.com/beeper/desktop-api-go@v5.0.1'
+go get -u 'github.com/beeper/desktop-api-go/v6@v6.0.0'
 ```
 
 <!-- x-release-please-end -->
@@ -55,8 +55,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
 func main() {
@@ -288,7 +288,7 @@ client.Accounts.List(context.TODO(), ...,
 
 The request option `option.WithDebugLog(nil)` may be helpful while debugging.
 
-See the [full list of request options](https://pkg.go.dev/github.com/beeper/desktop-api-go/option).
+See the [full list of request options](https://pkg.go.dev/github.com/beeper/desktop-api-go/v6/option).
 
 ### Pagination
 

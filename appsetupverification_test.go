@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/internal/testutil"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/internal/testutil"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
-func TestAppVerificationNewWithOptionalParams(t *testing.T) {
+func TestAppSetupVerificationNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,8 +25,8 @@ func TestAppVerificationNewWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Verifications.New(context.TODO(), beeperdesktopapi.AppVerificationNewParams{
-		Purpose: beeperdesktopapi.AppVerificationNewParamsPurposeLogin,
+	_, err := client.App.Setup.Verifications.New(context.TODO(), beeperdesktopapi.AppSetupVerificationNewParams{
+		Purpose: beeperdesktopapi.AppSetupVerificationNewParamsPurposeLogin,
 		UserID:  beeperdesktopapi.String("userID"),
 	})
 	if err != nil {
@@ -38,7 +38,7 @@ func TestAppVerificationNewWithOptionalParams(t *testing.T) {
 	}
 }
 
-func TestAppVerificationGet(t *testing.T) {
+func TestAppSetupVerificationGet(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -50,7 +50,7 @@ func TestAppVerificationGet(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Verifications.Get(context.TODO(), "x")
+	_, err := client.App.Setup.Verifications.Get(context.TODO(), "x")
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
@@ -60,7 +60,7 @@ func TestAppVerificationGet(t *testing.T) {
 	}
 }
 
-func TestAppVerificationList(t *testing.T) {
+func TestAppSetupVerificationList(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -72,7 +72,7 @@ func TestAppVerificationList(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Verifications.List(context.TODO())
+	_, err := client.App.Setup.Verifications.List(context.TODO())
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
@@ -82,7 +82,7 @@ func TestAppVerificationList(t *testing.T) {
 	}
 }
 
-func TestAppVerificationAccept(t *testing.T) {
+func TestAppSetupVerificationAccept(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -94,7 +94,7 @@ func TestAppVerificationAccept(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Verifications.Accept(context.TODO(), "x")
+	_, err := client.App.Setup.Verifications.Accept(context.TODO(), "x")
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
@@ -104,7 +104,7 @@ func TestAppVerificationAccept(t *testing.T) {
 	}
 }
 
-func TestAppVerificationCancelWithOptionalParams(t *testing.T) {
+func TestAppSetupVerificationCancelWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -116,10 +116,10 @@ func TestAppVerificationCancelWithOptionalParams(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Verifications.Cancel(
+	_, err := client.App.Setup.Verifications.Cancel(
 		context.TODO(),
 		"x",
-		beeperdesktopapi.AppVerificationCancelParams{
+		beeperdesktopapi.AppSetupVerificationCancelParams{
 			Code:   beeperdesktopapi.String("code"),
 			Reason: beeperdesktopapi.String("reason"),
 		},

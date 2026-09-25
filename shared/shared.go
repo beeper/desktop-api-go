@@ -6,9 +6,9 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
 )
 
 // aliased to make [param.APIUnion] private when embedding
@@ -148,6 +148,533 @@ func (r *AttachmentTranscription) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
+// Capabilities for one attachment message type.
+type AttachmentCapabilities struct {
+	// Supported MIME types or MIME patterns for this file message type. Missing MIME
+	// types should be treated as rejected.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	MimeTypes map[string]int64 `json:"mimeTypes" api:"required"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Caption int64 `json:"caption"`
+	// Maximum caption length when captions are supported.
+	MaxCaptionLength int64 `json:"maxCaptionLength"`
+	// Maximum audio or video duration in seconds.
+	MaxDuration int64 `json:"maxDuration"`
+	// Maximum image or video height in pixels.
+	MaxHeight int64 `json:"maxHeight"`
+	// Maximum file size in bytes.
+	MaxSize int64 `json:"maxSize"`
+	// Maximum image or video width in pixels.
+	MaxWidth int64 `json:"maxWidth"`
+	// True if this file type can be sent as view-once media.
+	ViewOnce bool `json:"viewOnce"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		MimeTypes        respjson.Field
+		Caption          respjson.Field
+		MaxCaptionLength respjson.Field
+		MaxDuration      respjson.Field
+		MaxHeight        respjson.Field
+		MaxSize          respjson.Field
+		MaxWidth         respjson.Field
+		ViewOnce         respjson.Field
+		ExtraFields      map[string]respjson.Field
+		raw              string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AttachmentCapabilities) RawJSON() string { return r.JSON.raw }
+func (r *AttachmentCapabilities) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat capabilities reported by the platform.
+type ChatCapabilities struct {
+	// Allowed Unicode reactions. Omitted means all emoji reactions are allowed.
+	AllowedReactions []string `json:"allowedReactions"`
+	// True if archive/unarchive is supported.
+	Archive bool `json:"archive"`
+	// Supported attachment message types and their per-type constraints, keyed by
+	// Matrix msgtype or pseudo-msgtype (for example m.image, m.video,
+	// org.matrix.msc3245.voice). Missing message types should be treated as rejected.
+	Attachments map[string]AttachmentCapabilities `json:"attachments"`
+	// True if custom emoji reactions are supported.
+	CustomEmojiReactions bool `json:"customEmojiReactions"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Delete int64 `json:"delete"`
+	// True if deleting chats for the authenticated user is supported.
+	DeleteChat bool `json:"deleteChat"`
+	// True if deleting chats for everyone is supported.
+	DeleteChatForEveryone bool `json:"deleteChatForEveryone"`
+	// True if deleting messages only for the authenticated user is supported.
+	DeleteForMe bool `json:"deleteForMe"`
+	// Maximum message age for delete-for-everyone, in seconds.
+	DeleteMaxAge int64 `json:"deleteMaxAge"`
+	// Disappearing-message timer capabilities.
+	DisappearingTimer ChatCapabilitiesDisappearingTimer `json:"disappearingTimer"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Edit int64 `json:"edit"`
+	// Maximum message age for edits, in seconds.
+	EditMaxAge int64 `json:"editMaxAge"`
+	// Maximum number of edits allowed for one message.
+	EditMaxCount int64 `json:"editMaxCount"`
+	// Supported rich-text formatting features keyed by feature name (for example bold,
+	// inline_code, code_block.syntax_highlighting). Omitted means no formatting
+	// support is advertised.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Formatting map[string]int64 `json:"formatting"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	LocationMessage int64 `json:"locationMessage"`
+	// True if marking chats unread is supported.
+	MarkAsUnread bool `json:"markAsUnread"`
+	// Maximum length of normal text messages.
+	MaxTextLength int64 `json:"maxTextLength"`
+	// Message request capabilities.
+	MessageRequest ChatCapabilitiesMessageRequest `json:"messageRequest"`
+	// Participant management capabilities.
+	ParticipantActions ChatCapabilitiesParticipantActions `json:"participantActions"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Poll int64 `json:"poll"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Reaction int64 `json:"reaction"`
+	// Maximum number of reactions allowed on a single message.
+	ReactionCount int64 `json:"reactionCount"`
+	// True if read receipts are supported.
+	ReadReceipts bool `json:"readReceipts"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Reply int64 `json:"reply"`
+	// Chat state update capabilities.
+	State ChatStateCapabilities `json:"state"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Thread int64 `json:"thread"`
+	// True if typing notifications are supported.
+	TypingNotifications bool `json:"typingNotifications"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		AllowedReactions      respjson.Field
+		Archive               respjson.Field
+		Attachments           respjson.Field
+		CustomEmojiReactions  respjson.Field
+		Delete                respjson.Field
+		DeleteChat            respjson.Field
+		DeleteChatForEveryone respjson.Field
+		DeleteForMe           respjson.Field
+		DeleteMaxAge          respjson.Field
+		DisappearingTimer     respjson.Field
+		Edit                  respjson.Field
+		EditMaxAge            respjson.Field
+		EditMaxCount          respjson.Field
+		Formatting            respjson.Field
+		LocationMessage       respjson.Field
+		MarkAsUnread          respjson.Field
+		MaxTextLength         respjson.Field
+		MessageRequest        respjson.Field
+		ParticipantActions    respjson.Field
+		Poll                  respjson.Field
+		Reaction              respjson.Field
+		ReactionCount         respjson.Field
+		ReadReceipts          respjson.Field
+		Reply                 respjson.Field
+		State                 respjson.Field
+		Thread                respjson.Field
+		TypingNotifications   respjson.Field
+		ExtraFields           map[string]respjson.Field
+		raw                   string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilities) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilities) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Disappearing-message timer capabilities.
+type ChatCapabilitiesDisappearingTimer struct {
+	// True if empty timer objects should be omitted from message content.
+	OmitEmptyTimer bool `json:"omitEmptyTimer"`
+	// Allowed disappearing timer values in milliseconds. Omitted means any timer is
+	// allowed.
+	Timers []int64 `json:"timers"`
+	// Supported disappearing timer types.
+	//
+	// Any of "afterRead", "afterReadByRecipient", "afterSend".
+	Types []string `json:"types"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		OmitEmptyTimer respjson.Field
+		Timers         respjson.Field
+		Types          respjson.Field
+		ExtraFields    map[string]respjson.Field
+		raw            string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesDisappearingTimer) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesDisappearingTimer) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Message request capabilities.
+type ChatCapabilitiesMessageRequest struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	AcceptWithButton int64 `json:"acceptWithButton"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	AcceptWithMessage int64 `json:"acceptWithMessage"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		AcceptWithButton  respjson.Field
+		AcceptWithMessage respjson.Field
+		ExtraFields       map[string]respjson.Field
+		raw               string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesMessageRequest) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesMessageRequest) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Participant management capabilities.
+type ChatCapabilitiesParticipantActions struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Ban int64 `json:"ban"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Invite int64 `json:"invite"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Kick int64 `json:"kick"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Leave int64 `json:"leave"`
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	RevokeInvite int64 `json:"revokeInvite"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Ban          respjson.Field
+		Invite       respjson.Field
+		Kick         respjson.Field
+		Leave        respjson.Field
+		RevokeInvite respjson.Field
+		ExtraFields  map[string]respjson.Field
+		raw          string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatCapabilitiesParticipantActions) RawJSON() string { return r.JSON.raw }
+func (r *ChatCapabilitiesParticipantActions) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Current draft object for this chat, or null when no draft is set.
+type ChatDraft struct {
+	// Rich-text draft body as returned by Beeper.
+	Text string `json:"text" api:"required"`
+	// Draft attachments keyed by attachment ID.
+	Attachments map[string]DraftAttachment `json:"attachments"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Text        respjson.Field
+		Attachments respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatDraft) RawJSON() string { return r.JSON.raw }
+func (r *ChatDraft) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat state update capabilities.
+type ChatStateCapabilities struct {
+	// Chat avatar state capability.
+	Avatar ChatStateCapabilitiesAvatar `json:"avatar"`
+	// Chat description/topic state capability.
+	Description ChatStateCapabilitiesDescription `json:"description"`
+	// Disappearing-message timer state capability.
+	DisappearingTimer ChatStateCapabilitiesDisappearingTimer `json:"disappearingTimer"`
+	// Chat title state capability.
+	Title ChatStateCapabilitiesTitle `json:"title"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Avatar            respjson.Field
+		Description       respjson.Field
+		DisappearingTimer respjson.Field
+		Title             respjson.Field
+		ExtraFields       map[string]respjson.Field
+		raw               string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatStateCapabilities) RawJSON() string { return r.JSON.raw }
+func (r *ChatStateCapabilities) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat avatar state capability.
+type ChatStateCapabilitiesAvatar struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatStateCapabilitiesAvatar) RawJSON() string { return r.JSON.raw }
+func (r *ChatStateCapabilitiesAvatar) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat description/topic state capability.
+type ChatStateCapabilitiesDescription struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatStateCapabilitiesDescription) RawJSON() string { return r.JSON.raw }
+func (r *ChatStateCapabilitiesDescription) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Disappearing-message timer state capability.
+type ChatStateCapabilitiesDisappearingTimer struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatStateCapabilitiesDisappearingTimer) RawJSON() string { return r.JSON.raw }
+func (r *ChatStateCapabilitiesDisappearingTimer) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Chat title state capability.
+type ChatStateCapabilitiesTitle struct {
+	// -2: rejected, -1: dropped, 0: unsupported, 1: partially supported, 2: fully
+	// supported.
+	//
+	// Any of -2, -1, 0, 1, 2.
+	Level int64 `json:"level" api:"required"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Level       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r ChatStateCapabilitiesTitle) RawJSON() string { return r.JSON.raw }
+func (r *ChatStateCapabilitiesTitle) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+type DraftAttachment struct {
+	// Draft attachment identifier.
+	ID string `json:"id" api:"required"`
+	// Draft attachment type. GIF and recorded audio are mutually exclusive types.
+	//
+	// Any of "file", "gif", "recorded_audio".
+	Type DraftAttachmentType `json:"type" api:"required"`
+	// Audio duration in seconds if known.
+	AudioDurationSeconds float64 `json:"audioDurationSeconds"`
+	// Original filename if available.
+	FileName string `json:"fileName"`
+	// Local filesystem path for the draft attachment.
+	FilePath string `json:"filePath"`
+	// File size in bytes if known.
+	FileSize float64 `json:"fileSize"`
+	// MIME type if known.
+	MimeType string `json:"mimeType"`
+	// Pixel dimensions of the attachment.
+	Size DraftAttachmentSize `json:"size"`
+	// Sticker identifier if the draft attachment is a sticker.
+	StickerID string `json:"stickerID"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ID                   respjson.Field
+		Type                 respjson.Field
+		AudioDurationSeconds respjson.Field
+		FileName             respjson.Field
+		FilePath             respjson.Field
+		FileSize             respjson.Field
+		MimeType             respjson.Field
+		Size                 respjson.Field
+		StickerID            respjson.Field
+		ExtraFields          map[string]respjson.Field
+		raw                  string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r DraftAttachment) RawJSON() string { return r.JSON.raw }
+func (r *DraftAttachment) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Draft attachment type. GIF and recorded audio are mutually exclusive types.
+type DraftAttachmentType string
+
+const (
+	DraftAttachmentTypeFile          DraftAttachmentType = "file"
+	DraftAttachmentTypeGif           DraftAttachmentType = "gif"
+	DraftAttachmentTypeRecordedAudio DraftAttachmentType = "recorded_audio"
+)
+
+// Pixel dimensions of the attachment.
+type DraftAttachmentSize struct {
+	Height float64 `json:"height"`
+	Width  float64 `json:"width"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Height      respjson.Field
+		Width       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r DraftAttachmentSize) RawJSON() string { return r.JSON.raw }
+func (r *DraftAttachmentSize) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Link preview included with a message.
+type LinkPreview struct {
+	// Link preview title.
+	Title string `json:"title" api:"required"`
+	// Resolved link URL.
+	URL string `json:"url" api:"required"`
+	// Favicon URL if available. May be temporary or available only on this device;
+	// download promptly if durable access is needed.
+	Favicon string `json:"favicon"`
+	// Preview image URL if available. May be temporary or available only on this
+	// device; download promptly if durable access is needed.
+	Img string `json:"img"`
+	// Preview image dimensions.
+	ImgSize LinkPreviewImgSize `json:"imgSize"`
+	// Original URL when the displayed URL is shortened or redirected.
+	OriginalURL string `json:"originalURL"`
+	// Link preview summary.
+	Summary string `json:"summary"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Title       respjson.Field
+		URL         respjson.Field
+		Favicon     respjson.Field
+		Img         respjson.Field
+		ImgSize     respjson.Field
+		OriginalURL respjson.Field
+		Summary     respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r LinkPreview) RawJSON() string { return r.JSON.raw }
+func (r *LinkPreview) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Preview image dimensions.
+type LinkPreviewImgSize struct {
+	Height float64 `json:"height"`
+	Width  float64 `json:"width"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Height      respjson.Field
+		Width       respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r LinkPreviewImgSize) RawJSON() string { return r.JSON.raw }
+func (r *LinkPreviewImgSize) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
 type Message struct {
 	// Message ID.
 	ID string `json:"id" api:"required"`
@@ -178,7 +705,7 @@ type Message struct {
 	// ID of the message this is a reply to, if any.
 	LinkedMessageID string `json:"linkedMessageID"`
 	// Link previews included with this message, if any.
-	Links []MessageLink `json:"links"`
+	Links []LinkPreview `json:"links"`
 	// Mentioned user IDs, @room, or null for legacy messages that require text
 	// scanning.
 	Mentions []string `json:"mentions" api:"nullable"`
@@ -189,7 +716,7 @@ type Message struct {
 	// Resolved sender display name.
 	SenderName string `json:"senderName"`
 	// Message send status for this message, when reported by the bridge.
-	SendStatus MessageSendStatus `json:"sendStatus"`
+	SendStatus SendStatus `json:"sendStatus"`
 	// Rich-text message body if present.
 	Text string `json:"text"`
 	// Message content type. Useful for distinguishing reactions, media messages, and
@@ -229,63 +756,6 @@ type Message struct {
 // Returns the unmodified JSON received from the API
 func (r Message) RawJSON() string { return r.JSON.raw }
 func (r *Message) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Link preview included with a message.
-type MessageLink struct {
-	// Link preview title.
-	Title string `json:"title" api:"required"`
-	// Resolved link URL.
-	URL string `json:"url" api:"required"`
-	// Favicon URL if available. May be temporary or available only on this device;
-	// download promptly if durable access is needed.
-	Favicon string `json:"favicon"`
-	// Preview image URL if available. May be temporary or available only on this
-	// device; download promptly if durable access is needed.
-	Img string `json:"img"`
-	// Preview image dimensions.
-	ImgSize MessageLinkImgSize `json:"imgSize"`
-	// Original URL when the displayed URL is shortened or redirected.
-	OriginalURL string `json:"originalURL"`
-	// Link preview summary.
-	Summary string `json:"summary"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Title       respjson.Field
-		URL         respjson.Field
-		Favicon     respjson.Field
-		Img         respjson.Field
-		ImgSize     respjson.Field
-		OriginalURL respjson.Field
-		Summary     respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r MessageLink) RawJSON() string { return r.JSON.raw }
-func (r *MessageLink) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Preview image dimensions.
-type MessageLinkImgSize struct {
-	Height float64 `json:"height"`
-	Width  float64 `json:"width"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Height      respjson.Field
-		Width       respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r MessageLinkImgSize) RawJSON() string { return r.JSON.raw }
-func (r *MessageLinkImgSize) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
@@ -366,42 +836,6 @@ func (r *MessageSeenByParticipantItemUnion) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-// Message send status for this message, when reported by the bridge.
-type MessageSendStatus struct {
-	// Current status of the message send attempt.
-	//
-	// Any of "SUCCESS", "PENDING", "FAIL_RETRIABLE", "FAIL_PERMANENT".
-	Status string `json:"status" api:"required"`
-	// Timestamp for the send status event.
-	Timestamp time.Time `json:"timestamp" api:"required" format:"date-time"`
-	// User IDs the message was delivered to, when reported by the network.
-	DeliveredToUsers []string `json:"deliveredToUsers"`
-	// Diagnostic error detail from the messaging network adapter. Do not show directly
-	// to users.
-	InternalError string `json:"internalError"`
-	// Human-readable send status or failure message.
-	Message string `json:"message"`
-	// Machine-readable failure reason. Present when the send status is a failure.
-	Reason string `json:"reason"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		Status           respjson.Field
-		Timestamp        respjson.Field
-		DeliveredToUsers respjson.Field
-		InternalError    respjson.Field
-		Message          respjson.Field
-		Reason           respjson.Field
-		ExtraFields      map[string]respjson.Field
-		raw              string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r MessageSendStatus) RawJSON() string { return r.JSON.raw }
-func (r *MessageSendStatus) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
 // Message content type. Useful for distinguishing reactions, media messages, and
 // state events from regular text messages.
 type MessageType string
@@ -451,6 +885,52 @@ func (r Reaction) RawJSON() string { return r.JSON.raw }
 func (r *Reaction) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
+
+// Message send status for this message, when reported by the bridge.
+type SendStatus struct {
+	// Current status of the message send attempt.
+	//
+	// Any of "SUCCESS", "PENDING", "FAIL_RETRIABLE", "FAIL_PERMANENT".
+	Status SendStatusStatus `json:"status" api:"required"`
+	// Timestamp for the send status event.
+	Timestamp time.Time `json:"timestamp" api:"required" format:"date-time"`
+	// User IDs the message was delivered to, when reported by the network.
+	DeliveredToUsers []string `json:"deliveredToUsers"`
+	// Diagnostic error detail from the messaging network adapter. Do not show directly
+	// to users.
+	InternalError string `json:"internalError"`
+	// Human-readable send status or failure message.
+	Message string `json:"message"`
+	// Machine-readable failure reason. Present when the send status is a failure.
+	Reason string `json:"reason"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		Status           respjson.Field
+		Timestamp        respjson.Field
+		DeliveredToUsers respjson.Field
+		InternalError    respjson.Field
+		Message          respjson.Field
+		Reason           respjson.Field
+		ExtraFields      map[string]respjson.Field
+		raw              string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r SendStatus) RawJSON() string { return r.JSON.raw }
+func (r *SendStatus) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Current status of the message send attempt.
+type SendStatusStatus string
+
+const (
+	SendStatusStatusSuccess       SendStatusStatus = "SUCCESS"
+	SendStatusStatusPending       SendStatusStatus = "PENDING"
+	SendStatusStatusFailRetriable SendStatusStatus = "FAIL_RETRIABLE"
+	SendStatusStatusFailPermanent SendStatusStatus = "FAIL_PERMANENT"
+)
 
 // User the account belongs to.
 type User struct {

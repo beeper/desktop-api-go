@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/internal/testutil"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/internal/testutil"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
-func TestAppVerificationQrConfirmScanned(t *testing.T) {
+func TestAppSetupRecoveryKeyResetNewWithOptionalParams(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,9 @@ func TestAppVerificationQrConfirmScanned(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Verifications.Qr.ConfirmScanned(context.TODO(), "x")
+	_, err := client.App.Setup.RecoveryKey.Reset.New(context.TODO(), beeperdesktopapi.AppSetupRecoveryKeyResetNewParams{
+		ExistingRecoveryKey: beeperdesktopapi.String("existingRecoveryKey"),
+	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
@@ -35,7 +37,7 @@ func TestAppVerificationQrConfirmScanned(t *testing.T) {
 	}
 }
 
-func TestAppVerificationQrScan(t *testing.T) {
+func TestAppSetupRecoveryKeyResetConfirm(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -47,8 +49,8 @@ func TestAppVerificationQrScan(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Verifications.Qr.Scan(context.TODO(), beeperdesktopapi.AppVerificationQrScanParams{
-		Data: "x",
+	_, err := client.App.Setup.RecoveryKey.Reset.Confirm(context.TODO(), beeperdesktopapi.AppSetupRecoveryKeyResetConfirmParams{
+		RecoveryKey: "x",
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
