@@ -10,14 +10,14 @@ import (
 	"net/url"
 	"slices"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/internal/apiquery"
-	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/v5/option"
-	"github.com/beeper/desktop-api-go/v5/packages/pagination"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
-	"github.com/beeper/desktop-api-go/v5/shared"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/internal/apiquery"
+	"github.com/beeper/desktop-api-go/v6/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v6/option"
+	"github.com/beeper/desktop-api-go/v6/packages/pagination"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/shared"
 )
 
 // Manage contacts on a specific account
@@ -69,7 +69,9 @@ func (r *AccountContactService) ListAutoPaging(ctx context.Context, accountID st
 }
 
 // Search contacts on a specific account using merged account contacts, network
-// search, and exact identifier lookup.
+// search, and exact identifier lookup. The exact lookup only runs when the query
+// is a phone number, email address, or username; pass one of those to resolve a
+// specific person.
 func (r *AccountContactService) Search(ctx context.Context, accountID string, query AccountContactSearchParams, opts ...option.RequestOption) (res *AccountContactSearchResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if accountID == "" {
@@ -131,7 +133,10 @@ const (
 )
 
 type AccountContactSearchParams struct {
-	// Text to search contacts by. Matching behavior depends on the network.
+	// Text to search contacts by. A phone number, email address, or username written
+	// with a leading @ is additionally looked up as an exact identifier on the
+	// network; any other text, such as a bare handle or a person or business name,
+	// searches existing contacts only. Matching behavior depends on the network.
 	Query string `query:"query" api:"required" json:"-"`
 	paramObj
 }

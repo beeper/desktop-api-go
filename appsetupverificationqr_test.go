@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/internal/testutil"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/internal/testutil"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
-func TestAppLoginVerificationRecoveryKeyResetNewWithOptionalParams(t *testing.T) {
+func TestAppSetupVerificationQRConfirmScanned(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,9 +25,7 @@ func TestAppLoginVerificationRecoveryKeyResetNewWithOptionalParams(t *testing.T)
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Login.Verification.RecoveryKey.Reset.New(context.TODO(), beeperdesktopapi.AppLoginVerificationRecoveryKeyResetNewParams{
-		ExistingRecoveryKey: beeperdesktopapi.String("existingRecoveryKey"),
-	})
+	_, err := client.App.Setup.Verifications.QR.ConfirmScanned(context.TODO(), "x")
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {
@@ -37,7 +35,7 @@ func TestAppLoginVerificationRecoveryKeyResetNewWithOptionalParams(t *testing.T)
 	}
 }
 
-func TestAppLoginVerificationRecoveryKeyResetConfirm(t *testing.T) {
+func TestAppSetupVerificationQRScan(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -49,8 +47,8 @@ func TestAppLoginVerificationRecoveryKeyResetConfirm(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Login.Verification.RecoveryKey.Reset.Confirm(context.TODO(), beeperdesktopapi.AppLoginVerificationRecoveryKeyResetConfirmParams{
-		RecoveryKey: "x",
+	_, err := client.App.Setup.Verifications.QR.Scan(context.TODO(), beeperdesktopapi.AppSetupVerificationQRScanParams{
+		Data: "x",
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error

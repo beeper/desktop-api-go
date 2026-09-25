@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/internal/testutil"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/internal/testutil"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
 func TestChatNewWithOptionalParams(t *testing.T) {
@@ -138,6 +138,7 @@ func TestChatListWithOptionalParams(t *testing.T) {
 		AccountIDs: []string{"matrix", "discordgo", "local-whatsapp_ba_EvYDBBsZbRQAy3UOSWqG0LuTVkc"},
 		Cursor:     beeperdesktopapi.String("1725489123456|c29tZUltc2dQYWdl"),
 		Direction:  beeperdesktopapi.ChatListParamsDirectionBefore,
+		Limit:      beeperdesktopapi.Int(1),
 	})
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
@@ -276,6 +277,7 @@ func TestChatSearchWithOptionalParams(t *testing.T) {
 		Direction:          beeperdesktopapi.ChatSearchParamsDirectionBefore,
 		Inbox:              beeperdesktopapi.ChatSearchParamsInboxPrimary,
 		IncludeMuted:       beeperdesktopapi.Bool(true),
+		LabelID:            beeperdesktopapi.String("labelID"),
 		LastActivityAfter:  beeperdesktopapi.Time(time.Now()),
 		LastActivityBefore: beeperdesktopapi.Time(time.Now()),
 		Limit:              beeperdesktopapi.Int(1),

@@ -9,36 +9,36 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/v5/option"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v6/option"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
 )
 
 // First-party sign-in and encrypted messaging setup for Beeper Desktop and Beeper
 // Server.
 //
-// AppVerificationSASService contains methods and other services that help with
-// interacting with the beeperdesktop API.
+// AppSetupVerificationSASService contains methods and other services that help
+// with interacting with the beeperdesktop API.
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
-// the [NewAppVerificationSASService] method instead.
-type AppVerificationSASService struct {
+// the [NewAppSetupVerificationSASService] method instead.
+type AppSetupVerificationSASService struct {
 	Options []option.RequestOption
 }
 
-// NewAppVerificationSASService generates a new service that applies the given
+// NewAppSetupVerificationSASService generates a new service that applies the given
 // options to each request. These options are applied after the parent client's
 // options (if there is one), and before any request-specific options.
-func NewAppVerificationSASService(opts ...option.RequestOption) (r AppVerificationSASService) {
-	r = AppVerificationSASService{}
+func NewAppSetupVerificationSASService(opts ...option.RequestOption) (r AppSetupVerificationSASService) {
+	r = AppSetupVerificationSASService{}
 	r.Options = opts
 	return
 }
 
 // Confirm that the emoji or number sequence matches on both devices.
-func (r *AppVerificationSASService) Confirm(ctx context.Context, verificationID string, opts ...option.RequestOption) (res *AppVerificationSASConfirmResponse, err error) {
+func (r *AppSetupVerificationSASService) Confirm(ctx context.Context, verificationID string, opts ...option.RequestOption) (res *AppSetupVerificationSASConfirmResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if verificationID == "" {
 		err = errors.New("missing required verificationID parameter")
@@ -50,7 +50,7 @@ func (r *AppVerificationSASService) Confirm(ctx context.Context, verificationID 
 }
 
 // Start emoji comparison for device verification.
-func (r *AppVerificationSASService) Start(ctx context.Context, verificationID string, opts ...option.RequestOption) (res *AppVerificationSASStartResponse, err error) {
+func (r *AppSetupVerificationSASService) Start(ctx context.Context, verificationID string, opts ...option.RequestOption) (res *AppSetupVerificationSASStartResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	if verificationID == "" {
 		err = errors.New("missing required verificationID parameter")
@@ -61,11 +61,11 @@ func (r *AppVerificationSASService) Start(ctx context.Context, verificationID st
 	return res, err
 }
 
-type AppVerificationSASConfirmResponse struct {
+type AppSetupVerificationSASConfirmResponse struct {
 	// Current app sign-in and encrypted messaging setup state.
-	Session AppVerificationSASConfirmResponseSession `json:"session" api:"required"`
+	Session AppSetupVerificationSASConfirmResponseSession `json:"session" api:"required"`
 	// Trusted device verification progress.
-	Verification AppVerificationSASConfirmResponseVerification `json:"verification"`
+	Verification AppSetupVerificationSASConfirmResponseVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Session      respjson.Field
@@ -76,15 +76,15 @@ type AppVerificationSASConfirmResponse struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponse) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponse) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponse) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Current app sign-in and encrypted messaging setup state.
-type AppVerificationSASConfirmResponseSession struct {
+type AppSetupVerificationSASConfirmResponseSession struct {
 	// Encrypted messaging setup status.
-	E2EE AppVerificationSASConfirmResponseSessionE2EE `json:"e2ee" api:"required"`
+	E2EE AppSetupVerificationSASConfirmResponseSessionE2EE `json:"e2ee" api:"required"`
 	// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
 	// Server.
 	//
@@ -92,9 +92,9 @@ type AppVerificationSASConfirmResponseSession struct {
 	// "needs-verification", "needs-secrets", "needs-first-sync", "ready".
 	State string `json:"state" api:"required"`
 	// Signed-in account details. Omitted until sign-in is complete.
-	Matrix AppVerificationSASConfirmResponseSessionMatrix `json:"matrix"`
+	Matrix AppSetupVerificationSASConfirmResponseSessionMatrix `json:"matrix"`
 	// Trusted device verification progress.
-	Verification AppVerificationSASConfirmResponseSessionVerification `json:"verification"`
+	Verification AppSetupVerificationSASConfirmResponseSessionVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		E2EE         respjson.Field
@@ -107,13 +107,13 @@ type AppVerificationSASConfirmResponseSession struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSession) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseSession) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseSession) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseSession) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging setup status.
-type AppVerificationSASConfirmResponseSessionE2EE struct {
+type AppSetupVerificationSASConfirmResponseSessionE2EE struct {
 	// Whether this account can verify trusted devices.
 	CrossSigning bool `json:"crossSigning" api:"required"`
 	// Whether the first encrypted message sync is complete.
@@ -125,7 +125,7 @@ type AppVerificationSASConfirmResponseSessionE2EE struct {
 	// Whether encrypted message backup is available.
 	KeyBackup bool `json:"keyBackup" api:"required"`
 	// Encrypted messaging keys available on this device.
-	Secrets AppVerificationSASConfirmResponseSessionE2EESecrets `json:"secrets" api:"required"`
+	Secrets AppSetupVerificationSASConfirmResponseSessionE2EESecrets `json:"secrets" api:"required"`
 	// Whether secure key storage is available.
 	SecretStorage bool `json:"secretStorage" api:"required"`
 	// Whether this device is trusted for encrypted messages.
@@ -149,13 +149,13 @@ type AppVerificationSASConfirmResponseSessionE2EE struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseSessionE2EE) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseSessionE2EE) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging keys available on this device.
-type AppVerificationSASConfirmResponseSessionE2EESecrets struct {
+type AppSetupVerificationSASConfirmResponseSessionE2EESecrets struct {
 	// Whether the account identity key is available.
 	MasterKey bool `json:"masterKey" api:"required"`
 	// Whether the encrypted message backup key is available.
@@ -179,13 +179,13 @@ type AppVerificationSASConfirmResponseSessionE2EESecrets struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Signed-in account details. Omitted until sign-in is complete.
-type AppVerificationSASConfirmResponseSessionMatrix struct {
+type AppSetupVerificationSASConfirmResponseSessionMatrix struct {
 	// Current device ID.
 	DeviceID string `json:"deviceID" api:"required"`
 	// Beeper homeserver URL for this account.
@@ -203,13 +203,13 @@ type AppVerificationSASConfirmResponseSessionMatrix struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseSessionMatrix) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseSessionMatrix) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppVerificationSASConfirmResponseSessionVerification struct {
+type AppSetupVerificationSASConfirmResponseSessionVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -234,15 +234,15 @@ type AppVerificationSASConfirmResponseSessionVerification struct {
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppVerificationSASConfirmResponseSessionVerificationError `json:"error"`
+	Error AppSetupVerificationSASConfirmResponseSessionVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppVerificationSASConfirmResponseSessionVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupVerificationSASConfirmResponseSessionVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppVerificationSASConfirmResponseSessionVerificationQr `json:"qr"`
+	QR AppSetupVerificationSASConfirmResponseSessionVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppVerificationSASConfirmResponseSessionVerificationSAS `json:"sas"`
+	SAS AppSetupVerificationSASConfirmResponseSessionVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -254,7 +254,7 @@ type AppVerificationSASConfirmResponseSessionVerification struct {
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -262,13 +262,15 @@ type AppVerificationSASConfirmResponseSessionVerification struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionVerification) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseSessionVerification) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseSessionVerification) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASConfirmResponseSessionVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppVerificationSASConfirmResponseSessionVerificationError struct {
+type AppSetupVerificationSASConfirmResponseSessionVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -283,15 +285,15 @@ type AppVerificationSASConfirmResponseSessionVerificationError struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionVerificationError) RawJSON() string {
+func (r AppSetupVerificationSASConfirmResponseSessionVerificationError) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppVerificationSASConfirmResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
+func (r *AppSetupVerificationSASConfirmResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Other device participating in verification.
-type AppVerificationSASConfirmResponseSessionVerificationOtherDevice struct {
+type AppSetupVerificationSASConfirmResponseSessionVerificationOtherDevice struct {
 	// Other device ID.
 	ID string `json:"id" api:"required"`
 	// Other device display name, if known.
@@ -306,15 +308,15 @@ type AppVerificationSASConfirmResponseSessionVerificationOtherDevice struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionVerificationOtherDevice) RawJSON() string {
+func (r AppSetupVerificationSASConfirmResponseSessionVerificationOtherDevice) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppVerificationSASConfirmResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r *AppSetupVerificationSASConfirmResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppVerificationSASConfirmResponseSessionVerificationQr struct {
+type AppSetupVerificationSASConfirmResponseSessionVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -326,13 +328,15 @@ type AppVerificationSASConfirmResponseSessionVerificationQr struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionVerificationQr) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseSessionVerificationQr) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseSessionVerificationQR) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASConfirmResponseSessionVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppVerificationSASConfirmResponseSessionVerificationSAS struct {
+type AppSetupVerificationSASConfirmResponseSessionVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -347,13 +351,15 @@ type AppVerificationSASConfirmResponseSessionVerificationSAS struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseSessionVerificationSAS) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseSessionVerificationSAS) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASConfirmResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppVerificationSASConfirmResponseVerification struct {
+type AppSetupVerificationSASConfirmResponseVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -378,15 +384,15 @@ type AppVerificationSASConfirmResponseVerification struct {
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppVerificationSASConfirmResponseVerificationError `json:"error"`
+	Error AppSetupVerificationSASConfirmResponseVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppVerificationSASConfirmResponseVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupVerificationSASConfirmResponseVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppVerificationSASConfirmResponseVerificationQr `json:"qr"`
+	QR AppSetupVerificationSASConfirmResponseVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppVerificationSASConfirmResponseVerificationSAS `json:"sas"`
+	SAS AppSetupVerificationSASConfirmResponseVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -398,7 +404,7 @@ type AppVerificationSASConfirmResponseVerification struct {
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -406,13 +412,13 @@ type AppVerificationSASConfirmResponseVerification struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseVerification) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseVerification) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseVerification) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppVerificationSASConfirmResponseVerificationError struct {
+type AppSetupVerificationSASConfirmResponseVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -427,13 +433,13 @@ type AppVerificationSASConfirmResponseVerificationError struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseVerificationError) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseVerificationError) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseVerificationError) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseVerificationError) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Other device participating in verification.
-type AppVerificationSASConfirmResponseVerificationOtherDevice struct {
+type AppSetupVerificationSASConfirmResponseVerificationOtherDevice struct {
 	// Other device ID.
 	ID string `json:"id" api:"required"`
 	// Other device display name, if known.
@@ -448,13 +454,15 @@ type AppVerificationSASConfirmResponseVerificationOtherDevice struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseVerificationOtherDevice) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseVerificationOtherDevice) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASConfirmResponseVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppVerificationSASConfirmResponseVerificationQr struct {
+type AppSetupVerificationSASConfirmResponseVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -466,13 +474,13 @@ type AppVerificationSASConfirmResponseVerificationQr struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseVerificationQr) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseVerificationQr) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseVerificationQR) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppVerificationSASConfirmResponseVerificationSAS struct {
+type AppSetupVerificationSASConfirmResponseVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -487,16 +495,16 @@ type AppVerificationSASConfirmResponseVerificationSAS struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASConfirmResponseVerificationSAS) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASConfirmResponseVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASConfirmResponseVerificationSAS) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASConfirmResponseVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppVerificationSASStartResponse struct {
+type AppSetupVerificationSASStartResponse struct {
 	// Current app sign-in and encrypted messaging setup state.
-	Session AppVerificationSASStartResponseSession `json:"session" api:"required"`
+	Session AppSetupVerificationSASStartResponseSession `json:"session" api:"required"`
 	// Trusted device verification progress.
-	Verification AppVerificationSASStartResponseVerification `json:"verification"`
+	Verification AppSetupVerificationSASStartResponseVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Session      respjson.Field
@@ -507,15 +515,15 @@ type AppVerificationSASStartResponse struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponse) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponse) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponse) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Current app sign-in and encrypted messaging setup state.
-type AppVerificationSASStartResponseSession struct {
+type AppSetupVerificationSASStartResponseSession struct {
 	// Encrypted messaging setup status.
-	E2EE AppVerificationSASStartResponseSessionE2EE `json:"e2ee" api:"required"`
+	E2EE AppSetupVerificationSASStartResponseSessionE2EE `json:"e2ee" api:"required"`
 	// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
 	// Server.
 	//
@@ -523,9 +531,9 @@ type AppVerificationSASStartResponseSession struct {
 	// "needs-verification", "needs-secrets", "needs-first-sync", "ready".
 	State string `json:"state" api:"required"`
 	// Signed-in account details. Omitted until sign-in is complete.
-	Matrix AppVerificationSASStartResponseSessionMatrix `json:"matrix"`
+	Matrix AppSetupVerificationSASStartResponseSessionMatrix `json:"matrix"`
 	// Trusted device verification progress.
-	Verification AppVerificationSASStartResponseSessionVerification `json:"verification"`
+	Verification AppSetupVerificationSASStartResponseSessionVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		E2EE         respjson.Field
@@ -538,13 +546,13 @@ type AppVerificationSASStartResponseSession struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSession) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSession) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseSession) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseSession) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging setup status.
-type AppVerificationSASStartResponseSessionE2EE struct {
+type AppSetupVerificationSASStartResponseSessionE2EE struct {
 	// Whether this account can verify trusted devices.
 	CrossSigning bool `json:"crossSigning" api:"required"`
 	// Whether the first encrypted message sync is complete.
@@ -556,7 +564,7 @@ type AppVerificationSASStartResponseSessionE2EE struct {
 	// Whether encrypted message backup is available.
 	KeyBackup bool `json:"keyBackup" api:"required"`
 	// Encrypted messaging keys available on this device.
-	Secrets AppVerificationSASStartResponseSessionE2EESecrets `json:"secrets" api:"required"`
+	Secrets AppSetupVerificationSASStartResponseSessionE2EESecrets `json:"secrets" api:"required"`
 	// Whether secure key storage is available.
 	SecretStorage bool `json:"secretStorage" api:"required"`
 	// Whether this device is trusted for encrypted messages.
@@ -580,13 +588,13 @@ type AppVerificationSASStartResponseSessionE2EE struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSessionE2EE) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseSessionE2EE) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging keys available on this device.
-type AppVerificationSASStartResponseSessionE2EESecrets struct {
+type AppSetupVerificationSASStartResponseSessionE2EESecrets struct {
 	// Whether the account identity key is available.
 	MasterKey bool `json:"masterKey" api:"required"`
 	// Whether the encrypted message backup key is available.
@@ -610,13 +618,13 @@ type AppVerificationSASStartResponseSessionE2EESecrets struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Signed-in account details. Omitted until sign-in is complete.
-type AppVerificationSASStartResponseSessionMatrix struct {
+type AppSetupVerificationSASStartResponseSessionMatrix struct {
 	// Current device ID.
 	DeviceID string `json:"deviceID" api:"required"`
 	// Beeper homeserver URL for this account.
@@ -634,13 +642,13 @@ type AppVerificationSASStartResponseSessionMatrix struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSessionMatrix) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseSessionMatrix) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppVerificationSASStartResponseSessionVerification struct {
+type AppSetupVerificationSASStartResponseSessionVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -665,15 +673,15 @@ type AppVerificationSASStartResponseSessionVerification struct {
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppVerificationSASStartResponseSessionVerificationError `json:"error"`
+	Error AppSetupVerificationSASStartResponseSessionVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppVerificationSASStartResponseSessionVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupVerificationSASStartResponseSessionVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppVerificationSASStartResponseSessionVerificationQr `json:"qr"`
+	QR AppSetupVerificationSASStartResponseSessionVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppVerificationSASStartResponseSessionVerificationSAS `json:"sas"`
+	SAS AppSetupVerificationSASStartResponseSessionVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -685,7 +693,7 @@ type AppVerificationSASStartResponseSessionVerification struct {
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -693,13 +701,13 @@ type AppVerificationSASStartResponseSessionVerification struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionVerification) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSessionVerification) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseSessionVerification) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseSessionVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppVerificationSASStartResponseSessionVerificationError struct {
+type AppSetupVerificationSASStartResponseSessionVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -714,36 +722,38 @@ type AppVerificationSASStartResponseSessionVerificationError struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionVerificationError) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
-	return apijson.UnmarshalRoot(data, r)
-}
-
-// Other device participating in verification.
-type AppVerificationSASStartResponseSessionVerificationOtherDevice struct {
-	// Other device ID.
-	ID string `json:"id" api:"required"`
-	// Other device display name, if known.
-	Name string `json:"name"`
-	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
-	JSON struct {
-		ID          respjson.Field
-		Name        respjson.Field
-		ExtraFields map[string]respjson.Field
-		raw         string
-	} `json:"-"`
-}
-
-// Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionVerificationOtherDevice) RawJSON() string {
+func (r AppSetupVerificationSASStartResponseSessionVerificationError) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppVerificationSASStartResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r *AppSetupVerificationSASStartResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
+	return apijson.UnmarshalRoot(data, r)
+}
+
+// Other device participating in verification.
+type AppSetupVerificationSASStartResponseSessionVerificationOtherDevice struct {
+	// Other device ID.
+	ID string `json:"id" api:"required"`
+	// Other device display name, if known.
+	Name string `json:"name"`
+	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
+	JSON struct {
+		ID          respjson.Field
+		Name        respjson.Field
+		ExtraFields map[string]respjson.Field
+		raw         string
+	} `json:"-"`
+}
+
+// Returns the unmodified JSON received from the API
+func (r AppSetupVerificationSASStartResponseSessionVerificationOtherDevice) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASStartResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppVerificationSASStartResponseSessionVerificationQr struct {
+type AppSetupVerificationSASStartResponseSessionVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -755,13 +765,15 @@ type AppVerificationSASStartResponseSessionVerificationQr struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionVerificationQr) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSessionVerificationQr) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseSessionVerificationQR) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASStartResponseSessionVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppVerificationSASStartResponseSessionVerificationSAS struct {
+type AppSetupVerificationSASStartResponseSessionVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -776,13 +788,15 @@ type AppVerificationSASStartResponseSessionVerificationSAS struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseSessionVerificationSAS) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseSessionVerificationSAS) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASStartResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppVerificationSASStartResponseVerification struct {
+type AppSetupVerificationSASStartResponseVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -807,15 +821,15 @@ type AppVerificationSASStartResponseVerification struct {
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppVerificationSASStartResponseVerificationError `json:"error"`
+	Error AppSetupVerificationSASStartResponseVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppVerificationSASStartResponseVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupVerificationSASStartResponseVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppVerificationSASStartResponseVerificationQr `json:"qr"`
+	QR AppSetupVerificationSASStartResponseVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppVerificationSASStartResponseVerificationSAS `json:"sas"`
+	SAS AppSetupVerificationSASStartResponseVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -827,7 +841,7 @@ type AppVerificationSASStartResponseVerification struct {
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -835,13 +849,13 @@ type AppVerificationSASStartResponseVerification struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseVerification) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseVerification) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseVerification) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppVerificationSASStartResponseVerificationError struct {
+type AppSetupVerificationSASStartResponseVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -856,13 +870,13 @@ type AppVerificationSASStartResponseVerificationError struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseVerificationError) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseVerificationError) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseVerificationError) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseVerificationError) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Other device participating in verification.
-type AppVerificationSASStartResponseVerificationOtherDevice struct {
+type AppSetupVerificationSASStartResponseVerificationOtherDevice struct {
 	// Other device ID.
 	ID string `json:"id" api:"required"`
 	// Other device display name, if known.
@@ -877,13 +891,15 @@ type AppVerificationSASStartResponseVerificationOtherDevice struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseVerificationOtherDevice) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseVerificationOtherDevice) RawJSON() string {
+	return r.JSON.raw
+}
+func (r *AppSetupVerificationSASStartResponseVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppVerificationSASStartResponseVerificationQr struct {
+type AppSetupVerificationSASStartResponseVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -895,13 +911,13 @@ type AppVerificationSASStartResponseVerificationQr struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseVerificationQr) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseVerificationQr) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseVerificationQR) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppVerificationSASStartResponseVerificationSAS struct {
+type AppSetupVerificationSASStartResponseVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -916,7 +932,7 @@ type AppVerificationSASStartResponseVerificationSAS struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppVerificationSASStartResponseVerificationSAS) RawJSON() string { return r.JSON.raw }
-func (r *AppVerificationSASStartResponseVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r AppSetupVerificationSASStartResponseVerificationSAS) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupVerificationSASStartResponseVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

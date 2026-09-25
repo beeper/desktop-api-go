@@ -5,11 +5,11 @@ package beeperdesktopapi
 import (
 	"net/url"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/internal/apiquery"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
-	"github.com/beeper/desktop-api-go/v5/shared"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/internal/apiquery"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/shared"
 )
 
 // Response indicating successful app focus action.

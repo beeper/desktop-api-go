@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	shimjson "github.com/beeper/desktop-api-go/v5/internal/encoding/json"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
+	shimjson "github.com/beeper/desktop-api-go/v6/internal/encoding/json"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
 )
 
 type Struct struct {

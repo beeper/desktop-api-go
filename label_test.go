@@ -8,12 +8,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/beeper/desktop-api-go/v5"
-	"github.com/beeper/desktop-api-go/v5/internal/testutil"
-	"github.com/beeper/desktop-api-go/v5/option"
+	"github.com/beeper/desktop-api-go/v6"
+	"github.com/beeper/desktop-api-go/v6/internal/testutil"
+	"github.com/beeper/desktop-api-go/v6/option"
 )
 
-func TestAppSession(t *testing.T) {
+func TestLabelList(t *testing.T) {
 	baseURL := "http://localhost:4010"
 	if envURL, ok := os.LookupEnv("TEST_API_BASE_URL"); ok {
 		baseURL = envURL
@@ -25,7 +25,7 @@ func TestAppSession(t *testing.T) {
 		option.WithBaseURL(baseURL),
 		option.WithAccessToken("My Access Token"),
 	)
-	_, err := client.App.Session(context.TODO())
+	_, err := client.Labels.List(context.TODO())
 	if err != nil {
 		var apierr *beeperdesktopapi.Error
 		if errors.As(err, &apierr) {

@@ -14,7 +14,7 @@ import (
 	"encoding"
 	"encoding/base64"
 	"fmt"
-	"github.com/beeper/desktop-api-go/v5/internal/encoding/json/shims"
+	"github.com/beeper/desktop-api-go/v6/internal/encoding/json/shims"
 	"reflect"
 	"strconv"
 	"strings"

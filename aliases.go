@@ -3,9 +3,9 @@
 package beeperdesktopapi
 
 import (
-	"github.com/beeper/desktop-api-go/v5/internal/apierror"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
-	"github.com/beeper/desktop-api-go/v5/shared"
+	"github.com/beeper/desktop-api-go/v6/internal/apierror"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
+	"github.com/beeper/desktop-api-go/v6/shared"
 )
 
 // aliased to make [param.APIUnion] private when embedding
@@ -49,18 +49,95 @@ type AttachmentSize = shared.AttachmentSize
 // This is an alias to an internal type.
 type AttachmentTranscription = shared.AttachmentTranscription
 
+// Capabilities for one attachment message type.
+//
 // This is an alias to an internal type.
-type Message = shared.Message
+type AttachmentCapabilities = shared.AttachmentCapabilities
+
+// Chat capabilities reported by the platform.
+//
+// This is an alias to an internal type.
+type ChatCapabilities = shared.ChatCapabilities
+
+// Disappearing-message timer capabilities.
+//
+// This is an alias to an internal type.
+type ChatCapabilitiesDisappearingTimer = shared.ChatCapabilitiesDisappearingTimer
+
+// Message request capabilities.
+//
+// This is an alias to an internal type.
+type ChatCapabilitiesMessageRequest = shared.ChatCapabilitiesMessageRequest
+
+// Participant management capabilities.
+//
+// This is an alias to an internal type.
+type ChatCapabilitiesParticipantActions = shared.ChatCapabilitiesParticipantActions
+
+// Current draft object for this chat, or null when no draft is set.
+//
+// This is an alias to an internal type.
+type ChatDraft = shared.ChatDraft
+
+// Chat state update capabilities.
+//
+// This is an alias to an internal type.
+type ChatStateCapabilities = shared.ChatStateCapabilities
+
+// Chat avatar state capability.
+//
+// This is an alias to an internal type.
+type ChatStateCapabilitiesAvatar = shared.ChatStateCapabilitiesAvatar
+
+// Chat description/topic state capability.
+//
+// This is an alias to an internal type.
+type ChatStateCapabilitiesDescription = shared.ChatStateCapabilitiesDescription
+
+// Disappearing-message timer state capability.
+//
+// This is an alias to an internal type.
+type ChatStateCapabilitiesDisappearingTimer = shared.ChatStateCapabilitiesDisappearingTimer
+
+// Chat title state capability.
+//
+// This is an alias to an internal type.
+type ChatStateCapabilitiesTitle = shared.ChatStateCapabilitiesTitle
+
+// This is an alias to an internal type.
+type DraftAttachment = shared.DraftAttachment
+
+// Draft attachment type. GIF and recorded audio are mutually exclusive types.
+//
+// This is an alias to an internal type.
+type DraftAttachmentType = shared.DraftAttachmentType
+
+// Equals "file"
+const DraftAttachmentTypeFile = shared.DraftAttachmentTypeFile
+
+// Equals "gif"
+const DraftAttachmentTypeGif = shared.DraftAttachmentTypeGif
+
+// Equals "recorded_audio"
+const DraftAttachmentTypeRecordedAudio = shared.DraftAttachmentTypeRecordedAudio
+
+// Pixel dimensions of the attachment.
+//
+// This is an alias to an internal type.
+type DraftAttachmentSize = shared.DraftAttachmentSize
 
 // Link preview included with a message.
 //
 // This is an alias to an internal type.
-type MessageLink = shared.MessageLink
+type LinkPreview = shared.LinkPreview
 
 // Preview image dimensions.
 //
 // This is an alias to an internal type.
-type MessageLinkImgSize = shared.MessageLinkImgSize
+type LinkPreviewImgSize = shared.LinkPreviewImgSize
+
+// This is an alias to an internal type.
+type Message = shared.Message
 
 // Read receipt state for this message, when available.
 //
@@ -71,11 +148,6 @@ type MessageSeenUnion = shared.MessageSeenUnion
 //
 // This is an alias to an internal type.
 type MessageSeenByParticipantItemUnion = shared.MessageSeenByParticipantItemUnion
-
-// Message send status for this message, when reported by the bridge.
-//
-// This is an alias to an internal type.
-type MessageSendStatus = shared.MessageSendStatus
 
 // Message content type. Useful for distinguishing reactions, media messages, and
 // state events from regular text messages.
@@ -115,6 +187,28 @@ const MessageTypeReaction = shared.MessageTypeReaction
 
 // This is an alias to an internal type.
 type Reaction = shared.Reaction
+
+// Message send status for this message, when reported by the bridge.
+//
+// This is an alias to an internal type.
+type SendStatus = shared.SendStatus
+
+// Current status of the message send attempt.
+//
+// This is an alias to an internal type.
+type SendStatusStatus = shared.SendStatusStatus
+
+// Equals "SUCCESS"
+const SendStatusStatusSuccess = shared.SendStatusStatusSuccess
+
+// Equals "PENDING"
+const SendStatusStatusPending = shared.SendStatusStatusPending
+
+// Equals "FAIL_RETRIABLE"
+const SendStatusStatusFailRetriable = shared.SendStatusStatusFailRetriable
+
+// Equals "FAIL_PERMANENT"
+const SendStatusStatusFailPermanent = shared.SendStatusStatusFailPermanent
 
 // User the account belongs to.
 //

@@ -7,38 +7,37 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/beeper/desktop-api-go/v5/internal/apijson"
-	"github.com/beeper/desktop-api-go/v5/internal/requestconfig"
-	"github.com/beeper/desktop-api-go/v5/option"
-	"github.com/beeper/desktop-api-go/v5/packages/param"
-	"github.com/beeper/desktop-api-go/v5/packages/respjson"
+	"github.com/beeper/desktop-api-go/v6/internal/apijson"
+	"github.com/beeper/desktop-api-go/v6/internal/requestconfig"
+	"github.com/beeper/desktop-api-go/v6/option"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
+	"github.com/beeper/desktop-api-go/v6/packages/respjson"
 )
 
 // First-party sign-in and encrypted messaging setup for Beeper Desktop and Beeper
 // Server.
 //
-// AppLoginVerificationRecoveryKeyResetService contains methods and other services
-// that help with interacting with the beeperdesktop API.
+// AppSetupRecoveryKeyResetService contains methods and other services that help
+// with interacting with the beeperdesktop API.
 //
 // Note, unlike clients, this service does not read variables from the environment
 // automatically. You should not instantiate this service directly, and instead use
-// the [NewAppLoginVerificationRecoveryKeyResetService] method instead.
-type AppLoginVerificationRecoveryKeyResetService struct {
+// the [NewAppSetupRecoveryKeyResetService] method instead.
+type AppSetupRecoveryKeyResetService struct {
 	Options []option.RequestOption
 }
 
-// NewAppLoginVerificationRecoveryKeyResetService generates a new service that
-// applies the given options to each request. These options are applied after the
-// parent client's options (if there is one), and before any request-specific
-// options.
-func NewAppLoginVerificationRecoveryKeyResetService(opts ...option.RequestOption) (r AppLoginVerificationRecoveryKeyResetService) {
-	r = AppLoginVerificationRecoveryKeyResetService{}
+// NewAppSetupRecoveryKeyResetService generates a new service that applies the
+// given options to each request. These options are applied after the parent
+// client's options (if there is one), and before any request-specific options.
+func NewAppSetupRecoveryKeyResetService(opts ...option.RequestOption) (r AppSetupRecoveryKeyResetService) {
+	r = AppSetupRecoveryKeyResetService{}
 	r.Options = opts
 	return
 }
 
 // Create a new recovery key when the user cannot use the existing one.
-func (r *AppLoginVerificationRecoveryKeyResetService) New(ctx context.Context, body AppLoginVerificationRecoveryKeyResetNewParams, opts ...option.RequestOption) (res *AppLoginVerificationRecoveryKeyResetNewResponse, err error) {
+func (r *AppSetupRecoveryKeyResetService) New(ctx context.Context, body AppSetupRecoveryKeyResetNewParams, opts ...option.RequestOption) (res *AppSetupRecoveryKeyResetNewResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/app/setup/verification/recovery-key/reset"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
@@ -46,19 +45,19 @@ func (r *AppLoginVerificationRecoveryKeyResetService) New(ctx context.Context, b
 }
 
 // Confirm that the new recovery key should be used for this account.
-func (r *AppLoginVerificationRecoveryKeyResetService) Confirm(ctx context.Context, body AppLoginVerificationRecoveryKeyResetConfirmParams, opts ...option.RequestOption) (res *AppLoginVerificationRecoveryKeyResetConfirmResponse, err error) {
+func (r *AppSetupRecoveryKeyResetService) Confirm(ctx context.Context, body AppSetupRecoveryKeyResetConfirmParams, opts ...option.RequestOption) (res *AppSetupRecoveryKeyResetConfirmResponse, err error) {
 	opts = slices.Concat(r.Options, opts)
 	path := "v1/app/setup/verification/recovery-key/reset/confirm"
 	err = requestconfig.ExecuteNewRequest(ctx, http.MethodPost, path, body, &res, opts...)
 	return res, err
 }
 
-type AppLoginVerificationRecoveryKeyResetNewResponse struct {
+type AppSetupRecoveryKeyResetNewResponse struct {
 	// New recovery key. Show it once and ask the user to save it.
 	RecoveryKey string `json:"recoveryKey" api:"required"`
 	// Current app sign-in and encrypted messaging setup state after creating the new
 	// recovery key.
-	Session AppLoginVerificationRecoveryKeyResetNewResponseSession `json:"session" api:"required"`
+	Session AppSetupRecoveryKeyResetNewResponseSession `json:"session" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		RecoveryKey respjson.Field
@@ -69,16 +68,16 @@ type AppLoginVerificationRecoveryKeyResetNewResponse struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponse) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginVerificationRecoveryKeyResetNewResponse) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetNewResponse) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetNewResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Current app sign-in and encrypted messaging setup state after creating the new
 // recovery key.
-type AppLoginVerificationRecoveryKeyResetNewResponseSession struct {
+type AppSetupRecoveryKeyResetNewResponseSession struct {
 	// Encrypted messaging setup status.
-	E2EE AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EE `json:"e2ee" api:"required"`
+	E2EE AppSetupRecoveryKeyResetNewResponseSessionE2EE `json:"e2ee" api:"required"`
 	// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
 	// Server.
 	//
@@ -86,9 +85,9 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSession struct {
 	// "needs-verification", "needs-secrets", "needs-first-sync", "ready".
 	State string `json:"state" api:"required"`
 	// Signed-in account details. Omitted until sign-in is complete.
-	Matrix AppLoginVerificationRecoveryKeyResetNewResponseSessionMatrix `json:"matrix"`
+	Matrix AppSetupRecoveryKeyResetNewResponseSessionMatrix `json:"matrix"`
 	// Trusted device verification progress.
-	Verification AppLoginVerificationRecoveryKeyResetNewResponseSessionVerification `json:"verification"`
+	Verification AppSetupRecoveryKeyResetNewResponseSessionVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		E2EE         respjson.Field
@@ -101,13 +100,13 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSession struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSession) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSession) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetNewResponseSession) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetNewResponseSession) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging setup status.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EE struct {
+type AppSetupRecoveryKeyResetNewResponseSessionE2EE struct {
 	// Whether this account can verify trusted devices.
 	CrossSigning bool `json:"crossSigning" api:"required"`
 	// Whether the first encrypted message sync is complete.
@@ -119,7 +118,7 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EE struct {
 	// Whether encrypted message backup is available.
 	KeyBackup bool `json:"keyBackup" api:"required"`
 	// Encrypted messaging keys available on this device.
-	Secrets AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EESecrets `json:"secrets" api:"required"`
+	Secrets AppSetupRecoveryKeyResetNewResponseSessionE2EESecrets `json:"secrets" api:"required"`
 	// Whether secure key storage is available.
 	SecretStorage bool `json:"secretStorage" api:"required"`
 	// Whether this device is trusted for encrypted messages.
@@ -143,15 +142,13 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EE struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EE) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EE) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetNewResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetNewResponseSessionE2EE) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging keys available on this device.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EESecrets struct {
+type AppSetupRecoveryKeyResetNewResponseSessionE2EESecrets struct {
 	// Whether the account identity key is available.
 	MasterKey bool `json:"masterKey" api:"required"`
 	// Whether the encrypted message backup key is available.
@@ -175,15 +172,13 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EESecrets struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EESecrets) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetNewResponseSessionE2EESecrets) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetNewResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Signed-in account details. Omitted until sign-in is complete.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionMatrix struct {
+type AppSetupRecoveryKeyResetNewResponseSessionMatrix struct {
 	// Current device ID.
 	DeviceID string `json:"deviceID" api:"required"`
 	// Beeper homeserver URL for this account.
@@ -201,15 +196,13 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionMatrix struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionMatrix) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionMatrix) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetNewResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetNewResponseSessionMatrix) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerification struct {
+type AppSetupRecoveryKeyResetNewResponseSessionVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -234,15 +227,15 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerification struct {
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationError `json:"error"`
+	Error AppSetupRecoveryKeyResetNewResponseSessionVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupRecoveryKeyResetNewResponseSessionVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationQr `json:"qr"`
+	QR AppSetupRecoveryKeyResetNewResponseSessionVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationSAS `json:"sas"`
+	SAS AppSetupRecoveryKeyResetNewResponseSessionVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -254,7 +247,7 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerification struct {
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -262,15 +255,13 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerification struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionVerification) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionVerification) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetNewResponseSessionVerification) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetNewResponseSessionVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationError struct {
+type AppSetupRecoveryKeyResetNewResponseSessionVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -285,15 +276,15 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationError str
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationError) RawJSON() string {
+func (r AppSetupRecoveryKeyResetNewResponseSessionVerificationError) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetNewResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Other device participating in verification.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationOtherDevice struct {
+type AppSetupRecoveryKeyResetNewResponseSessionVerificationOtherDevice struct {
 	// Other device ID.
 	ID string `json:"id" api:"required"`
 	// Other device display name, if known.
@@ -308,15 +299,15 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationOtherDevi
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationOtherDevice) RawJSON() string {
+func (r AppSetupRecoveryKeyResetNewResponseSessionVerificationOtherDevice) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetNewResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationQr struct {
+type AppSetupRecoveryKeyResetNewResponseSessionVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -328,15 +319,13 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationQr struct
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationQr) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationQr) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetNewResponseSessionVerificationQR) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetNewResponseSessionVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationSAS struct {
+type AppSetupRecoveryKeyResetNewResponseSessionVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -351,16 +340,16 @@ type AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationSAS struc
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationSAS) RawJSON() string {
+func (r AppSetupRecoveryKeyResetNewResponseSessionVerificationSAS) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetNewResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetNewResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginVerificationRecoveryKeyResetConfirmResponse struct {
+type AppSetupRecoveryKeyResetConfirmResponse struct {
 	// Current app sign-in and encrypted messaging setup state.
-	Session AppLoginVerificationRecoveryKeyResetConfirmResponseSession `json:"session" api:"required"`
+	Session AppSetupRecoveryKeyResetConfirmResponseSession `json:"session" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		Session     respjson.Field
@@ -370,15 +359,15 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponse struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponse) RawJSON() string { return r.JSON.raw }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponse) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetConfirmResponse) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetConfirmResponse) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Current app sign-in and encrypted messaging setup state.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSession struct {
+type AppSetupRecoveryKeyResetConfirmResponseSession struct {
 	// Encrypted messaging setup status.
-	E2EE AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EE `json:"e2ee" api:"required"`
+	E2EE AppSetupRecoveryKeyResetConfirmResponseSessionE2EE `json:"e2ee" api:"required"`
 	// Current sign-in and encrypted messaging setup state for Beeper Desktop or Beeper
 	// Server.
 	//
@@ -386,9 +375,9 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSession struct {
 	// "needs-verification", "needs-secrets", "needs-first-sync", "ready".
 	State string `json:"state" api:"required"`
 	// Signed-in account details. Omitted until sign-in is complete.
-	Matrix AppLoginVerificationRecoveryKeyResetConfirmResponseSessionMatrix `json:"matrix"`
+	Matrix AppSetupRecoveryKeyResetConfirmResponseSessionMatrix `json:"matrix"`
 	// Trusted device verification progress.
-	Verification AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerification `json:"verification"`
+	Verification AppSetupRecoveryKeyResetConfirmResponseSessionVerification `json:"verification"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		E2EE         respjson.Field
@@ -401,15 +390,13 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSession struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSession) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSession) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetConfirmResponseSession) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetConfirmResponseSession) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging setup status.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EE struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionE2EE struct {
 	// Whether this account can verify trusted devices.
 	CrossSigning bool `json:"crossSigning" api:"required"`
 	// Whether the first encrypted message sync is complete.
@@ -421,7 +408,7 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EE struct {
 	// Whether encrypted message backup is available.
 	KeyBackup bool `json:"keyBackup" api:"required"`
 	// Encrypted messaging keys available on this device.
-	Secrets AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EESecrets `json:"secrets" api:"required"`
+	Secrets AppSetupRecoveryKeyResetConfirmResponseSessionE2EESecrets `json:"secrets" api:"required"`
 	// Whether secure key storage is available.
 	SecretStorage bool `json:"secretStorage" api:"required"`
 	// Whether this device is trusted for encrypted messages.
@@ -445,15 +432,13 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EE struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EE) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EE) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionE2EE) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionE2EE) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Encrypted messaging keys available on this device.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EESecrets struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionE2EESecrets struct {
 	// Whether the account identity key is available.
 	MasterKey bool `json:"masterKey" api:"required"`
 	// Whether the encrypted message backup key is available.
@@ -477,15 +462,15 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EESecrets struc
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EESecrets) RawJSON() string {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionE2EESecrets) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionE2EESecrets) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Signed-in account details. Omitted until sign-in is complete.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionMatrix struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionMatrix struct {
 	// Current device ID.
 	DeviceID string `json:"deviceID" api:"required"`
 	// Beeper homeserver URL for this account.
@@ -503,15 +488,13 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionMatrix struct {
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionMatrix) RawJSON() string {
-	return r.JSON.raw
-}
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionMatrix) UnmarshalJSON(data []byte) error {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionMatrix) RawJSON() string { return r.JSON.raw }
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionMatrix) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Trusted device verification progress.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerification struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionVerification struct {
 	// Verification ID to pass in verification action paths.
 	ID string `json:"id" api:"required"`
 	// Verification actions that are valid for the current state.
@@ -536,15 +519,15 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerification stru
 	// "error".
 	State string `json:"state" api:"required"`
 	// Verification error details, if verification stopped.
-	Error AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationError `json:"error"`
+	Error AppSetupRecoveryKeyResetConfirmResponseSessionVerificationError `json:"error"`
 	// Other device participating in verification.
-	OtherDevice AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice `json:"otherDevice"`
+	OtherDevice AppSetupRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice `json:"otherDevice"`
 	// Other Beeper user participating in verification.
 	OtherUserID string `json:"otherUserID"`
 	// QR verification data.
-	Qr AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationQr `json:"qr"`
+	QR AppSetupRecoveryKeyResetConfirmResponseSessionVerificationQR `json:"qr"`
 	// Emoji or number comparison data for verification.
-	SAS AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationSAS `json:"sas"`
+	SAS AppSetupRecoveryKeyResetConfirmResponseSessionVerificationSAS `json:"sas"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
 	JSON struct {
 		ID               respjson.Field
@@ -556,7 +539,7 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerification stru
 		Error            respjson.Field
 		OtherDevice      respjson.Field
 		OtherUserID      respjson.Field
-		Qr               respjson.Field
+		QR               respjson.Field
 		SAS              respjson.Field
 		ExtraFields      map[string]respjson.Field
 		raw              string
@@ -564,15 +547,15 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerification stru
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerification) RawJSON() string {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionVerification) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerification) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionVerification) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Verification error details, if verification stopped.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationError struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionVerificationError struct {
 	// Verification error code.
 	Code string `json:"code" api:"required"`
 	// User-facing verification error message.
@@ -587,15 +570,15 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationError
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationError) RawJSON() string {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionVerificationError) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionVerificationError) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Other device participating in verification.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice struct {
 	// Other device ID.
 	ID string `json:"id" api:"required"`
 	// Other device display name, if known.
@@ -610,15 +593,15 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationOther
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice) RawJSON() string {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionVerificationOtherDevice) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // QR verification data.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationQr struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionVerificationQR struct {
 	// QR code payload to display for verification.
 	Data string `json:"data" api:"required"`
 	// JSON contains metadata for fields, check presence with [respjson.Field.Valid].
@@ -630,15 +613,15 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationQr st
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationQr) RawJSON() string {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionVerificationQR) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationQr) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionVerificationQR) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
 // Emoji or number comparison data for verification.
-type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationSAS struct {
+type AppSetupRecoveryKeyResetConfirmResponseSessionVerificationSAS struct {
 	// Emoji sequence to compare on both devices.
 	Emojis string `json:"emojis" api:"required"`
 	// Number sequence to compare on both devices.
@@ -653,37 +636,37 @@ type AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationSAS s
 }
 
 // Returns the unmodified JSON received from the API
-func (r AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationSAS) RawJSON() string {
+func (r AppSetupRecoveryKeyResetConfirmResponseSessionVerificationSAS) RawJSON() string {
 	return r.JSON.raw
 }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetConfirmResponseSessionVerificationSAS) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginVerificationRecoveryKeyResetNewParams struct {
+type AppSetupRecoveryKeyResetNewParams struct {
 	// Existing recovery key, if the user has it.
 	ExistingRecoveryKey param.Opt[string] `json:"existingRecoveryKey,omitzero"`
 	paramObj
 }
 
-func (r AppLoginVerificationRecoveryKeyResetNewParams) MarshalJSON() (data []byte, err error) {
-	type shadow AppLoginVerificationRecoveryKeyResetNewParams
+func (r AppSetupRecoveryKeyResetNewParams) MarshalJSON() (data []byte, err error) {
+	type shadow AppSetupRecoveryKeyResetNewParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *AppLoginVerificationRecoveryKeyResetNewParams) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetNewParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }
 
-type AppLoginVerificationRecoveryKeyResetConfirmParams struct {
+type AppSetupRecoveryKeyResetConfirmParams struct {
 	// New recovery key returned by the reset step.
 	RecoveryKey string `json:"recoveryKey" api:"required"`
 	paramObj
 }
 
-func (r AppLoginVerificationRecoveryKeyResetConfirmParams) MarshalJSON() (data []byte, err error) {
-	type shadow AppLoginVerificationRecoveryKeyResetConfirmParams
+func (r AppSetupRecoveryKeyResetConfirmParams) MarshalJSON() (data []byte, err error) {
+	type shadow AppSetupRecoveryKeyResetConfirmParams
 	return param.MarshalObject(r, (*shadow)(&r))
 }
-func (r *AppLoginVerificationRecoveryKeyResetConfirmParams) UnmarshalJSON(data []byte) error {
+func (r *AppSetupRecoveryKeyResetConfirmParams) UnmarshalJSON(data []byte) error {
 	return apijson.UnmarshalRoot(data, r)
 }

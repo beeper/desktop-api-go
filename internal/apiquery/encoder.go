@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/beeper/desktop-api-go/v5/packages/param"
+	"github.com/beeper/desktop-api-go/v6/packages/param"
 )
 
 var encoders sync.Map // map[reflect.Type]encoderFunc
